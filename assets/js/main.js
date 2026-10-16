@@ -78,7 +78,7 @@
 
   function fechar() {
     lightbox.hidden = true;
-    lightboxImg.src = '';
+    lightboxImg.removeAttribute('src');
     document.body.style.overflow = '';
     if (ultimoFoco) { ultimoFoco.focus(); }
   }
