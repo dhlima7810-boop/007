@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="no-js">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,21 +11,26 @@
 <meta property="og:type" content="restaurant">
 <meta property="og:title" content="Pizza Mia — Pizzaria e Rodízio em Guarulhos">
 <meta property="og:description" content="Rodízio, esfihas e pizzas para viagem. Promoção todo dia em Vila Galvão.">
-<meta property="og:image" content="assets/img/pizza-combo.jpg">
+<meta property="og:image" content="assets/img/hero-poster.jpg">
 <meta property="og:locale" content="pt_BR">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/style.css">
+
+<!-- marca que o JS esta ligado, para a animacao poder esconder o texto antes de revelar -->
+<script>document.documentElement.className = 'js';</script>
 </head>
 <body>
 
 <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
 
+<div class="progresso" id="progresso" aria-hidden="true"></div>
+
 <header class="topo" id="topo">
   <div class="container topo__inner">
-    <a class="marca" href="#topo">
+    <a class="marca" href="#hero">
       <img src="assets/img/logo.jpg" alt="" width="48" height="48">
       <span class="marca__nome">Pizza <em>Mia</em></span>
     </a>
@@ -47,15 +52,36 @@
 <main id="conteudo">
 
   <!-- ============ HERO ============ -->
-  <section class="hero">
-    <div class="hero__bg" role="img" aria-label="Fachada da Pizza Mia na Av. Emilio Ribas, em Vila Galvão"></div>
+  <section class="hero" id="hero">
+    <div class="hero__media">
+      <video class="hero__video" id="heroVideo"
+             autoplay muted loop playsinline preload="auto"
+             poster="assets/img/hero-poster.jpg" aria-hidden="true" tabindex="-1">
+        <source src="assets/video/hero.webm" type="video/webm">
+        <source src="assets/video/hero.mp4" type="video/mp4">
+      </video>
+      <div class="hero__gradiente"></div>
+    </div>
+
+    <!-- a cortina sobe depois que o video ja esta rodando: e a pausa antes da primeira palavra -->
+    <div class="hero__cortina" id="heroCortina" aria-hidden="true"></div>
+
     <div class="container hero__inner">
-      <p class="hero__tag">Vila Galvão · Guarulhos · SP</p>
-      <h1 class="hero__titulo">A pizza que o bairro<br><span>conhece de nome</span></h1>
+      <p class="hero__tag">
+        <span class="hero__risco" aria-hidden="true"></span>
+        <span class="hero__tag-txt">Vila Galvão · Guarulhos · SP</span>
+      </p>
+
+      <h1 class="hero__titulo" aria-label="A pizza que o bairro conhece de nome">
+        <span class="linha"><span class="linha__in" data-split>A pizza que o bairro</span></span>
+        <span class="linha"><span class="linha__in linha__in--destaque" data-split>conhece de nome</span></span>
+      </h1>
+
       <p class="hero__texto">
         Rodízio, esfihas e pizza para viagem direto do forno.
         <strong>Promoção todo dia da semana.</strong>
       </p>
+
       <div class="hero__acoes">
         <a class="botao botao--principal" href="tel:+551124528022">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.4 11.4 0 0 0 .57 3.6 1 1 0 0 1-.25 1z"/></svg>
@@ -64,15 +90,24 @@
         <a class="botao botao--secundario" href="#promocoes">Ver promoções</a>
       </div>
     </div>
+
+    <a class="rolar" href="#promocoes" id="rolar" aria-label="Role para ver as promoções">
+      <span class="rolar__txt">Role</span>
+      <span class="rolar__trilho"><span class="rolar__bola"></span></span>
+    </a>
   </section>
 
   <!-- ============ FAIXA ============ -->
-  <section class="faixa" aria-label="Destaques">
-    <div class="container faixa__grid">
-      <div class="faixa__item"><strong>Rodízio</strong><span>Todo dia tem preço especial</span></div>
-      <div class="faixa__item"><strong>Para viagem</strong><span>Retirada e disk pizza</span></div>
-      <div class="faixa__item"><strong>Salão amplo</strong><span>Espaço para a família toda</span></div>
+  <section class="faixa" aria-label="O que a Pizza Mia serve">
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__trilho" id="marqueeTrilho">
+        <span class="marquee__grupo">
+          <b>Rodízio</b><i>·</i><b>Pizzas para viagem</b><i>·</i><b>Esfihas</b><i>·</i>
+          <b>Salão amplo</b><i>·</i><b>Disk pizza</b><i>·</i><b>Promoção todo dia</b><i>·</i>
+        </span>
+      </div>
     </div>
+    <p class="sr-only">Rodízio, pizzas para viagem, esfihas, salão amplo, disk pizza e promoção todo dia.</p>
   </section>
 
   <!-- ============ PROMOÇÕES ============ -->
@@ -80,7 +115,7 @@
     <div class="container">
       <header class="secao__cabecalho">
         <p class="secao__sobretitulo">Outlet na Pizza Mia</p>
-        <h2 class="secao__titulo">Promoção todo dia</h2>
+        <h2 class="secao__titulo"><span class="linha"><span class="linha__in" data-split>Promoção todo dia</span></span></h2>
         <p class="secao__texto">
           Cada dia da semana tem a sua. O dia de hoje aparece em destaque —
           ligue para confirmar o preço, que muda de tempos em tempos.
@@ -151,7 +186,7 @@
     <div class="container">
       <header class="secao__cabecalho">
         <p class="secao__sobretitulo">O que servimos</p>
-        <h2 class="secao__titulo">Cardápio</h2>
+        <h2 class="secao__titulo"><span class="linha"><span class="linha__in" data-split>Cardápio</span></span></h2>
         <p class="secao__texto">
           Estamos montando o cardápio completo aqui no site. Por enquanto,
           peça pelo telefone — a equipe passa todos os sabores do dia.
@@ -194,27 +229,25 @@
     <div class="container">
       <header class="secao__cabecalho">
         <p class="secao__sobretitulo">Dá uma olhada</p>
-        <h2 class="secao__titulo">A Pizza Mia por dentro</h2>
+        <h2 class="secao__titulo"><span class="linha"><span class="linha__in" data-split>A Pizza Mia por dentro</span></span></h2>
+        <p class="secao__texto">A casa na esquina, o salão na hora do rodízio e as pizzas saindo do forno.</p>
       </header>
 
       <div class="galeria">
-        <button class="galeria__item galeria__item--grande" data-img="assets/img/pizza-combo.jpg" data-leg="Combo meio a meio com refrigerante de 1 litro">
-          <img src="assets/img/pizza-combo.jpg" alt="Pizza meio calabresa, meio mussarela, com garrafa de guaraná" loading="lazy">
-        </button>
-        <button class="galeria__item" data-img="assets/img/fachada.jpg" data-leg="Nossa fachada na Av. Emilio Ribas, 3175">
+        <button class="galeria__item galeria__item--grande" data-img="assets/img/fachada.jpg" data-leg="Nossa fachada na Av. Emilio Ribas, 3175">
           <img src="assets/img/fachada.jpg" alt="Fachada da pizzaria, prédio amarelo e vermelho na esquina" loading="lazy">
         </button>
         <button class="galeria__item" data-img="assets/img/salao.jpg" data-leg="Salão cheio no horário do rodízio">
           <img src="assets/img/salao.jpg" alt="Salão da pizzaria com mesas ocupadas" loading="lazy">
+        </button>
+        <button class="galeria__item" data-img="assets/img/fachada-noite.jpg" data-leg="A casa à noite, no movimento do rodízio">
+          <img src="assets/img/fachada-noite.jpg" alt="Pizzaria iluminada à noite com clientes no salão" loading="lazy">
         </button>
         <button class="galeria__item" data-img="assets/img/pizza-brocolis.jpg" data-leg="Pizza de brócolis com bacon">
           <img src="assets/img/pizza-brocolis.jpg" alt="Pizza de brócolis com bacon e refrigerante" loading="lazy">
         </button>
         <button class="galeria__item" data-img="assets/img/pizza-carne.jpg" data-leg="Pizza de carne seca com catupiry">
           <img src="assets/img/pizza-carne.jpg" alt="Pizza de carne com catupiry em grade e refrigerante" loading="lazy">
-        </button>
-        <button class="galeria__item" data-img="assets/img/fachada-noite.jpg" data-leg="A casa à noite, no movimento do rodízio">
-          <img src="assets/img/fachada-noite.jpg" alt="Pizzaria iluminada à noite com clientes no salão" loading="lazy">
         </button>
         <!-- A foto do cartaz de promocoes esta em assets/img/promocoes.jpg.
              Saiu da galeria porque mostra precos antigos. Quando houver um
@@ -232,7 +265,7 @@
     <div class="container">
       <header class="secao__cabecalho">
         <p class="secao__sobretitulo">Venha comer aqui</p>
-        <h2 class="secao__titulo">Onde estamos</h2>
+        <h2 class="secao__titulo"><span class="linha"><span class="linha__in" data-split>Onde estamos</span></span></h2>
       </header>
 
       <div class="local">
@@ -251,10 +284,11 @@
             </p>
           </div>
 
-          <!-- TODO: trocar pelo horário real de funcionamento da pizzaria -->
+          <!-- TODO: confirmar com a pizzaria. Guias da cidade indicam
+               terca a domingo, das 18h as 00h, mas nao batem entre si. -->
           <div class="dado">
             <h3>Horário</h3>
-            <p>Aberto todos os dias.<br>Confirme o horário pelo telefone.</p>
+            <p>Confirme o horário pelo telefone.</p>
           </div>
         </div>
 
@@ -297,6 +331,8 @@
   </figure>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="assets/js/main.js"></script>
 </body>
 </html>

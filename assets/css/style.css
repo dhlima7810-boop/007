@@ -106,37 +106,93 @@ h1,h2,h3{margin:0;line-height:1.05}
 .menu-btn[aria-expanded="true"] span:nth-child(3){transform:translateY(-9px) rotate(-45deg)}
 
 /* ---------------- Hero ---------------- */
-.hero{position:relative;isolation:isolate;color:#fff;overflow:hidden}
-.hero__bg{
-  position:absolute;inset:0;z-index:-2;
-  background:url('../img/fachada.jpg') center 38% / cover no-repeat;
-  transform:scale(1.05);
+.hero{
+  position:relative;isolation:isolate;color:#fff;overflow:hidden;
+  min-height:100svh;min-height:100vh;
+  display:flex;align-items:center;
 }
-.hero::after{
-  content:'';position:absolute;inset:0;z-index:-1;
-  background:linear-gradient(105deg, rgba(23,17,14,.94) 0%, rgba(23,17,14,.82) 45%, rgba(23,17,14,.5) 100%);
+.hero__media{position:absolute;inset:-6% 0;z-index:-2;will-change:transform}
+.hero__video{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transform-origin:center;will-change:transform;
 }
-.hero__inner{padding:5.5rem 0 5rem;max-width:720px}
+.hero__gradiente{
+  position:absolute;inset:0;
+  background:
+    linear-gradient(105deg, rgba(23,17,14,.96) 0%, rgba(23,17,14,.88) 45%, rgba(23,17,14,.58) 100%),
+    linear-gradient(to top, rgba(23,17,14,.92) 0%, rgba(23,17,14,0) 42%);
+}
+/* a cortina e a pausa antes da primeira palavra: sobe depois que o video ja roda */
+.hero__cortina{position:absolute;inset:0;z-index:-1;background:#0d0906;opacity:0;pointer-events:none}
+.js .hero__cortina{opacity:1}
+
+.hero__inner{padding:7rem 0 9rem;max-width:760px;position:relative;z-index:1}
+
 .hero__tag{
-  margin:0 0 1rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
-  font-size:.8rem;color:var(--amarelo);
+  margin:0 0 1.35rem;display:flex;align-items:center;gap:.9rem;
+  font-weight:800;text-transform:uppercase;font-size:.8rem;color:var(--amarelo);
 }
+.hero__risco{
+  display:block;width:64px;height:2px;background:var(--amarelo);
+  transform-origin:left center;flex:none;
+}
+.hero__tag-txt{letter-spacing:.14em;display:block}
+
 .hero__titulo{
   font-family:var(--titulo);
-  font-size:clamp(2.6rem, 7.5vw, 4.6rem);
+  font-size:clamp(2.7rem, 8.4vw, 5.4rem);
   text-transform:uppercase;letter-spacing:.5px;
 }
-.hero__titulo span{color:var(--amarelo)}
-.hero__texto{font-size:1.12rem;margin:1.2rem 0 2rem;color:#efe6da;max-width:46ch}
+/* cada linha e uma janela: as letras sobem de dentro dela */
+.linha{display:block;overflow:hidden;padding-bottom:.08em;margin-bottom:-.04em}
+.linha__in{display:block}
+.linha__in--destaque{color:var(--amarelo)}
+.letra{display:inline-block;white-space:pre;will-change:transform}
+.palavra{display:inline-block;white-space:nowrap}
+
+.hero__texto{font-size:1.14rem;margin:1.4rem 0 2.2rem;color:#efe6da;max-width:46ch}
 .hero__texto strong{color:#fff}
 .hero__acoes{display:flex;flex-wrap:wrap;gap:.9rem}
 
-/* ---------------- Faixa ---------------- */
-.faixa{background:var(--amarelo);color:var(--preto)}
-.faixa__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;padding:1.5rem 0}
-.faixa__item{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.15rem}
-.faixa__item strong{font-family:var(--titulo);font-size:1.35rem;text-transform:uppercase;letter-spacing:.5px}
-.faixa__item span{font-size:.92rem;color:#5a4a32}
+/* ---- indicador de rolagem ---- */
+.rolar{
+  position:absolute;left:50%;bottom:2.2rem;transform:translateX(-50%);
+  z-index:2;display:flex;flex-direction:column;align-items:center;gap:.7rem;
+  text-decoration:none;color:rgba(255,255,255,.82);
+}
+.rolar__txt{
+  font-size:.68rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase;
+  padding-left:.3em;
+}
+.rolar__trilho{
+  width:26px;height:42px;border:2px solid rgba(255,255,255,.55);border-radius:999px;
+  display:flex;justify-content:center;padding-top:7px;
+}
+.rolar__bola{width:4px;height:8px;border-radius:999px;background:var(--amarelo)}
+.rolar:hover{color:#fff}
+.rolar:hover .rolar__trilho{border-color:var(--amarelo)}
+
+/* ---------------- Barra de progresso ---------------- */
+.progresso{
+  position:fixed;top:0;left:0;height:3px;width:100%;z-index:70;
+  background:var(--amarelo);transform:scaleX(0);transform-origin:left center;
+}
+
+/* ---------------- Faixa (letreiro) ---------------- */
+.faixa{background:var(--amarelo);color:var(--preto);overflow:hidden}
+.marquee{padding:1.15rem 0}
+.marquee__trilho{display:flex;width:max-content;will-change:transform}
+.marquee__grupo{display:flex;align-items:center;gap:1.6rem;padding-right:1.6rem;flex:none}
+.marquee__grupo b{
+  font-family:var(--titulo);font-size:1.5rem;text-transform:uppercase;
+  letter-spacing:.5px;font-weight:400;white-space:nowrap;
+}
+.marquee__grupo i{color:var(--vermelho);font-style:normal;font-size:1.4rem;line-height:1}
+
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
 
 /* ---------------- Seções ---------------- */
 .secao{padding:4.5rem 0}
@@ -232,10 +288,6 @@ h1,h2,h3{margin:0;line-height:1.05}
 .galeria__item img{width:100%;height:100%;object-fit:cover;transition:transform .45s ease, opacity .3s ease}
 .galeria__item:hover img{transform:scale(1.07);opacity:.88}
 .galeria__item--grande{grid-row:span 2;grid-column:span 2}
-/* as duas ultimas fotos esticam para fechar a ultima linha sem buraco */
-@media (min-width:980px){
-  .galeria__item:nth-last-child(-n+2){grid-column:span 2}
-}
 
 /* ---------------- Local ---------------- */
 .local{display:grid;grid-template-columns:1fr 1.25fr;gap:2rem;align-items:start}
@@ -329,4 +381,19 @@ h1,h2,h3{margin:0;line-height:1.05}
   html{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
   .revelar{opacity:1;transform:none}
+}
+
+/* ---------------- Estado inicial das animacoes ----------------
+   So vale com o JS ligado. Sem JS (ou se o GSAP nao carregar), o
+   main.js tira a classe .js e tudo aparece normalmente.
+   ------------------------------------------------------------- */
+.js .hero__tag-txt,
+.js .hero__texto,
+.js .hero__acoes,
+.js .rolar{opacity:0}
+.js .hero__risco{transform:scaleX(0)}
+
+@media (prefers-reduced-motion:reduce){
+  .hero__media{inset:0}
+  .marquee__trilho{transform:none !important}
 }

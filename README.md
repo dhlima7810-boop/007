@@ -22,10 +22,48 @@ Depois acesse <http://localhost:8000>.
 index.html              página única, com todas as seções
 assets/
   css/style.css         estilos (cores tiradas da marca: amarelo e vermelho)
-  js/main.js            menu do celular, destaque do dia, galeria, animações
-  img/                  fotos da pizzaria
+  js/main.js            animações GSAP, menu, destaque do dia, galeria
+  img/                  fotos da pizzaria + hero-poster.jpg
+  video/hero.mp4        vídeo de fundo do topo (e hero.webm, mesma coisa)
   favicon.png           ícone da aba
 ```
+
+## Animação
+
+O GSAP e o ScrollTrigger vêm de CDN (`cdnjs`), carregados no fim do
+`index.html`. Não precisa instalar nada.
+
+A abertura do topo segue esta ordem, e é ela que cria a tensão antes da
+primeira palavra:
+
+1. a tela entra preta, com o vídeo já rodando por baixo;
+2. o vídeo começa 22% maior e vai assentando ao longo de 4 segundos;
+3. a cortina preta sobe;
+4. um risco amarelo se estica da esquerda para a direita;
+5. "Vila Galvão · Guarulhos · SP" aparece desfocado, com as letras muito
+   afastadas, e vai fechando o espaçamento até ficar nítido;
+6. só então as letras do título sobem de dentro de uma janela, uma a uma.
+
+Depois disso: barra de progresso no topo, letreiro amarelo rolando sem
+parar, parallax no vídeo e nas fotos, títulos de seção subindo da janela e
+o indicador "Role" que some assim que a página desce.
+
+**Se o GSAP não carregar**, o `main.js` tira a classe `js` do `<html>` e a
+página aparece inteira, sem animação nenhuma. Quem usa "reduzir movimento"
+no sistema também vê a versão parada, com o vídeo pausado.
+
+### Trocar o vídeo do topo
+
+O vídeo atual foi gerado a partir da própria foto da pizza, com uma
+aproximação lenta que vai e volta — por isso o loop não tem corte. Quando
+a pizzaria gravar um vídeo de verdade (o forno, a pizza sendo cortada, o
+salão cheio), é só substituir `assets/video/hero.mp4` e
+`assets/video/hero.webm` e trocar o `assets/img/hero-poster.jpg` por um
+quadro dele. Nada mais precisa mudar.
+
+Dicas para o vídeo novo: sem som, poucos segundos, movimento lento, e de
+preferência uma cena escura ou que escureça nas bordas, porque o texto fica
+por cima.
 
 ## O que ainda falta preencher
 
@@ -62,5 +100,15 @@ Estes pontos estão marcados com comentário `TODO` / `ATENÇÃO` no código:
 ## Observação sobre as fotos
 
 As imagens em `assets/img/` foram recortadas das fotos enviadas pelo dono do
-projeto. Antes de publicar, vale confirmar com a pizzaria se pode usar as fotos
-de divulgação (as do combo vieram de material promocional do 99Food).
+projeto. Cada uma aparece **uma única vez** no site: a da pizza virou o vídeo
+do topo, e as outras cinco estão na galeria.
+
+Antes de publicar, vale confirmar com a pizzaria se pode usar as fotos de
+divulgação — as do combo vieram de material promocional do 99Food.
+
+**Para conseguir mais fotos:** o caminho certo é pedir na própria pizzaria,
+que tem as originais em boa resolução. As fotos que aparecem no Tripadvisor,
+no Restaurant Guru e no Google são de clientes e pertencem a quem tirou, então
+não dá para pegar de lá e publicar. A página oficial no Facebook
+(`facebook.com/PizzariaMia`) tem fotos da própria casa — essas a pizzaria pode
+autorizar.
