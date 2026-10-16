@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pizza Mia — Pizzaria e Rodízio em Vila Galvão, Guarulhos</title>
+<meta name="description" content="Pizza Mia — rodízio de pizzas, esfihas e pizzas para viagem na Av. Emilio Ribas, 3175, Vila Galvão, Guarulhos. Promoção todo dia. Disk pizza (11) 2452-8022.">
+<meta name="theme-color" content="#c8102e">
+<link rel="icon" href="assets/favicon.png" type="image/png">
+
+<meta property="og:type" content="restaurant">
+<meta property="og:title" content="Pizza Mia — Pizzaria e Rodízio em Guarulhos">
+<meta property="og:description" content="Rodízio, esfihas e pizzas para viagem. Promoção todo dia em Vila Galvão.">
+<meta property="og:image" content="assets/img/pizza-combo.jpg">
+<meta property="og:locale" content="pt_BR">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="topo" id="topo">
+  <div class="container topo__inner">
+    <a class="marca" href="#topo">
+      <img src="assets/img/logo.jpg" alt="" width="48" height="48">
+      <span class="marca__nome">Pizza <em>Mia</em></span>
+    </a>
+
+    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="navegacao" aria-label="Abrir menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="nav" id="navegacao" aria-label="Menu principal">
+      <a href="#promocoes">Promoções</a>
+      <a href="#cardapio">Cardápio</a>
+      <a href="#galeria">Fotos</a>
+      <a href="#local">Onde estamos</a>
+      <a class="nav__cta" href="tel:+551124528022">Ligar agora</a>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="hero__bg" role="img" aria-label="Fachada da Pizza Mia na Av. Emilio Ribas, em Vila Galvão"></div>
+    <div class="container hero__inner">
+      <p class="hero__tag">Vila Galvão · Guarulhos · SP</p>
+      <h1 class="hero__titulo">A pizza que o bairro<br><span>conhece de nome</span></h1>
+      <p class="hero__texto">
+        Rodízio, esfihas e pizza para viagem direto do forno.
+        <strong>Promoção todo dia da semana.</strong>
+      </p>
+      <div class="hero__acoes">
+        <a class="botao botao--principal" href="tel:+551124528022">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.4 11.4 0 0 0 .57 3.6 1 1 0 0 1-.25 1z"/></svg>
+          Disk Pizza (11) 2452-8022
+        </a>
+        <a class="botao botao--secundario" href="#promocoes">Ver promoções</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAIXA ============ -->
+  <section class="faixa" aria-label="Destaques">
+    <div class="container faixa__grid">
+      <div class="faixa__item"><strong>Rodízio</strong><span>Todo dia tem preço especial</span></div>
+      <div class="faixa__item"><strong>Para viagem</strong><span>Retirada e disk pizza</span></div>
+      <div class="faixa__item"><strong>Salão amplo</strong><span>Espaço para a família toda</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PROMOÇÕES ============ -->
+  <section class="secao" id="promocoes">
+    <div class="container">
+      <header class="secao__cabecalho">
+        <p class="secao__sobretitulo">Outlet na Pizza Mia</p>
+        <h2 class="secao__titulo">Promoção todo dia</h2>
+        <p class="secao__texto">Cada dia da semana tem a sua. O dia de hoje aparece em destaque.</p>
+      </header>
+
+      <ul class="promos" id="promos">
+        <li class="promo" data-dia="1">
+          <p class="promo__dia">Segunda-feira</p>
+          <h3 class="promo__nome">Rodízio</h3>
+          <p class="promo__preco"><span>R$</span>20,90</p>
+          <p class="promo__obs">Exceto feriados e vésperas</p>
+        </li>
+        <li class="promo" data-dia="2">
+          <p class="promo__dia">Terça-feira</p>
+          <h3 class="promo__nome">Esfihas de carne e queijo</h3>
+          <p class="promo__preco"><span>R$</span>0,99</p>
+          <p class="promo__obs">No pacote: 10 de carne + 2 de queijo por R$ 12,90</p>
+        </li>
+        <li class="promo" data-dia="3">
+          <p class="promo__dia">Quarta-feira</p>
+          <h3 class="promo__nome">Pizzas para viagem</h3>
+          <p class="promo__preco"><span>R$</span>19,90</p>
+          <p class="promo__obs">Sabores selecionados</p>
+        </li>
+        <li class="promo" data-dia="4">
+          <p class="promo__dia">Quinta-feira</p>
+          <h3 class="promo__nome">Rodízio com refrigerante à vontade</h3>
+          <p class="promo__preco"><span>R$</span>27,90</p>
+          <p class="promo__obs">Exceto feriados e vésperas</p>
+        </li>
+        <li class="promo" data-dia="5">
+          <p class="promo__dia">Sexta-feira</p>
+          <h3 class="promo__nome">1 Coca-Cola de 1 litro grátis</h3>
+          <p class="promo__preco promo__preco--texto">Grátis</p>
+          <p class="promo__obs">Na compra de 1 pizza para viagem</p>
+        </li>
+        <li class="promo" data-dia="6">
+          <p class="promo__dia">Sábado</p>
+          <h3 class="promo__nome">1 chopp Brahma grátis</h3>
+          <p class="promo__preco promo__preco--texto">Grátis</p>
+          <p class="promo__obs">Na compra de 1 pizza, à noite</p>
+        </li>
+        <!-- ATENÇÃO: o cartaz da semana marca R$ 27,90 no domingo, mas o banner
+             "DOMINGO — Rodízio com refrigerante à vontade" marca R$ 37,90.
+             Confirme na pizzaria e ajuste o valor abaixo se for o caso. -->
+        <li class="promo" data-dia="0">
+          <p class="promo__dia">Domingo</p>
+          <h3 class="promo__nome">Rodízio com refrigerante à vontade</h3>
+          <p class="promo__preco"><span>R$</span>27,90</p>
+          <p class="promo__obs">Exceto feriados e vésperas</p>
+        </li>
+      </ul>
+
+      <p class="aviso">Preços sujeitos a alteração. Confirme pelo telefone antes de vir.</p>
+    </div>
+  </section>
+
+  <!-- ============ CARDÁPIO ============ -->
+  <section class="secao secao--escura" id="cardapio">
+    <div class="container">
+      <header class="secao__cabecalho">
+        <p class="secao__sobretitulo">O que servimos</p>
+        <h2 class="secao__titulo">Cardápio</h2>
+        <p class="secao__texto">
+          Estamos montando o cardápio completo aqui no site. Por enquanto,
+          peça pelo telefone — a equipe passa todos os sabores do dia.
+        </p>
+      </header>
+
+      <div class="cardapio">
+        <article class="item">
+          <h3>Rodízio de pizzas</h3>
+          <p>Salgadas e doces saindo do forno a noite toda, servidas na mesa.</p>
+        </article>
+        <article class="item">
+          <h3>Pizzas para viagem</h3>
+          <p>Retirada no balcão ou disk pizza pelo (11) 2452-6575.</p>
+        </article>
+        <article class="item">
+          <h3>Esfihas</h3>
+          <p>De carne e de queijo, abertas, feitas no mesmo forno.</p>
+        </article>
+        <article class="item">
+          <h3>Bebidas</h3>
+          <p>Refrigerantes, chopp Brahma e a opção de refrigerante à vontade no rodízio.</p>
+        </article>
+        <!-- Para adicionar sabores depois, copie um bloco:
+        <article class="item">
+          <h3>Nome do sabor</h3>
+          <p>Ingredientes.</p>
+        </article>
+        -->
+      </div>
+
+      <div class="cardapio__cta">
+        <a class="botao botao--principal" href="tel:+551124528022">Pedir pelo telefone</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GALERIA ============ -->
+  <section class="secao" id="galeria">
+    <div class="container">
+      <header class="secao__cabecalho">
+        <p class="secao__sobretitulo">Dá uma olhada</p>
+        <h2 class="secao__titulo">A Pizza Mia por dentro</h2>
+      </header>
+
+      <div class="galeria">
+        <button class="galeria__item galeria__item--grande" data-img="assets/img/pizza-combo.jpg" data-leg="Combo meio a meio com refrigerante de 1 litro">
+          <img src="assets/img/pizza-combo.jpg" alt="Pizza meio calabresa, meio mussarela, com garrafa de guaraná" loading="lazy">
+        </button>
+        <button class="galeria__item" data-img="assets/img/fachada.jpg" data-leg="Nossa fachada na Av. Emilio Ribas, 3175">
+          <img src="assets/img/fachada.jpg" alt="Fachada da pizzaria, prédio amarelo e vermelho na esquina" loading="lazy">
+        </button>
+        <button class="galeria__item" data-img="assets/img/salao.jpg" data-leg="Salão cheio no horário do rodízio">
+          <img src="assets/img/salao.jpg" alt="Salão da pizzaria com mesas ocupadas" loading="lazy">
+        </button>
+        <button class="galeria__item" data-img="assets/img/pizza-brocolis.jpg" data-leg="Pizza de brócolis com bacon">
+          <img src="assets/img/pizza-brocolis.jpg" alt="Pizza de brócolis com bacon e refrigerante" loading="lazy">
+        </button>
+        <button class="galeria__item" data-img="assets/img/pizza-carne.jpg" data-leg="Pizza de carne seca com catupiry">
+          <img src="assets/img/pizza-carne.jpg" alt="Pizza de carne com catupiry em grade e refrigerante" loading="lazy">
+        </button>
+        <button class="galeria__item" data-img="assets/img/fachada-noite.jpg" data-leg="A casa à noite, no movimento do rodízio">
+          <img src="assets/img/fachada-noite.jpg" alt="Pizzaria iluminada à noite com clientes no salão" loading="lazy">
+        </button>
+        <button class="galeria__item" data-img="assets/img/promocoes.jpg" data-leg="Cartaz com as promoções da semana">
+          <img src="assets/img/promocoes.jpg" alt="Cartaz com as promoções de cada dia da semana" loading="lazy">
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LOCAL ============ -->
+  <section class="secao secao--escura" id="local">
+    <div class="container">
+      <header class="secao__cabecalho">
+        <p class="secao__sobretitulo">Venha comer aqui</p>
+        <h2 class="secao__titulo">Onde estamos</h2>
+      </header>
+
+      <div class="local">
+        <div class="local__info">
+          <div class="dado">
+            <h3>Endereço</h3>
+            <p>Av. Emilio Ribas, 3175<br>Vila Galvão — Guarulhos / SP</p>
+            <a class="link" href="https://www.google.com/maps/search/?api=1&query=Av.+Emilio+Ribas+3175+Vila+Galv%C3%A3o+Guarulhos+SP" target="_blank" rel="noopener">Abrir no Google Maps →</a>
+          </div>
+
+          <div class="dado">
+            <h3>Telefones</h3>
+            <p>
+              <a class="link" href="tel:+551124528022">(11) 2452-8022</a><br>
+              <a class="link" href="tel:+551124526575">(11) 2452-6575</a> — disk pizza
+            </p>
+          </div>
+
+          <!-- TODO: trocar pelo horário real de funcionamento da pizzaria -->
+          <div class="dado">
+            <h3>Horário</h3>
+            <p>Aberto todos os dias.<br>Confirme o horário pelo telefone.</p>
+          </div>
+        </div>
+
+        <div class="local__mapa">
+          <iframe
+            title="Mapa com a localização da Pizza Mia"
+            src="https://maps.google.com/maps?q=Av.%20Emilio%20Ribas%203175%20Vila%20Galv%C3%A3o%20Guarulhos%20SP&t=&z=16&ie=UTF8&iwloc=&output=embed"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="rodape">
+  <div class="container rodape__inner">
+    <div>
+      <img src="assets/img/logo.jpg" alt="Logo da Pizza Mia" width="64" height="64" class="rodape__logo">
+      <p class="rodape__texto">
+        Av. Emilio Ribas, 3175 — Vila Galvão, Guarulhos / SP<br>
+        (11) 2452-8022 · (11) 2452-6575
+      </p>
+    </div>
+    <p class="rodape__creditos">© <span id="ano">2026</span> Pizza Mia. Todos os direitos reservados.</p>
+  </div>
+</footer>
+
+<a class="ligar-fixo" href="tel:+551124528022" aria-label="Ligar para a Pizza Mia">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.4 11.4 0 0 0 .57 3.6 1 1 0 0 1-.25 1z"/></svg>
+  <span>Ligar</span>
+</a>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Foto ampliada" hidden>
+  <button class="lightbox__fechar" id="lightboxFechar" aria-label="Fechar">&times;</button>
+  <figure class="lightbox__figura">
+    <img id="lightboxImg" src="" alt="">
+    <figcaption id="lightboxLeg"></figcaption>
+  </figure>
+</div>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
