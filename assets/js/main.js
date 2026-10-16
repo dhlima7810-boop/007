@@ -59,7 +59,7 @@
   if (promoHoje) { promoHoje.classList.add('promo--hoje'); }
 
   /* =======================================================
-     4. Lightbox da galeria
+     4. Lightbox das fotos
      ======================================================= */
   var lightbox = document.getElementById('lightbox');
   var lightboxImg = document.getElementById('lightboxImg');
@@ -85,7 +85,7 @@
   }
 
   if (lightbox) {
-    document.querySelectorAll('.galeria__item').forEach(function (botao) {
+    document.querySelectorAll('.noite__foto').forEach(function (botao) {
       botao.addEventListener('click', function () { abrirFoto(botao); });
     });
     lightboxFechar.addEventListener('click', fecharFoto);
@@ -276,22 +276,93 @@
     scrollTrigger: { trigger: '.local__mapa', start: 'top 85%' }
   });
 
-  /* fotos entram e ainda ganham um parallax leve por dentro */
-  document.querySelectorAll('.galeria__item').forEach(function (item, i) {
-    gsap.from(item, {
-      y: 48, opacity: 0, duration: .9, ease: 'power3.out', delay: (i % 3) * 0.07,
-      scrollTrigger: { trigger: item, start: 'top 90%' }
+  /* =======================================================
+     12. "Uma noite aqui" — secao presa na tela (pin scroll)
+
+     O scroll deixa de rolar a pagina e passa a mover a cena:
+     e o scrub que da a sensacao de camera, porque cada pixel
+     rolado corresponde a um pedaco da linha do tempo, e o
+     atraso de 1s faz a camera chegar amaciando em vez de
+     grudar no dedo.
+
+     Dentro de cada cena os elementos entram em sequencia,
+     0.2s entre um e outro, com ease power3.out.
+
+     So no desktop: no celular a secao vira uma lista comum,
+     porque prender a tela em telas pequenas atrapalha mais
+     do que ajuda.
+     ======================================================= */
+  var mm = gsap.matchMedia();
+
+  mm.add('(min-width: 860px)', function () {
+    var secao = document.getElementById('noite');
+    var cenas = gsap.utils.toArray('#noitePalco .noite__cena');
+    var contador = document.getElementById('cenaAtual');
+    if (!secao || !cenas.length) { return; }
+
+    secao.classList.add('pin-ativo');
+
+    var linha = gsap.timeline({
+      scrollTrigger: {
+        trigger: secao,
+        start: 'top top',
+        end: function () { return '+=' + (window.innerHeight * cenas.length * 0.9); },
+        pin: true,
+        scrub: 1,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onUpdate: function (self) {
+          var i = Math.min(cenas.length - 1, Math.floor(self.progress * cenas.length));
+          if (contador) { contador.textContent = String(i + 1).padStart(2, '0'); }
+        }
+      }
     });
-    gsap.fromTo(item.querySelector('img'),
-      { yPercent: -7 },
-      {
-        yPercent: 7, ease: 'none',
-        scrollTrigger: { trigger: item, start: 'top bottom', end: 'bottom top', scrub: true }
-      });
+
+    cenas.forEach(function (cena, i) {
+      var entram = cena.querySelectorAll('[data-entra]');
+      var foto = cena.querySelector('.noite__foto img');
+
+      // a cena anterior recua, como quem sai de foco
+      if (i > 0) {
+        linha.to(cenas[i - 1], {
+          autoAlpha: 0, y: -40, scale: .96, duration: .45, ease: 'power3.in'
+        }, i - 0.55);
+      }
+
+      linha.fromTo(entram,
+        { autoAlpha: 0, y: 56 },
+        { autoAlpha: 1, y: 0, duration: .9, ease: 'power3.out', stagger: 0.2 },
+        i);
+
+      // a foto continua se aproximando enquanto a cena esta no ar
+      if (foto) {
+        linha.fromTo(foto, { scale: 1.08 }, { scale: 1, duration: 1.2, ease: 'none' }, i);
+      }
+    });
+
+    return function () {
+      secao.classList.remove('pin-ativo');
+      gsap.set(cenas, { clearProps: 'all' });
+      gsap.set('#noitePalco [data-entra]', { clearProps: 'all' });
+    };
+  });
+
+  /* no celular: entrada simples, cena por cena */
+  mm.add('(max-width: 859px)', function () {
+    var limpar = [];
+    document.querySelectorAll('#noitePalco .noite__cena').forEach(function (cena) {
+      limpar.push(gsap.fromTo(cena.querySelectorAll('[data-entra]'),
+        { autoAlpha: 0, y: 40 },
+        {
+          autoAlpha: 1, y: 0, duration: .8, ease: 'power3.out', stagger: 0.2,
+          scrollTrigger: { trigger: cena, start: 'top 80%' }
+        }));
+    });
+    return function () { limpar.forEach(function (t) { t.kill(); }); };
   });
 
   /* =======================================================
-     12. Barra de progresso da leitura
+     13. Barra de progresso da leitura
      ======================================================= */
   gsap.to('#progresso', {
     scaleX: 1, ease: 'none',
@@ -299,7 +370,7 @@
   });
 
   /* =======================================================
-     13. Pausa o video quando ele sai da tela (economiza bateria)
+     14. Pausa o video quando ele sai da tela (economiza bateria)
      ======================================================= */
   var video = document.getElementById('heroVideo');
   if (video) {

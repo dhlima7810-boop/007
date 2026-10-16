@@ -119,8 +119,8 @@ h1,h2,h3{margin:0;line-height:1.05}
 .hero__gradiente{
   position:absolute;inset:0;
   background:
-    linear-gradient(105deg, rgba(23,17,14,.96) 0%, rgba(23,17,14,.88) 45%, rgba(23,17,14,.58) 100%),
-    linear-gradient(to top, rgba(23,17,14,.92) 0%, rgba(23,17,14,0) 42%);
+    linear-gradient(105deg, rgba(23,17,14,.9) 0%, rgba(23,17,14,.74) 48%, rgba(23,17,14,.4) 100%),
+    linear-gradient(to top, rgba(23,17,14,.88) 0%, rgba(23,17,14,0) 45%);
 }
 /* a cortina e a pausa antes da primeira palavra: sobe depois que o video ja roda */
 .hero__cortina{position:absolute;inset:0;z-index:-1;background:#0d0906;opacity:0;pointer-events:none}
@@ -139,6 +139,7 @@ h1,h2,h3{margin:0;line-height:1.05}
 .hero__tag-txt{letter-spacing:.14em;display:block}
 
 .hero__titulo{
+  text-shadow:0 4px 26px rgba(0,0,0,.6);
   font-family:var(--titulo);
   font-size:clamp(2.7rem, 8.4vw, 5.4rem);
   text-transform:uppercase;letter-spacing:.5px;
@@ -150,7 +151,10 @@ h1,h2,h3{margin:0;line-height:1.05}
 .letra{display:inline-block;white-space:pre;will-change:transform}
 .palavra{display:inline-block;white-space:nowrap}
 
-.hero__texto{font-size:1.14rem;margin:1.4rem 0 2.2rem;color:#efe6da;max-width:46ch}
+.hero__texto{
+  font-size:1.14rem;margin:1.4rem 0 2.2rem;color:#f3ebe1;max-width:46ch;
+  text-shadow:0 2px 14px rgba(0,0,0,.85);
+}
 .hero__texto strong{color:#fff}
 .hero__acoes{display:flex;flex-wrap:wrap;gap:.9rem}
 
@@ -276,18 +280,64 @@ h1,h2,h3{margin:0;line-height:1.05}
 .item p{margin:0;color:#c9bcae;font-size:.96rem}
 .cardapio__cta{margin-top:2.2rem;text-align:center}
 
-/* ---------------- Galeria ---------------- */
-.galeria{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:.9rem;grid-auto-rows:200px;
-}
-.galeria__item{
+/* ---------------- Uma noite aqui (pin scroll) ----------------
+   Sem JS, ou no celular, a secao e uma lista comum: uma cena
+   embaixo da outra. No desktop o JS poe a classe .pin-ativo,
+   que empilha as cenas no mesmo lugar e prende a secao na tela
+   enquanto o scroll move a camera.
+   ------------------------------------------------------------- */
+.noite{background:var(--preto);color:var(--creme);padding:5rem 0 6rem;overflow:hidden}
+.noite__cabecalho{text-align:center;margin-bottom:3.5rem}
+.noite__cabecalho .secao__sobretitulo{color:var(--amarelo)}
+
+.noite__palco{position:relative}
+.noite__cena{margin-bottom:5rem}
+.noite__cena:last-child{margin-bottom:0}
+.noite__cena__in{display:grid;gap:1.6rem;align-items:center}
+
+.noite__foto{
   padding:0;border:0;cursor:pointer;background:#000;
-  border-radius:var(--raio);overflow:hidden;position:relative;
+  border-radius:var(--raio);overflow:hidden;display:block;width:100%;
+  box-shadow:0 24px 60px rgba(0,0,0,.5);
 }
-.galeria__item img{width:100%;height:100%;object-fit:cover;transition:transform .45s ease, opacity .3s ease}
-.galeria__item:hover img{transform:scale(1.07);opacity:.88}
-.galeria__item--grande{grid-row:span 2;grid-column:span 2}
+.noite__foto img{width:100%;display:block;transition:transform .5s ease}
+.noite__foto:hover img{transform:scale(1.03)}
+
+.noite__num{
+  display:block;font-family:var(--titulo);font-size:3rem;line-height:1;
+  color:var(--amarelo);margin-bottom:.4rem;
+}
+.noite__titulo{
+  font-family:var(--titulo);text-transform:uppercase;letter-spacing:.5px;
+  font-size:clamp(1.7rem,3.4vw,2.5rem);margin-bottom:.8rem;
+}
+.noite__desc{margin:0;color:#c9bcae;font-size:1.05rem;line-height:1.6;max-width:42ch}
+
+.noite__contador{
+  margin:3rem 0 0;text-align:center;
+  font-family:var(--titulo);font-size:1.05rem;letter-spacing:.2em;color:#6d6259;
+}
+.noite__contador span{color:var(--amarelo)}
+.noite__contador i{font-style:normal;margin:0 .4rem}
+
+@media (min-width:860px){
+  .noite__cena__in{grid-template-columns:1.05fr .95fr;gap:3.5rem}
+}
+
+/* ---- modo pin: as cenas dividem o mesmo espaco ---- */
+.noite.pin-ativo{
+  height:100vh;height:100svh;
+  padding:var(--alt-topo,72px) 0 0;
+  display:flex;flex-direction:column;
+}
+.noite.pin-ativo .noite__cabecalho{flex:none;margin:1rem 0 .5rem}
+.noite.pin-ativo .noite__cabecalho .secao__titulo{font-size:clamp(1.8rem,3.4vw,2.6rem)}
+.noite.pin-ativo .noite__palco{flex:1 1 auto;min-height:0;position:relative}
+.noite.pin-ativo .noite__cena{position:absolute;inset:0;margin:0;display:flex;align-items:center}
+.noite.pin-ativo .noite__foto img{max-height:min(46vh,420px);object-fit:cover}
+.noite.pin-ativo .noite__num{font-size:2.4rem}
+.noite.pin-ativo .noite__desc{font-size:1rem}
+.noite.pin-ativo .noite__contador{flex:none;margin:.6rem 0 1.4rem}
 
 /* ---------------- Local ---------------- */
 .local{display:grid;grid-template-columns:1fr 1.25fr;gap:2rem;align-items:start}
@@ -342,7 +392,6 @@ h1,h2,h3{margin:0;line-height:1.05}
 /* ---------------- Responsivo ---------------- */
 @media (max-width:860px){
   .local{grid-template-columns:1fr}
-  .galeria__item--grande{grid-column:span 2}
 }
 
 @media (max-width:720px){
@@ -370,9 +419,6 @@ h1,h2,h3{margin:0;line-height:1.05}
   .promos{grid-template-columns:1fr}
   .promo{min-height:0}
 
-  .galeria{grid-auto-rows:150px}
-  .galeria__item--grande{grid-row:span 2}
-
   .ligar-fixo{display:inline-flex}
   .rodape{padding-bottom:5.5rem}
 }
@@ -392,6 +438,7 @@ h1,h2,h3{margin:0;line-height:1.05}
 .js .hero__acoes,
 .js .rolar{opacity:0}
 .js .hero__risco{transform:scaleX(0)}
+.js .noite [data-entra]{opacity:0}
 
 @media (prefers-reduced-motion:reduce){
   .hero__media{inset:0}

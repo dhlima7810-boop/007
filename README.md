@@ -25,6 +25,7 @@ assets/
   js/main.js            animações GSAP, menu, destaque do dia, galeria
   img/                  fotos da pizzaria + hero-poster.jpg
   video/hero.mp4        vídeo de fundo do topo (e hero.webm, mesma coisa)
+                        gerado a partir de img/fachada-noite.jpg
   favicon.png           ícone da aba
 ```
 
@@ -45,8 +46,31 @@ primeira palavra:
 6. só então as letras do título sobem de dentro de uma janela, uma a uma.
 
 Depois disso: barra de progresso no topo, letreiro amarelo rolando sem
-parar, parallax no vídeo e nas fotos, títulos de seção subindo da janela e
-o indicador "Role" que some assim que a página desce.
+parar, parallax no vídeo, títulos de seção subindo da janela e o indicador
+"Role" que some assim que a página desce.
+
+### A seção "Uma noite aqui" (pin scroll)
+
+É a seção presa na tela. Enquanto você rola, a página não anda: o scroll
+passa a mover as cenas, uma de cada vez, da calçada até a mesa.
+
+O que dá a sensação de câmera é o `scrub: 1` do ScrollTrigger. Cada pixel
+rolado corresponde a um pedaço da linha do tempo, e o atraso de 1 segundo
+faz a cena chegar amaciando, em vez de grudar no dedo. A cena anterior
+recua e some antes de a próxima entrar, para os dois textos nunca
+aparecerem juntos.
+
+Dentro de cada cena os elementos entram em sequência — foto, número,
+título, descrição — com `stagger: 0.2` e `ease: 'power3.out'`. A foto
+continua se aproximando devagar enquanto a cena está no ar.
+
+O pin só vale no desktop (`min-width: 860px`, via `gsap.matchMedia`). No
+celular a seção vira uma lista comum, com as mesmas entradas em sequência,
+porque prender a tela em aparelho pequeno atrapalha mais do que ajuda.
+
+Para mexer nas cenas, cada uma é um bloco `.noite__cena` no `index.html`.
+Acrescentar ou tirar uma funciona sozinho: o JavaScript conta quantas
+existem e ajusta a altura do pin e o contador.
 
 **Se o GSAP não carregar**, o `main.js` tira a classe `js` do `<html>` e a
 página aparece inteira, sem animação nenhuma. Quem usa "reduzir movimento"

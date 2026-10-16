@@ -42,7 +42,7 @@
     <nav class="nav" id="navegacao" aria-label="Menu principal">
       <a href="#promocoes">Promoções</a>
       <a href="#cardapio">Cardápio</a>
-      <a href="#galeria">Fotos</a>
+      <a href="#noite">Uma noite aqui</a>
       <a href="#local">Onde estamos</a>
       <a class="nav__cta" href="tel:+551124528022">Ligar agora</a>
     </nav>
@@ -224,40 +224,82 @@
     </div>
   </section>
 
-  <!-- ============ GALERIA ============ -->
-  <section class="secao" id="galeria">
-    <div class="container">
-      <header class="secao__cabecalho">
-        <p class="secao__sobretitulo">Dá uma olhada</p>
-        <h2 class="secao__titulo"><span class="linha"><span class="linha__in" data-split>A Pizza Mia por dentro</span></span></h2>
-        <p class="secao__texto">A casa na esquina, o salão na hora do rodízio e as pizzas saindo do forno.</p>
-      </header>
-
-      <div class="galeria">
-        <button class="galeria__item galeria__item--grande" data-img="assets/img/fachada.jpg" data-leg="Nossa fachada na Av. Emilio Ribas, 3175">
-          <img src="assets/img/fachada.jpg" alt="Fachada da pizzaria, prédio amarelo e vermelho na esquina" loading="lazy">
-        </button>
-        <button class="galeria__item" data-img="assets/img/salao.jpg" data-leg="Salão cheio no horário do rodízio">
-          <img src="assets/img/salao.jpg" alt="Salão da pizzaria com mesas ocupadas" loading="lazy">
-        </button>
-        <button class="galeria__item" data-img="assets/img/fachada-noite.jpg" data-leg="A casa à noite, no movimento do rodízio">
-          <img src="assets/img/fachada-noite.jpg" alt="Pizzaria iluminada à noite com clientes no salão" loading="lazy">
-        </button>
-        <button class="galeria__item" data-img="assets/img/pizza-brocolis.jpg" data-leg="Pizza de brócolis com bacon">
-          <img src="assets/img/pizza-brocolis.jpg" alt="Pizza de brócolis com bacon e refrigerante" loading="lazy">
-        </button>
-        <button class="galeria__item" data-img="assets/img/pizza-carne.jpg" data-leg="Pizza de carne seca com catupiry">
-          <img src="assets/img/pizza-carne.jpg" alt="Pizza de carne com catupiry em grade e refrigerante" loading="lazy">
-        </button>
-        <!-- A foto do cartaz de promocoes esta em assets/img/promocoes.jpg.
-             Saiu da galeria porque mostra precos antigos. Quando houver um
-             cartaz novo, basta trocar o arquivo e colar o bloco abaixo aqui.
-        <button class="galeria__item" data-img="assets/img/promocoes.jpg" data-leg="Cartaz com as promoções da semana">
-          <img src="assets/img/promocoes.jpg" alt="Cartaz com as promoções de cada dia da semana" loading="lazy">
-        </button>
-        -->
-      </div>
+  <!-- ============ UMA NOITE AQUI (pin scroll) ============ -->
+  <section class="noite" id="noite">
+    <div class="container noite__cabecalho">
+      <p class="secao__sobretitulo">Da calçada até a mesa</p>
+      <h2 class="secao__titulo"><span class="linha"><span class="linha__in" data-split>Uma noite aqui</span></span></h2>
     </div>
+
+    <div class="noite__palco" id="noitePalco">
+
+      <div class="noite__cena" data-cena>
+        <div class="container noite__cena__in">
+        <button class="noite__foto" data-img="assets/img/fachada.jpg" data-leg="A casa na esquina da Av. Emilio Ribas, 3175" data-entra>
+          <img src="assets/img/fachada.jpg" alt="Fachada da pizzaria de dia, prédio amarelo e vermelho na esquina" loading="lazy">
+        </button>
+        <div class="noite__texto">
+          <span class="noite__num" data-entra>01</span>
+          <h3 class="noite__titulo" data-entra>A casa na esquina</h3>
+          <p class="noite__desc" data-entra>
+            Av. Emilio Ribas, 3175, em Vila Galvão. De dia dá para ver o prédio
+            amarelo e vermelho de longe, antes mesmo de chegar na porta.
+          </p>
+        </div>
+        </div>
+      </div>
+
+      <div class="noite__cena" data-cena>
+        <div class="container noite__cena__in">
+        <button class="noite__foto" data-img="assets/img/varanda.jpg" data-leg="O salão na hora do rodízio" data-entra>
+          <img src="assets/img/varanda.jpg" alt="Salão da pizzaria com mesas de madeira e clientes jantando" loading="lazy">
+        </button>
+        <div class="noite__texto">
+          <span class="noite__num" data-entra>02</span>
+          <h3 class="noite__titulo" data-entra>O salão vai enchendo</h3>
+          <p class="noite__desc" data-entra>
+            Mesa de madeira, ventilador ligado, piso quadriculado. O rodízio
+            começa e as pizzas passam de mesa em mesa a noite toda.
+          </p>
+        </div>
+        </div>
+      </div>
+
+      <div class="noite__cena" data-cena>
+        <div class="container noite__cena__in">
+        <button class="noite__foto" data-img="assets/img/mesa.jpg" data-leg="Salgada, doce, pão de alho e as entradas" data-entra>
+          <img src="assets/img/mesa.jpg" alt="Mesa com pizza salgada, pizza doce de banana e morango, pães de alho e sobremesas" loading="lazy">
+        </button>
+        <div class="noite__texto">
+          <span class="noite__num" data-entra>03</span>
+          <h3 class="noite__titulo" data-entra>A mesa fica assim</h3>
+          <p class="noite__desc" data-entra>
+            Salgada e doce no mesmo rodízio: calabresa, mussarela, banana com
+            chocolate, morango. Mais pão de alho e as entradas no meio.
+          </p>
+        </div>
+        </div>
+      </div>
+
+      <div class="noite__cena" data-cena>
+        <div class="container noite__cena__in">
+        <button class="noite__foto" data-img="assets/img/pizza-viagem.jpg" data-leg="A mesma pizza, na caixa, para viagem" data-entra>
+          <img src="assets/img/pizza-viagem.jpg" alt="Pizza meio calabresa e meio mussarela com azeitonas, na embalagem para viagem" loading="lazy">
+        </button>
+        <div class="noite__texto">
+          <span class="noite__num" data-entra>04</span>
+          <h3 class="noite__titulo" data-entra>E também sai para viagem</h3>
+          <p class="noite__desc" data-entra>
+            Não dá para ficar? A mesma pizza vai na caixa. Retirada no balcão
+            ou disk pizza pelo (11) 2452-6575.
+          </p>
+        </div>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="noite__contador" aria-hidden="true"><span id="cenaAtual">01</span> <i>/</i> 04</p>
   </section>
 
   <!-- ============ LOCAL ============ -->
