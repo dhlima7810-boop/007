@@ -81,58 +81,68 @@
       <header class="secao__cabecalho">
         <p class="secao__sobretitulo">Outlet na Pizza Mia</p>
         <h2 class="secao__titulo">Promoção todo dia</h2>
-        <p class="secao__texto">Cada dia da semana tem a sua. O dia de hoje aparece em destaque.</p>
+        <p class="secao__texto">
+          Cada dia da semana tem a sua. O dia de hoje aparece em destaque —
+          ligue para confirmar o preço, que muda de tempos em tempos.
+        </p>
       </header>
 
       <ul class="promos" id="promos">
         <li class="promo" data-dia="1">
           <p class="promo__dia">Segunda-feira</p>
-          <h3 class="promo__nome">Rodízio</h3>
-          <p class="promo__preco"><span>R$</span>20,90</p>
+          <h3 class="promo__nome">Rodízio de pizzas</h3>
+          <!-- Quando souber o valor, descomente a linha abaixo e troque o numero.
+               O estilo do preco ja esta pronto na folha de estilo.
+          <p class="promo__preco"><span>R$</span>00,00</p>
+          -->
           <p class="promo__obs">Exceto feriados e vésperas</p>
+          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
         <li class="promo" data-dia="2">
           <p class="promo__dia">Terça-feira</p>
           <h3 class="promo__nome">Esfihas de carne e queijo</h3>
-          <p class="promo__preco"><span>R$</span>0,99</p>
-          <p class="promo__obs">No pacote: 10 de carne + 2 de queijo por R$ 12,90</p>
+          <p class="promo__obs">Unidade ou no pacote: 10 de carne + 2 de queijo</p>
+          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
         <li class="promo" data-dia="3">
           <p class="promo__dia">Quarta-feira</p>
           <h3 class="promo__nome">Pizzas para viagem</h3>
-          <p class="promo__preco"><span>R$</span>19,90</p>
           <p class="promo__obs">Sabores selecionados</p>
+          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
         <li class="promo" data-dia="4">
           <p class="promo__dia">Quinta-feira</p>
           <h3 class="promo__nome">Rodízio com refrigerante à vontade</h3>
-          <p class="promo__preco"><span>R$</span>27,90</p>
           <p class="promo__obs">Exceto feriados e vésperas</p>
+          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
         <li class="promo" data-dia="5">
           <p class="promo__dia">Sexta-feira</p>
           <h3 class="promo__nome">1 Coca-Cola de 1 litro grátis</h3>
-          <p class="promo__preco promo__preco--texto">Grátis</p>
           <p class="promo__obs">Na compra de 1 pizza para viagem</p>
+          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
         <li class="promo" data-dia="6">
           <p class="promo__dia">Sábado</p>
           <h3 class="promo__nome">1 chopp Brahma grátis</h3>
-          <p class="promo__preco promo__preco--texto">Grátis</p>
           <p class="promo__obs">Na compra de 1 pizza, à noite</p>
+          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-        <!-- ATENÇÃO: o cartaz da semana marca R$ 27,90 no domingo, mas o banner
-             "DOMINGO — Rodízio com refrigerante à vontade" marca R$ 37,90.
-             Confirme na pizzaria e ajuste o valor abaixo se for o caso. -->
         <li class="promo" data-dia="0">
           <p class="promo__dia">Domingo</p>
           <h3 class="promo__nome">Rodízio com refrigerante à vontade</h3>
-          <p class="promo__preco"><span>R$</span>27,90</p>
           <p class="promo__obs">Exceto feriados e vésperas</p>
+          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
       </ul>
 
-      <p class="aviso">Preços sujeitos a alteração. Confirme pelo telefone antes de vir.</p>
+      <div class="aviso">
+        <p>Os preços mudam de tempos em tempos. Ligue e confirme o valor do dia.</p>
+        <a class="botao botao--principal" href="tel:+551124528022">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.4 11.4 0 0 0 .57 3.6 1 1 0 0 1-.25 1z"/></svg>
+          (11) 2452-8022
+        </a>
+      </div>
     </div>
   </section>
 
@@ -206,9 +216,13 @@
         <button class="galeria__item" data-img="assets/img/fachada-noite.jpg" data-leg="A casa à noite, no movimento do rodízio">
           <img src="assets/img/fachada-noite.jpg" alt="Pizzaria iluminada à noite com clientes no salão" loading="lazy">
         </button>
+        <!-- A foto do cartaz de promocoes esta em assets/img/promocoes.jpg.
+             Saiu da galeria porque mostra precos antigos. Quando houver um
+             cartaz novo, basta trocar o arquivo e colar o bloco abaixo aqui.
         <button class="galeria__item" data-img="assets/img/promocoes.jpg" data-leg="Cartaz com as promoções da semana">
           <img src="assets/img/promocoes.jpg" alt="Cartaz com as promoções de cada dia da semana" loading="lazy">
         </button>
+        -->
       </div>
     </div>
   </section>

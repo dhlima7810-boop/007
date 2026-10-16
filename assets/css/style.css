@@ -159,7 +159,7 @@ h1,h2,h3{margin:0;line-height:1.05}
 }
 .promo{
   background:#fff;border:1px solid var(--borda);border-radius:var(--raio);
-  padding:1.5rem 1.35rem;position:relative;
+  padding:1.6rem 1.4rem;position:relative;min-height:200px;
   display:flex;flex-direction:column;
   transition:transform .2s ease, box-shadow .2s ease;
 }
@@ -168,14 +168,22 @@ h1,h2,h3{margin:0;line-height:1.05}
   margin:0 0 .6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;
   font-size:.74rem;color:var(--vermelho);
 }
-.promo__nome{font-size:1.12rem;font-weight:800;font-family:var(--corpo);margin-bottom:.9rem}
+.promo__nome{font-size:1.2rem;font-weight:800;font-family:var(--corpo);margin-bottom:.7rem;line-height:1.25}
 .promo__preco{
-  font-family:var(--titulo);font-size:2.6rem;line-height:1;margin:auto 0 .5rem;
+  font-family:var(--titulo);font-size:2.6rem;line-height:1;margin:.2rem 0 .6rem;
   color:var(--preto);display:flex;align-items:baseline;gap:.2rem;
 }
 .promo__preco span{font-size:1.1rem;color:var(--cinza)}
 .promo__preco--texto{font-size:2rem;color:var(--vermelho)}
-.promo__obs{margin:0;font-size:.86rem;color:var(--cinza);line-height:1.45}
+.promo__obs{margin:0 0 1.1rem;font-size:.9rem;color:var(--cinza);line-height:1.45}
+.promo__link{
+  margin-top:auto;align-self:flex-start;
+  font-weight:800;font-size:.9rem;text-decoration:none;color:var(--vermelho);
+  border-bottom:2px solid currentColor;padding-bottom:2px;
+  transition:color .2s, border-color .2s;
+}
+.promo__link::after{content:' \2192'}
+.promo__link:hover{color:var(--vermelho-escuro)}
 
 .promo--hoje{
   background:var(--vermelho);border-color:var(--vermelho);color:#fff;
@@ -186,6 +194,7 @@ h1,h2,h3{margin:0;line-height:1.05}
 .promo--hoje .promo__preco--texto{color:#fff}
 .promo--hoje .promo__preco span{color:rgba(255,255,255,.75)}
 .promo--hoje .promo__obs{color:rgba(255,255,255,.85)}
+.promo--hoje .promo__link{color:#fff}
 .promo--hoje::after{
   content:'Hoje';
   position:absolute;top:-11px;right:1.2rem;
@@ -194,7 +203,11 @@ h1,h2,h3{margin:0;line-height:1.05}
   padding:.3rem .7rem;border-radius:999px;
 }
 
-.aviso{margin:2rem 0 0;text-align:center;font-size:.86rem;color:var(--cinza)}
+.aviso{
+  margin:2.5rem auto 0;max-width:560px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:1rem;
+}
+.aviso p{margin:0;font-size:.95rem;color:var(--cinza)}
 
 /* ---------------- Cardápio ---------------- */
 .cardapio{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.1rem}
@@ -303,7 +316,7 @@ h1,h2,h3{margin:0;line-height:1.05}
 
   .secao{padding:3.25rem 0}
   .promos{grid-template-columns:1fr}
-  .promo__preco{margin-top:1rem}
+  .promo{min-height:0}
 
   .galeria{grid-auto-rows:150px}
   .galeria__item--grande{grid-row:span 2}

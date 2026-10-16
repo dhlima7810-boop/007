@@ -31,13 +31,21 @@ assets/
 
 Estes pontos estão marcados com comentário `TODO` / `ATENÇÃO` no código:
 
-1. **Horário de funcionamento** — em `index.html`, seção `#local`. Hoje está escrito
-   "Aberto todos os dias. Confirme o horário pelo telefone."
-2. **Preço do rodízio de domingo** — o cartaz da semana marca **R$ 27,90**, mas o
-   banner do domingo marca **R$ 37,90**. Confirmar qual vale e ajustar o card.
+1. **Preços** — o site não mostra valor nenhum, de propósito: os preços do
+   cartaz antigo não valem mais. Cada card de promoção tem um link
+   "Consultar preço" que liga para a pizzaria. Quando souber os valores,
+   abra `index.html` na seção `#promocoes`: dentro do card de segunda-feira
+   há uma linha comentada mostrando exatamente como colocar o preço. É só
+   descomentar e repetir nos outros dias.
+2. **Horário de funcionamento** — em `index.html`, seção `#local`. Hoje está
+   escrito "Aberto todos os dias. Confirme o horário pelo telefone."
 3. **Cardápio completo** — a seção `#cardapio` tem só as categorias. Dentro dela há
    um bloco de exemplo comentado para copiar e colar a cada sabor novo.
-4. **Redes sociais e delivery** — se a pizzaria tiver Instagram, iFood ou 99Food,
+4. **Foto do cartaz de promoções** — o arquivo continua em
+   `assets/img/promocoes.jpg`, mas saiu da galeria porque mostra os preços
+   antigos. Quando houver cartaz novo, troque o arquivo e descomente o bloco
+   na seção `#galeria`.
+5. **Redes sociais e delivery** — se a pizzaria tiver Instagram, iFood ou 99Food,
    dá para incluir os links no menu e no rodapé.
 
 ## Dados usados no site
