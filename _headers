@@ -1,0 +1,21 @@
+# Cabecalhos de cache. Lido por Netlify e Cloudflare Pages.
+# GitHub Pages ignora este arquivo: la o cache e fixo em 10 minutos e
+# nao da para mudar. Se o cache importar, hospede em um dos dois acima.
+
+/assets/img/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/css/*
+  Cache-Control: public, max-age=604800
+
+/assets/js/*
+  Cache-Control: public, max-age=604800
+
+/*.html
+  Cache-Control: public, max-age=600, must-revalidate
+
+/
+  Cache-Control: public, max-age=600, must-revalidate

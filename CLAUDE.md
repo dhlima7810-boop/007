@@ -108,3 +108,25 @@ assets/vendor/        libs
   "Consultar preço" que liga.
 - Fotos: use só as que a pizzaria forneceu. Imagens de Tripadvisor, Google ou
   Restaurant Guru são de terceiros e não entram.
+- **Telefone: um só, (11) 2452-6575.** É o que aparece primeiro na placa da
+  fachada, primeiro no rodapé do cardápio impresso e como linha principal nos
+  guias da cidade. O 2452-8022 existe, mas sai do site para não dividir a
+  ligação. Se trocar, troque em todas as ocorrências e no JSON-LD.
+- **Horário: todos os dias, 18h à meia-noite.** Os dias vêm do próprio cartaz
+  da casa, que anuncia promoção para os sete dias da semana.
+- **Razão social e CNPJ:** La Casa Della Pizza Mia Ltda, 54.968.854/0001-95.
+  Aparece no rodapé e nas páginas legais.
+
+## Dados estruturados e publicação
+
+O `index.html` tem um bloco JSON-LD (`Restaurant` + `Menu`) no `<head>`. Ele é
+**gerado a partir do próprio HTML** da página, lendo os `<li class="sabor">`,
+para nunca divergir do que está na tela. Mexeu nos sabores, regere — a receita
+está no README.
+
+Antes de publicar, trocar `SITE_URL` pelo domínio real em três lugares:
+`index.html` (JSON-LD), `sitemap.xml` e `robots.txt`. Enquanto for `SITE_URL`,
+os buscadores ignoram essas URLs.
+
+O `robots.txt` libera explicitamente GPTBot, ClaudeBot, PerplexityBot e
+Google-Extended, entre outros. Não feche esses agentes sem o dono pedir.

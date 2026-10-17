@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pizza Mia — Pizzaria e Rodízio em Vila Galvão, Guarulhos</title>
-<meta name="description" content="Pizza Mia — rodízio de pizzas, esfihas e pizzas para viagem na Av. Emilio Ribas, 3175, Vila Galvão, Guarulhos. Promoção todo dia. Disk pizza (11) 2452-8022.">
+<meta name="description" content="Pizza Mia — rodízio de pizzas, esfihas e pizzas para viagem na Av. Emilio Ribas, 3175, Vila Galvão, Guarulhos. Todos os dias das 18h à meia-noite. Disk pizza (11) 2452-6575.">
 <meta name="theme-color" content="#121010">
 <link rel="icon" href="assets/favicon.png" type="image/png">
 
@@ -19,6 +19,437 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Figtree:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/vendor/lenis.css">
 <link rel="stylesheet" href="assets/css/style.css">
+
+<!-- =========================================================
+     Dados estruturados (JSON-LD). Diz em dados o que a pagina
+     ja diz em texto: endereco, telefone, horario e cardapio.
+
+     ATENCAO ANTES DE PUBLICAR: trocar SITE_URL pelo dominio
+     real em todas as ocorrencias deste bloco, no sitemap.xml
+     e no robots.txt. Enquanto for SITE_URL, os buscadores
+     ignoram as URLs.
+
+     O bloco foi gerado a partir do proprio HTML da pagina. Se
+     mexer nos sabores, regere para nao divergir — a receita
+     esta no README.
+     ========================================================= -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "@id": "https://SITE_URL/#restaurante",
+  "name": "Pizza Mia",
+  "legalName": "La Casa Della Pizza Mia Ltda",
+  "taxID": "54.968.854/0001-95",
+  "description": "Pizzaria e rodízio em Vila Galvão, Guarulhos. Rodízio de pizzas salgadas e doces, esfihas e pizzas para viagem.",
+  "image": "https://SITE_URL/assets/img/fachada-noite.jpg",
+  "logo": "https://SITE_URL/assets/img/logo.jpg",
+  "url": "https://SITE_URL/",
+  "telephone": "+55-11-2452-6575",
+  "servesCuisine": [
+    "Pizza",
+    "Italiana",
+    "Brasileira"
+  ],
+  "priceRange": "$$",
+  "currenciesAccepted": "BRL",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Av. Emilio Ribas, 3175",
+    "addressLocality": "Guarulhos",
+    "addressRegion": "SP",
+    "postalCode": "07051-001",
+    "addressCountry": "BR"
+  },
+  "areaServed": {
+    "@type": "City",
+    "name": "Guarulhos"
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "opens": "18:00",
+      "closes": "00:00"
+    }
+  ],
+  "acceptsReservations": "False",
+  "hasMenu": {
+    "@type": "Menu",
+    "@id": "https://SITE_URL/#cardapio",
+    "name": "Cardápio Pizza Mia",
+    "inLanguage": "pt-BR",
+    "hasMenuSection": [
+      {
+        "@type": "MenuSection",
+        "name": "Pizzas salgadas",
+        "description": "Lista parcial: faltam os sabores de A a E e as pizzas doces.",
+        "hasMenuItem": [
+          {
+            "@type": "MenuItem",
+            "name": "Frajola",
+            "offers": {
+              "@type": "Offer",
+              "price": "58.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "frango, palmito e catupiry"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Frango c/ catupiry",
+            "offers": {
+              "@type": "Offer",
+              "price": "58.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "frango com catupiry"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Giselda",
+            "offers": {
+              "@type": "Offer",
+              "price": "66.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "frango, milho, ervilha, palmito e mussarela"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Gorgonzola",
+            "offers": {
+              "@type": "Offer",
+              "price": "66.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "gorgonzola"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Kani I",
+            "offers": {
+              "@type": "Offer",
+              "price": "62.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "kani acebolado"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Kani II",
+            "offers": {
+              "@type": "Offer",
+              "price": "60.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "kani e mussarela"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Kani III",
+            "offers": {
+              "@type": "Offer",
+              "price": "62.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "kani e catupiry"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Lazanha",
+            "offers": {
+              "@type": "Offer",
+              "price": "56.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "presunto, mussarela, catupiry, molho bolonhesa e parmesão"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Lisboense",
+            "offers": {
+              "@type": "Offer",
+              "price": "62.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "presunto e mussarela"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Lombo I",
+            "offers": {
+              "@type": "Offer",
+              "price": "66.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "lombo acebolado"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Lombo II",
+            "offers": {
+              "@type": "Offer",
+              "price": "68.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "lombo e mussarela"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Lombo III",
+            "offers": {
+              "@type": "Offer",
+              "price": "60.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "lombo e catupiry"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Marguerita",
+            "offers": {
+              "@type": "Offer",
+              "price": "57.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "mussarela, manjericão e rodelas de tomate"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Marilu",
+            "offers": {
+              "@type": "Offer",
+              "price": "62.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "frango, milho e catupiry"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Milho verde I",
+            "offers": {
+              "@type": "Offer",
+              "price": "58.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "milho verde e mussarela"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Milho verde II",
+            "offers": {
+              "@type": "Offer",
+              "price": "63.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "milho verde e catupiry"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Moda da casa",
+            "offers": {
+              "@type": "Offer",
+              "price": "63.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "calabresa moída, palmito, cebola e mussarela"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Mussarela",
+            "offers": {
+              "@type": "Offer",
+              "price": "63.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "mussarela"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Napolitana",
+            "offers": {
+              "@type": "Offer",
+              "price": "61.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "mussarela, tomate e parmesão"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Palmito I",
+            "offers": {
+              "@type": "Offer",
+              "price": "50.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "palmito e mussarela"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Palmito II",
+            "offers": {
+              "@type": "Offer",
+              "price": "58.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "palmito e catupiry"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Hamburguer",
+            "offers": {
+              "@type": "Offer",
+              "price": "58.00",
+              "priceCurrency": "BRL"
+            }
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Peito de peru I",
+            "offers": {
+              "@type": "Offer",
+              "price": "72.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "peito de peru, champignon, ervilha, mussarela e parmesão"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Peito de peru II",
+            "offers": {
+              "@type": "Offer",
+              "price": "72.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "peito de peru, milho, ervilha e catupiry"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Pepperoni",
+            "offers": {
+              "@type": "Offer",
+              "price": "72.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "mussarela, salame e pepperoni"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Pizzaiolo",
+            "offers": {
+              "@type": "Offer",
+              "price": "65.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "mussarela, milho, catupiry e bacon"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Portuguesa",
+            "offers": {
+              "@type": "Offer",
+              "price": "66.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "presunto, ovos, cebola e mussarela"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Provolone",
+            "offers": {
+              "@type": "Offer",
+              "price": "66.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "provolone"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Quatro queijos",
+            "offers": {
+              "@type": "Offer",
+              "price": "58.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "parmesão, provolone, mussarela e catupiry"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Requinte",
+            "offers": {
+              "@type": "Offer",
+              "price": "68.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "presunto, ovos, palmito, cebola, catupiry e bacon"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Roma",
+            "offers": {
+              "@type": "Offer",
+              "price": "68.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "aliche, mussarela, tomate e parmesão"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Siciliana",
+            "offers": {
+              "@type": "Offer",
+              "price": "52.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "mussarela, champignon e bacon"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Três queijos",
+            "offers": {
+              "@type": "Offer",
+              "price": "57.00",
+              "priceCurrency": "BRL"
+            },
+            "description": "provolone, mussarela e catupiry"
+          }
+        ]
+      },
+      {
+        "@type": "MenuSection",
+        "name": "Rodízio",
+        "hasMenuItem": [
+          {
+            "@type": "MenuItem",
+            "name": "Rodízio de pizzas",
+            "description": "Salgadas e doces saindo do forno a noite toda, servidas na mesa."
+          }
+        ]
+      },
+      {
+        "@type": "MenuSection",
+        "name": "Esfihas",
+        "hasMenuItem": [
+          {
+            "@type": "MenuItem",
+            "name": "Esfihas",
+            "description": "De carne e de queijo, abertas, feitas no mesmo forno."
+          }
+        ]
+      }
+    ]
+  }
+}
+</script>
 
 <script>document.documentElement.className = 'js';</script>
 </head>
@@ -43,7 +474,7 @@
       <a href="#cardapio">Cardápio</a>
       <a href="#noite">Uma noite aqui</a>
       <a href="#local">Onde estamos</a>
-      <a class="nav__cta" href="tel:+551124528022">(11) 2452-8022</a>
+      <a class="nav__cta" href="tel:+551124526575">(11) 2452-6575</a>
     </nav>
   </div>
 </header>
@@ -75,7 +506,7 @@
           Promoção todo dia da semana.
         </p>
         <div class="hero__acoes" data-entra>
-          <a class="botao botao--acento" href="tel:+551124528022">Disk Pizza (11) 2452-8022</a>
+          <a class="botao botao--acento" href="tel:+551124526575">Disk Pizza (11) 2452-6575</a>
           <a class="botao botao--fantasma" href="#semana">Ver a semana</a>
         </div>
       </div>
@@ -123,7 +554,7 @@
             -->
             <span class="dia__obs">Exceto feriados e vésperas</span>
           </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+          <a class="dia__link" href="tel:+551124526575">Consultar preço</a>
         </li>
         <li class="dia" data-dia="2">
           <span class="dia__nome">Terça</span>
@@ -131,7 +562,7 @@
             <span class="dia__titulo">Esfihas de carne e queijo</span>
             <span class="dia__obs">Unidade ou no pacote: 10 de carne + 2 de queijo</span>
           </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+          <a class="dia__link" href="tel:+551124526575">Consultar preço</a>
         </li>
         <li class="dia" data-dia="3">
           <span class="dia__nome">Quarta</span>
@@ -139,7 +570,7 @@
             <span class="dia__titulo">Pizzas para viagem</span>
             <span class="dia__obs">Sabores selecionados</span>
           </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+          <a class="dia__link" href="tel:+551124526575">Consultar preço</a>
         </li>
         <li class="dia" data-dia="4">
           <span class="dia__nome">Quinta</span>
@@ -147,7 +578,7 @@
             <span class="dia__titulo">Rodízio com refrigerante à vontade</span>
             <span class="dia__obs">Exceto feriados e vésperas</span>
           </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+          <a class="dia__link" href="tel:+551124526575">Consultar preço</a>
         </li>
         <li class="dia" data-dia="5">
           <span class="dia__nome">Sexta</span>
@@ -155,7 +586,7 @@
             <span class="dia__titulo">1 Coca-Cola de 1 litro grátis</span>
             <span class="dia__obs">Na compra de 1 pizza para viagem</span>
           </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+          <a class="dia__link" href="tel:+551124526575">Consultar preço</a>
         </li>
         <li class="dia" data-dia="6">
           <span class="dia__nome">Sábado</span>
@@ -163,7 +594,7 @@
             <span class="dia__titulo">1 chopp Brahma grátis</span>
             <span class="dia__obs">Na compra de 1 pizza, à noite</span>
           </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+          <a class="dia__link" href="tel:+551124526575">Consultar preço</a>
         </li>
         <li class="dia" data-dia="0">
           <span class="dia__nome">Domingo</span>
@@ -171,7 +602,7 @@
             <span class="dia__titulo">Rodízio com refrigerante à vontade</span>
             <span class="dia__obs">Exceto feriados e vésperas</span>
           </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+          <a class="dia__link" href="tel:+551124526575">Consultar preço</a>
         </li>
       </ol>
     </div>
@@ -477,18 +908,19 @@
           </div>
 
           <div class="dado">
-            <h3 class="dado__rotulo">Telefones</h3>
+            <h3 class="dado__rotulo">Telefone</h3>
             <p class="dado__valor">
-              <a class="elo" href="tel:+551124528022">(11) 2452-8022</a><br>
-              <a class="elo" href="tel:+551124526575">(11) 2452-6575</a> <span class="dado__nota">disk pizza</span>
+              <a class="elo" href="tel:+551124526575">(11) 2452-6575</a>
+              <span class="dado__nota">salão e disk pizza</span>
             </p>
           </div>
 
-          <!-- TODO: confirmar com a pizzaria. Guias da cidade indicam
-               terca a domingo, das 18h as 00h, mas nao batem entre si. -->
           <div class="dado">
             <h3 class="dado__rotulo">Horário</h3>
-            <p class="dado__valor">Confirme o horário pelo telefone.</p>
+            <p class="dado__valor">
+              Todos os dias<br>
+              <strong>das 18h à meia-noite</strong>
+            </p>
           </div>
         </div>
 
@@ -513,13 +945,31 @@
     </a>
     <p class="rodape__endereco">
       Av. Emilio Ribas, 3175 — Vila Galvão, Guarulhos / SP<br>
-      (11) 2452-8022 · (11) 2452-6575
+      (11) 2452-6575 · todos os dias, das 18h à meia-noite<br>
+      <strong>La Casa Della Pizza Mia Ltda</strong> · CNPJ 54.968.854/0001-95
     </p>
-    <p class="rodape__creditos">© <span id="ano">2026</span> Pizza Mia</p>
+
+    <div class="rodape__legal">
+      <p class="rodape__social">
+        <a class="elo" href="https://www.google.com/maps/search/?api=1&query=Pizza+Mia+Av.+Emilio+Ribas+3175+Vila+Galv%C3%A3o+Guarulhos+SP" target="_blank" rel="noopener">Google</a>
+        <!-- INSTAGRAM: nao incluido de proposito. A busca achou DOIS perfis
+             candidatos para esta pizzaria (@pizzamiagv e @pizzamia_1) e nao
+             deu para confirmar qual e o oficial. Publicar o errado mandaria
+             o cliente para a concorrencia. Quando o dono confirmar, trocar a
+             linha abaixo e tirar o comentario.
+        <a class="elo" href="https://www.instagram.com/PERFIL/" target="_blank" rel="noopener">Instagram</a>
+        -->
+      </p>
+      <p class="rodape__creditos">
+        <a class="elo" href="privacidade.html">Privacidade</a> ·
+        <a class="elo" href="termos.html">Termos de uso</a> ·
+        © <span id="ano">2026</span> Pizza Mia
+      </p>
+    </div>
   </div>
 </footer>
 
-<a class="ligar-fixo" href="tel:+551124528022" aria-label="Ligar para a Pizza Mia">
+<a class="ligar-fixo" href="tel:+551124526575" aria-label="Ligar para a Pizza Mia">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.4 11.4 0 0 0 .57 3.6 1 1 0 0 1-.25 1z"/></svg>
   <span>Ligar</span>
 </a>

@@ -117,6 +117,11 @@ Marcado com `TODO` / comentário no código:
    a domingo, das 18h às 00h, mas não batem entre si.
 4. **Segunda unidade** — existe uma Pizza Mia na Av. São Paulo, 474, Cidade
    Brasil, (11) 2425-5960. Ainda não está no site.
+5. **Instagram** — a busca achou dois perfis candidatos (`@pizzamiagv` e
+   `@pizzamia_1`) e não deu para confirmar qual é o oficial. O link está
+   comentado no rodapé do `index.html`, pronto para receber o certo.
+6. **CNPJ** — 54.968.854/0001-95 veio de consulta pública. Vale o dono
+   confirmar antes de publicar, porque é identificador legal.
 
 ## As fotos
 
@@ -135,6 +140,42 @@ As que aparecem no Tripadvisor, no Restaurant Guru e no Google são de clientes
 e pertencem a quem tirou. A página oficial no Facebook
 (`facebook.com/PizzariaMia`) tem fotos da própria casa — essas a pizzaria pode
 autorizar.
+
+## Dados estruturados (JSON-LD)
+
+O `<head>` do `index.html` carrega um bloco `Restaurant` + `Menu` que diz em
+dados o que a página diz em texto: endereço, telefone, horário e os 33 sabores
+com preço. É o que faz buscador e assistente de IA responderem "que horas
+abre" e "quanto custa a portuguesa" sem adivinhar.
+
+O bloco é **gerado a partir do próprio HTML**, lendo os `<li class="sabor">`.
+Se mexer nos sabores, regere para não divergir do que está na tela. O script
+que gerou está no histórico desta conversa; em resumo: ler os `sabor__nome`,
+`sabor__preco` e `sabor__ing`, montar os `MenuItem` com `offers`, e substituir
+o bloco inteiro.
+
+## Antes de publicar
+
+1. **Trocar `SITE_URL` pelo domínio real** em três arquivos: `index.html`
+   (JSON-LD), `sitemap.xml` e `robots.txt`. Enquanto for `SITE_URL`, os
+   buscadores ignoram essas URLs.
+2. **Atualizar as datas** do `sitemap.xml`.
+3. **Conferir o `robots.txt` no ar**, em `SEU-DOMINIO/robots.txt`. Alguns
+   hosts servem um `robots.txt` próprio e ignoram o do repositório — nesse
+   caso o arquivo daqui não vale de nada e é preciso configurar no painel do
+   host.
+4. **Cache:** o `_headers` vale para Netlify e Cloudflare Pages. O GitHub
+   Pages ignora e fixa o cache em 10 minutos, sem como mudar.
+
+## Páginas legais
+
+`privacidade.html` e `termos.html` usam o mesmo CSS do site. A política de
+privacidade declara o que realmente acontece: o site não coleta nada, mas
+carrega Google Fonts e um mapa do Google, e isso conecta o navegador do
+visitante a esses serviços.
+
+**São minutas.** Valem como ponto de partida honesto, não como peça jurídica
+revisada. Vale uma lida de alguém da área antes de publicar.
 
 ## Publicar de graça (GitHub Pages)
 
