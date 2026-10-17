@@ -1,22 +1,25 @@
 /* =========================================================
-   Pizza Mia — comportamentos e animacoes da pagina
-   Depende do GSAP + ScrollTrigger (carregados pelo index.html).
-   Se o GSAP nao carregar, a pagina continua funcionando: o
-   bloco de abertura tira a classe .js e o conteudo aparece.
+   Pizza Mia — comportamento e animação
+
+   Regra do projeto (CLAUDE.md):
+   toda animação usa Lenis no scroll e GSAP no movimento.
+   O encaixe entre os dois fica aqui no topo, uma vez só.
    ========================================================= */
 (function () {
   'use strict';
 
   var raiz = document.documentElement;
-  var temGsap = typeof window.gsap !== 'undefined';
+  var temLibs = typeof window.gsap !== 'undefined' &&
+                typeof window.ScrollTrigger !== 'undefined' &&
+                typeof window.Lenis !== 'undefined';
   var menosMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var anima = temLibs && !menosMovimento;
 
-  if (!temGsap || menosMovimento) {
+  if (!anima) {
+    // sem libs ou com movimento reduzido: mostra tudo, parado
     raiz.classList.remove('js');
     var cortina = document.getElementById('heroCortina');
     if (cortina) { cortina.style.display = 'none'; }
-    var video = document.getElementById('heroVideo');
-    if (video && menosMovimento) { video.pause(); }
   }
 
   /* =======================================================
@@ -25,38 +28,35 @@
   var menuBtn = document.getElementById('menuBtn');
   var nav = document.getElementById('navegacao');
 
+  function fecharMenu() {
+    if (!nav) { return; }
+    nav.classList.remove('aberto');
+    menuBtn.setAttribute('aria-expanded', 'false');
+    menuBtn.setAttribute('aria-label', 'Abrir menu');
+  }
+
   if (menuBtn && nav) {
     menuBtn.addEventListener('click', function () {
       var aberto = nav.classList.toggle('aberto');
       menuBtn.setAttribute('aria-expanded', String(aberto));
       menuBtn.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu');
     });
-
-    nav.addEventListener('click', function (e) {
-      if (e.target.tagName === 'A') {
-        nav.classList.remove('aberto');
-        menuBtn.setAttribute('aria-expanded', 'false');
-        menuBtn.setAttribute('aria-label', 'Abrir menu');
-      }
-    });
   }
 
   /* =======================================================
-     2. Sombra no topo ao rolar
+     2. Sombra/fio no topo ao rolar
      ======================================================= */
   var topo = document.getElementById('topo');
-  if (topo) {
-    window.addEventListener('scroll', function () {
-      topo.classList.toggle('rolou', window.scrollY > 20);
-    }, { passive: true });
+  function marcarTopo(y) {
+    if (topo) { topo.classList.toggle('rolou', y > 16); }
   }
 
   /* =======================================================
-     3. Destaque da promocao de hoje
+     3. Destaque do dia de hoje
      ======================================================= */
   var hoje = String(new Date().getDay()); // 0 = domingo
-  var promoHoje = document.querySelector('.promo[data-dia="' + hoje + '"]');
-  if (promoHoje) { promoHoje.classList.add('promo--hoje'); }
+  var diaHoje = document.querySelector('.dia[data-dia="' + hoje + '"]');
+  if (diaHoje) { diaHoje.classList.add('dia--hoje'); }
 
   /* =======================================================
      4. Lightbox das fotos
@@ -66,6 +66,7 @@
   var lightboxLeg = document.getElementById('lightboxLeg');
   var lightboxFechar = document.getElementById('lightboxFechar');
   var ultimoFoco = null;
+  var lenis = null;
 
   function abrirFoto(botao) {
     ultimoFoco = botao;
@@ -73,14 +74,14 @@
     lightboxImg.alt = botao.querySelector('img').alt;
     lightboxLeg.textContent = botao.dataset.leg || '';
     lightbox.hidden = false;
-    document.body.style.overflow = 'hidden';
+    if (lenis) { lenis.stop(); } else { document.body.style.overflow = 'hidden'; }
     lightboxFechar.focus();
   }
 
   function fecharFoto() {
     lightbox.hidden = true;
     lightboxImg.removeAttribute('src');
-    document.body.style.overflow = '';
+    if (lenis) { lenis.start(); } else { document.body.style.overflow = ''; }
     if (ultimoFoco) { ultimoFoco.focus(); }
   }
 
@@ -98,20 +99,66 @@
   }
 
   /* =======================================================
-     5. Ano no rodape
+     5. Ano no rodapé
      ======================================================= */
   var ano = document.getElementById('ano');
   if (ano) { ano.textContent = new Date().getFullYear(); }
 
   /* -------------------------------------------------------
-     Daqui para baixo e so animacao. Sem GSAP, para por aqui.
+     Sem animação? Liga o scroll do navegador nas âncoras e sai.
      ------------------------------------------------------- */
-  if (!temGsap || menosMovimento) { return; }
+  if (!anima) {
+    window.addEventListener('scroll', function () { marcarTopo(window.scrollY); }, { passive: true });
+    if (nav) {
+      nav.addEventListener('click', function (e) { if (e.target.tagName === 'A') { fecharMenu(); } });
+    }
+    return;
+  }
 
   gsap.registerPlugin(ScrollTrigger);
 
   /* =======================================================
-     6. Quebra o texto em letras, mantendo as palavras inteiras
+     6. Lenis + GSAP + ScrollTrigger — o encaixe
+
+     Lenis é o dono do scroll; ele avisa o ScrollTrigger a cada
+     quadro. O ticker do GSAP conduz o Lenis, então os dois
+     andam no mesmo relógio e não brigam por quadro.
+     ======================================================= */
+  lenis = new Lenis({
+    duration: 1.05,
+    easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+    smoothWheel: true,
+    syncTouch: true,       // o pin também vale no celular
+    touchMultiplier: 1.4,
+    gestureOrientation: 'vertical'
+  });
+
+  lenis.on('scroll', ScrollTrigger.update);
+  lenis.on('scroll', function (e) { marcarTopo(e.scroll); });
+
+  gsap.ticker.add(function (tempo) { lenis.raf(tempo * 1000); });
+  gsap.ticker.lagSmoothing(0);
+
+  ScrollTrigger.scrollerProxy(document.documentElement, {
+    scrollTop: function (valor) {
+      if (arguments.length) { lenis.scrollTo(valor, { immediate: true }); }
+      return lenis.animatedScroll;
+    }
+  });
+
+  // âncoras passam pelo Lenis, nunca pelo scroll nativo
+  document.querySelectorAll('a[href^="#"]').forEach(function (elo) {
+    elo.addEventListener('click', function (e) {
+      var alvo = document.querySelector(elo.getAttribute('href'));
+      if (!alvo) { return; }
+      e.preventDefault();
+      fecharMenu();
+      lenis.scrollTo(alvo, { offset: -4, duration: 1.2 });
+    });
+  });
+
+  /* =======================================================
+     7. Quebra o texto em letras, mantendo as palavras inteiras
      ======================================================= */
   function quebrarEmLetras(el) {
     var texto = el.textContent.trim();
@@ -122,7 +169,6 @@
     texto.split(' ').forEach(function (palavra, i, todas) {
       var spanPalavra = document.createElement('span');
       spanPalavra.className = 'palavra';
-
       palavra.split('').forEach(function (caractere) {
         var spanLetra = document.createElement('span');
         spanLetra.className = 'letra';
@@ -130,9 +176,7 @@
         spanPalavra.appendChild(spanLetra);
         letras.push(spanLetra);
       });
-
       el.appendChild(spanPalavra);
-
       if (i < todas.length - 1) {
         var espaco = document.createElement('span');
         espaco.className = 'letra';
@@ -141,225 +185,192 @@
         letras.push(espaco);
       }
     });
-
     return letras;
   }
 
-  var titulosDivididos = {};
+  var divididos = {};
   document.querySelectorAll('[data-split]').forEach(function (el, i) {
-    el.dataset.splitId = 'split-' + i;
-    titulosDivididos[el.dataset.splitId] = quebrarEmLetras(el);
+    el.dataset.splitId = 's' + i;
+    divididos[el.dataset.splitId] = quebrarEmLetras(el);
   });
-
-  function letrasDe(el) { return titulosDivididos[el.dataset.splitId] || []; }
+  function letrasDe(el) { return divididos[el.dataset.splitId] || []; }
 
   /* =======================================================
-     7. Abertura do hero
-        A ordem cria a tensao: o video entra grande e vai
-        assentando, o risco se estica, a linha de cima
-        aparece esticada e fecha o espacamento, e so entao
-        a primeira palavra do titulo sobe.
+     8. Abertura do hero
      ======================================================= */
   var linhasTitulo = document.querySelectorAll('.hero__titulo [data-split]');
   var abertura = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
   abertura
-    .fromTo('.hero__video',
-      { scale: 1.22 },
-      { scale: 1, duration: 4.2, ease: 'power2.out' }, 0)
-    .to('.hero__cortina',
-      { opacity: 0, duration: 1.5, ease: 'power2.inOut' }, 0.25)
-    .to('.hero__risco',
-      { scaleX: 1, duration: 1, ease: 'power4.inOut' }, 0.55)
-    .fromTo('.hero__tag-txt',
-      { opacity: 0, letterSpacing: '1.1em', filter: 'blur(7px)' },
-      { opacity: 1, letterSpacing: '0.14em', filter: 'blur(0px)', duration: 1.2 }, 0.8);
+    .fromTo('.hero__media', { scale: 1.14 }, { scale: 1, duration: 3.6, ease: 'power2.out' }, 0)
+    .to('.hero__cortina', { opacity: 0, duration: 1.3, ease: 'power2.inOut' }, 0.2)
+    .fromTo('.hero__rotulo',
+      { opacity: 0, y: 14, filter: 'blur(5px)' },
+      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1 }, 0.65);
 
   linhasTitulo.forEach(function (linha, i) {
     abertura.from(letrasDe(linha), {
-      yPercent: 115,
-      rotate: 5,
-      opacity: 0,
-      duration: 1,
-      ease: 'power4.out',
-      stagger: 0.026
-    }, 1.45 + i * 0.22);
+      yPercent: 115, rotate: 4, opacity: 0,
+      duration: .95, ease: 'power4.out', stagger: 0.024
+    }, 1.05 + i * 0.2);
   });
 
   abertura
-    .to('.hero__texto', { opacity: 1, duration: .9 }, 2.15)
-    .from('.hero__texto', { y: 26, duration: .9 }, 2.15)
-    .to('.hero__acoes', { opacity: 1, duration: .1 }, 2.3)
-    .from('.hero__acoes .botao', { y: 24, opacity: 0, duration: .8, stagger: .11 }, 2.3)
-    .to('.rolar', { opacity: 1, duration: .8 }, 2.75)
-    .from('.rolar', { y: -16, duration: .8 }, 2.75);
+    .to('.hero__texto', { opacity: 1, duration: .8 }, 1.75)
+    .from('.hero__texto', { y: 22, duration: .8 }, 1.75)
+    .to('.hero__acoes', { opacity: 1, duration: .1 }, 1.9)
+    .from('.hero__acoes .botao', { y: 20, opacity: 0, duration: .7, stagger: .1 }, 1.9)
+    .to('.rolar', { opacity: 1, duration: .7 }, 2.25);
 
-  /* bolinha pulando dentro do indicador */
-  gsap.to('.rolar__bola', {
-    y: 14, opacity: .2, duration: .9,
-    repeat: -1, yoyo: true, ease: 'power1.inOut'
-  });
+  gsap.fromTo('.rolar__bola',
+    { x: -12 }, { x: 34, duration: 1.6, repeat: -1, ease: 'power2.inOut' });
 
   /* =======================================================
-     8. Indicador some ao descer + parallax do video
+     9. Parallax do hero e saída do indicador
      ======================================================= */
   gsap.to('.rolar', {
-    opacity: 0, y: 24, ease: 'none',
-    scrollTrigger: { trigger: '#hero', start: 'top top', end: '18% top', scrub: true }
+    opacity: 0, ease: 'none',
+    scrollTrigger: { trigger: '#hero', start: 'top top', end: '14% top', scrub: true }
   });
-
   gsap.to('.hero__media', {
-    yPercent: 16, ease: 'none',
+    yPercent: 12, ease: 'none',
     scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }
   });
-
   gsap.to('.hero__inner', {
-    y: 90, opacity: 0, ease: 'none',
-    scrollTrigger: { trigger: '#hero', start: 'top top', end: '70% top', scrub: true }
+    y: 70, opacity: 0, ease: 'none',
+    scrollTrigger: { trigger: '#hero', start: 'top top', end: '75% top', scrub: true }
   });
 
   /* =======================================================
-     9. Letreiro amarelo em movimento continuo
+     10. Letreiro em movimento contínuo
      ======================================================= */
   var trilho = document.getElementById('marqueeTrilho');
   if (trilho) {
     var grupo = trilho.querySelector('.marquee__grupo');
-    // duplica ate dar o dobro da largura da tela, para o loop nao mostrar buraco
     while (trilho.offsetWidth < window.innerWidth * 2) {
       trilho.appendChild(grupo.cloneNode(true));
     }
     var umGrupo = grupo.offsetWidth;
-    gsap.to(trilho, {
-      x: -umGrupo,
-      duration: umGrupo / 55,
-      ease: 'none',
-      repeat: -1
-    });
+    gsap.to(trilho, { x: -umGrupo, duration: umGrupo / 55, ease: 'none', repeat: -1 });
   }
 
   /* =======================================================
-     10. Titulos das secoes sobem da janela
+     11. Entradas das seções
      ======================================================= */
-  document.querySelectorAll('.secao__titulo [data-split]').forEach(function (linha) {
+  document.querySelectorAll('.titulo [data-split]').forEach(function (linha) {
     gsap.from(letrasDe(linha), {
       yPercent: 110, opacity: 0, duration: .85, ease: 'power4.out', stagger: .02,
       scrollTrigger: { trigger: linha, start: 'top 88%' }
     });
   });
 
-  document.querySelectorAll('.secao__sobretitulo').forEach(function (el) {
+  document.querySelectorAll('.cabecalho .rotulo, .noite__cabecalho .rotulo').forEach(function (el) {
     gsap.from(el, {
-      opacity: 0, letterSpacing: '.6em', duration: .9,
+      opacity: 0, x: -14, duration: .8, ease: 'power3.out',
+      scrollTrigger: { trigger: el, start: 'top 92%' }
+    });
+  });
+
+  document.querySelectorAll('.cabecalho__texto').forEach(function (el) {
+    gsap.from(el, {
+      opacity: 0, y: 18, duration: .8, ease: 'power3.out',
       scrollTrigger: { trigger: el, start: 'top 90%' }
     });
   });
 
-  /* =======================================================
-     11. Entrada dos blocos
-     ======================================================= */
-  function entrarEmGrupo(seletorPai, seletorFilho, deslocamento) {
-    document.querySelectorAll(seletorPai).forEach(function (pai) {
-      gsap.from(pai.querySelectorAll(seletorFilho), {
-        y: deslocamento, opacity: 0, duration: .8, ease: 'power3.out', stagger: .08,
-        scrollTrigger: { trigger: pai, start: 'top 82%' }
+  function entrarEmGrupo(pai, filho, desloca) {
+    document.querySelectorAll(pai).forEach(function (p) {
+      gsap.from(p.querySelectorAll(filho), {
+        y: desloca, opacity: 0, duration: .8, ease: 'power3.out', stagger: .07,
+        scrollTrigger: { trigger: p, start: 'top 84%' }
       });
     });
   }
-
-  entrarEmGrupo('.promos', '.promo', 36);
-  entrarEmGrupo('.cardapio', '.item', 30);
-  entrarEmGrupo('.local__info', '.dado', 26);
-  entrarEmGrupo('.aviso', 'p, .botao', 20);
+  entrarEmGrupo('.semana', '.dia', 26);
+  entrarEmGrupo('.itens', '.item', 24);
+  entrarEmGrupo('.local__info', '.dado', 22);
 
   gsap.from('.local__mapa', {
-    opacity: 0, scale: .96, duration: 1, ease: 'power3.out',
-    scrollTrigger: { trigger: '.local__mapa', start: 'top 85%' }
+    opacity: 0, y: 28, duration: 1, ease: 'power3.out',
+    scrollTrigger: { trigger: '.local__mapa', start: 'top 86%' }
   });
 
   /* =======================================================
-     12. "Uma noite aqui" — secao presa na tela (pin scroll)
+     12. "Uma noite aqui" — seção presa na tela
 
-     O scroll deixa de rolar a pagina e passa a mover a cena:
-     e o scrub que da a sensacao de camera, porque cada pixel
-     rolado corresponde a um pedaco da linha do tempo, e o
-     atraso de 1s faz a camera chegar amaciando em vez de
-     grudar no dedo.
-
-     Dentro de cada cena os elementos entram em sequencia,
-     0.2s entre um e outro, com ease power3.out.
-
-     So no desktop: no celular a secao vira uma lista comum,
-     porque prender a tela em telas pequenas atrapalha mais
-     do que ajuda.
+     O scrub é o que dá a sensação de câmera: cada pixel rolado
+     move um pedaço da linha do tempo, e o atraso faz a cena
+     chegar amaciando. Com o Lenis no scroll, isso vale também
+     no celular, por isso o pin agora roda em qualquer largura.
      ======================================================= */
-  var mm = gsap.matchMedia();
+  var secaoNoite = document.getElementById('noite');
+  var cenas = gsap.utils.toArray('#noitePalco .noite__cena');
+  var contador = document.getElementById('cenaAtual');
+  var barra = document.getElementById('cenaBarra');
 
-  mm.add('(min-width: 860px)', function () {
-    var secao = document.getElementById('noite');
-    var cenas = gsap.utils.toArray('#noitePalco .noite__cena');
-    var contador = document.getElementById('cenaAtual');
-    if (!secao || !cenas.length) { return; }
+  if (secaoNoite && cenas.length) {
+    secaoNoite.classList.add('pin-ativo');
 
-    secao.classList.add('pin-ativo');
-
-    var linha = gsap.timeline({
-      scrollTrigger: {
-        trigger: secao,
-        start: 'top top',
-        end: function () { return '+=' + (window.innerHeight * cenas.length * 0.9); },
-        pin: true,
-        scrub: 1,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onUpdate: function (self) {
-          var i = Math.min(cenas.length - 1, Math.floor(self.progress * cenas.length));
-          if (contador) { contador.textContent = String(i + 1).padStart(2, '0'); }
-        }
-      }
-    });
+    var linha = gsap.timeline();
+    var marcos = [];   // em que ponto da linha do tempo cada cena entra
 
     cenas.forEach(function (cena, i) {
       var entram = cena.querySelectorAll('[data-entra]');
       var foto = cena.querySelector('.noite__foto img');
 
-      // a cena anterior recua, como quem sai de foco
-      if (i > 0) {
-        linha.to(cenas[i - 1], {
-          autoAlpha: 0, y: -40, scale: .96, duration: .45, ease: 'power3.in'
-        }, i - 0.55);
+      // A cena 01 entra ANTES do pin, enquanto a seção ainda sobe.
+      // Sem isso, quem chega na seção encontra ela vazia e só vê
+      // alguma coisa depois de rolar mais um pouco.
+      if (i === 0) {
+        marcos.push(0);
+        gsap.fromTo(entram,
+          { autoAlpha: 0, y: 54 },
+          {
+            autoAlpha: 1, y: 0, duration: .9, ease: 'power3.out', stagger: 0.2,
+            scrollTrigger: { trigger: secaoNoite, start: 'top 62%' }
+          });
+        return;
       }
+
+      var pos = (i - 1) * 1.5 + 0.9;
+      marcos.push(pos);
+
+      linha.to(cenas[i - 1], {
+        autoAlpha: 0, y: -36, scale: .97, duration: .45, ease: 'power3.in'
+      }, pos - 0.55);
 
       linha.fromTo(entram,
-        { autoAlpha: 0, y: 56 },
+        { autoAlpha: 0, y: 54 },
         { autoAlpha: 1, y: 0, duration: .9, ease: 'power3.out', stagger: 0.2 },
-        i);
+        pos);
 
-      // a foto continua se aproximando enquanto a cena esta no ar
       if (foto) {
-        linha.fromTo(foto, { scale: 1.08 }, { scale: 1, duration: 1.2, ease: 'none' }, i);
+        linha.fromTo(foto, { scale: 1.07 }, { scale: 1, duration: 1.2, ease: 'none' }, pos);
       }
     });
 
-    return function () {
-      secao.classList.remove('pin-ativo');
-      gsap.set(cenas, { clearProps: 'all' });
-      gsap.set('#noitePalco [data-entra]', { clearProps: 'all' });
-    };
-  });
+    linha.to({}, { duration: .8 });   // respiro no fim, antes de soltar o pin
 
-  /* no celular: entrada simples, cena por cena */
-  mm.add('(max-width: 859px)', function () {
-    var limpar = [];
-    document.querySelectorAll('#noitePalco .noite__cena').forEach(function (cena) {
-      limpar.push(gsap.fromTo(cena.querySelectorAll('[data-entra]'),
-        { autoAlpha: 0, y: 40 },
-        {
-          autoAlpha: 1, y: 0, duration: .8, ease: 'power3.out', stagger: 0.2,
-          scrollTrigger: { trigger: cena, start: 'top 80%' }
-        }));
+    ScrollTrigger.create({
+      animation: linha,
+      trigger: secaoNoite,
+      start: 'top top',
+      end: function () { return '+=' + (window.innerHeight * cenas.length * 0.95); },
+      pin: true,
+      scrub: 1,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+      onUpdate: function (self) {
+        var t = self.progress * linha.duration();
+        var i = 0;
+        for (var k = 0; k < marcos.length; k++) {
+          if (t >= marcos[k] - 0.25) { i = k; }
+        }
+        if (contador) { contador.textContent = String(i + 1).padStart(2, '0'); }
+        if (barra) { barra.style.transform = 'scaleX(' + self.progress.toFixed(3) + ')'; }
+      }
     });
-    return function () { limpar.forEach(function (t) { t.kill(); }); };
-  });
+  }
 
   /* =======================================================
      13. Barra de progresso da leitura
@@ -369,19 +380,6 @@
     scrollTrigger: { start: 'top top', end: 'max', scrub: .3 }
   });
 
-  /* =======================================================
-     14. Pausa o video quando ele sai da tela (economiza bateria)
-     ======================================================= */
-  var video = document.getElementById('heroVideo');
-  if (video) {
-    ScrollTrigger.create({
-      trigger: '#hero',
-      start: 'top bottom',
-      end: 'bottom top',
-      onToggle: function (self) {
-        if (self.isActive) { video.play().catch(function () {}); }
-        else { video.pause(); }
-      }
-    });
-  }
+  // o pin muda a altura da página; recalcula depois que tudo carregou
+  window.addEventListener('load', function () { ScrollTrigger.refresh(); });
 })();

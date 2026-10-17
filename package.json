@@ -1,0 +1,24 @@
+{
+  "name": "007-s-repository",
+  "version": "1.0.0",
+  "description": "Site institucional da **Pizza Mia** — pizzaria e rodízio em Vila Galvão, Guarulhos / SP.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhlima7810-boop/007-s-repository.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dhlima7810-boop/007-s-repository/issues"
+  },
+  "homepage": "https://github.com/dhlima7810-boop/007-s-repository#readme",
+  "dependencies": {
+    "gsap": "^3.13.0",
+    "lenis": "^1.3.11"
+  }
+}

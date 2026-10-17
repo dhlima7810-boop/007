@@ -5,71 +5,63 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pizza Mia — Pizzaria e Rodízio em Vila Galvão, Guarulhos</title>
 <meta name="description" content="Pizza Mia — rodízio de pizzas, esfihas e pizzas para viagem na Av. Emilio Ribas, 3175, Vila Galvão, Guarulhos. Promoção todo dia. Disk pizza (11) 2452-8022.">
-<meta name="theme-color" content="#c8102e">
+<meta name="theme-color" content="#121010">
 <link rel="icon" href="assets/favicon.png" type="image/png">
 
 <meta property="og:type" content="restaurant">
 <meta property="og:title" content="Pizza Mia — Pizzaria e Rodízio em Guarulhos">
 <meta property="og:description" content="Rodízio, esfihas e pizzas para viagem. Promoção todo dia em Vila Galvão.">
-<meta property="og:image" content="assets/img/hero-poster.jpg">
+<meta property="og:image" content="assets/img/fachada-noite.jpg">
 <meta property="og:locale" content="pt_BR">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Figtree:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/vendor/lenis.css">
 <link rel="stylesheet" href="assets/css/style.css">
 
-<!-- marca que o JS esta ligado, para a animacao poder esconder o texto antes de revelar -->
 <script>document.documentElement.className = 'js';</script>
 </head>
 <body>
 
-<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
-
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
 <div class="progresso" id="progresso" aria-hidden="true"></div>
 
 <header class="topo" id="topo">
-  <div class="container topo__inner">
+  <div class="faixa-util topo__inner">
     <a class="marca" href="#hero">
-      <img src="assets/img/logo.jpg" alt="" width="48" height="48">
+      <img src="assets/img/logo.jpg" alt="" width="40" height="40">
       <span class="marca__nome">Pizza <em>Mia</em></span>
     </a>
 
     <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="navegacao" aria-label="Abrir menu">
-      <span></span><span></span><span></span>
+      <span></span><span></span>
     </button>
 
     <nav class="nav" id="navegacao" aria-label="Menu principal">
-      <a href="#promocoes">Promoções</a>
+      <a href="#semana">A semana</a>
       <a href="#cardapio">Cardápio</a>
       <a href="#noite">Uma noite aqui</a>
       <a href="#local">Onde estamos</a>
-      <a class="nav__cta" href="tel:+551124528022">Ligar agora</a>
+      <a class="nav__cta" href="tel:+551124528022">(11) 2452-8022</a>
     </nav>
   </div>
 </header>
 
 <main id="conteudo">
 
-  <!-- ============ HERO ============ -->
+  <!-- ============ HERO (parado) ============ -->
   <section class="hero" id="hero">
     <div class="hero__media">
-      <video class="hero__video" id="heroVideo"
-             autoplay muted loop playsinline preload="auto"
-             poster="assets/img/hero-poster.jpg" aria-hidden="true" tabindex="-1">
-        <source src="assets/video/hero.webm" type="video/webm">
-        <source src="assets/video/hero.mp4" type="video/mp4">
-      </video>
-      <div class="hero__gradiente"></div>
+      <img src="assets/img/fachada-noite.jpg" alt="Fachada da Pizza Mia à noite, na esquina da Av. Emilio Ribas, com o salão cheio visto pelas janelas" fetchpriority="high">
     </div>
-
-    <!-- a cortina sobe depois que o video ja esta rodando: e a pausa antes da primeira palavra -->
+    <div class="hero__veu" aria-hidden="true"></div>
     <div class="hero__cortina" id="heroCortina" aria-hidden="true"></div>
 
-    <div class="container hero__inner">
-      <p class="hero__tag">
-        <span class="hero__risco" aria-hidden="true"></span>
-        <span class="hero__tag-txt">Vila Galvão · Guarulhos · SP</span>
+    <div class="faixa-util hero__inner">
+      <p class="rotulo hero__rotulo" data-entra>
+        <span class="rotulo__ponto" aria-hidden="true"></span>
+        Vila Galvão · Guarulhos · SP
       </p>
 
       <h1 class="hero__titulo" aria-label="A pizza que o bairro conhece de nome">
@@ -77,260 +69,268 @@
         <span class="linha"><span class="linha__in linha__in--destaque" data-split>conhece de nome</span></span>
       </h1>
 
-      <p class="hero__texto">
-        Rodízio, esfihas e pizza para viagem direto do forno.
-        <strong>Promoção todo dia da semana.</strong>
-      </p>
-
-      <div class="hero__acoes">
-        <a class="botao botao--principal" href="tel:+551124528022">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.4 11.4 0 0 0 .57 3.6 1 1 0 0 1-.25 1z"/></svg>
-          Disk Pizza (11) 2452-8022
-        </a>
-        <a class="botao botao--secundario" href="#promocoes">Ver promoções</a>
+      <div class="hero__base">
+        <p class="hero__texto" data-entra>
+          Rodízio, esfihas e pizza para viagem direto do forno.
+          Promoção todo dia da semana.
+        </p>
+        <div class="hero__acoes" data-entra>
+          <a class="botao botao--acento" href="tel:+551124528022">Disk Pizza (11) 2452-8022</a>
+          <a class="botao botao--fantasma" href="#semana">Ver a semana</a>
+        </div>
       </div>
     </div>
 
-    <a class="rolar" href="#promocoes" id="rolar" aria-label="Role para ver as promoções">
+    <a class="rolar" href="#semana" id="rolar" aria-label="Role para ver a semana">
       <span class="rolar__txt">Role</span>
-      <span class="rolar__trilho"><span class="rolar__bola"></span></span>
+      <span class="rolar__trilho" aria-hidden="true"><span class="rolar__bola"></span></span>
     </a>
   </section>
 
-  <!-- ============ FAIXA ============ -->
-  <section class="faixa" aria-label="O que a Pizza Mia serve">
+  <!-- ============ LETREIRO ============ -->
+  <section class="letreiro" aria-label="O que a Pizza Mia serve">
     <div class="marquee" aria-hidden="true">
       <div class="marquee__trilho" id="marqueeTrilho">
         <span class="marquee__grupo">
-          <b>Rodízio</b><i>·</i><b>Pizzas para viagem</b><i>·</i><b>Esfihas</b><i>·</i>
-          <b>Salão amplo</b><i>·</i><b>Disk pizza</b><i>·</i><b>Promoção todo dia</b><i>·</i>
+          <b>Rodízio</b><i></i><b>Pizzas para viagem</b><i></i><b>Esfihas</b><i></i>
+          <b>Salão amplo</b><i></i><b>Disk pizza</b><i></i><b>Promoção todo dia</b><i></i>
         </span>
       </div>
     </div>
-    <p class="sr-only">Rodízio, pizzas para viagem, esfihas, salão amplo, disk pizza e promoção todo dia.</p>
+    <p class="so-leitor">Rodízio, pizzas para viagem, esfihas, salão amplo, disk pizza e promoção todo dia.</p>
   </section>
 
-  <!-- ============ PROMOÇÕES ============ -->
-  <section class="secao" id="promocoes">
-    <div class="container">
-      <header class="secao__cabecalho">
-        <p class="secao__sobretitulo">Outlet na Pizza Mia</p>
-        <h2 class="secao__titulo"><span class="linha"><span class="linha__in" data-split>Promoção todo dia</span></span></h2>
-        <p class="secao__texto">
-          Cada dia da semana tem a sua. O dia de hoje aparece em destaque —
-          ligue para confirmar o preço, que muda de tempos em tempos.
+  <!-- ============ A SEMANA ============ -->
+  <section class="secao" id="semana">
+    <div class="faixa-util">
+      <header class="cabecalho">
+        <p class="rotulo"><span class="rotulo__ponto" aria-hidden="true"></span>Outlet na Pizza Mia</p>
+        <h2 class="titulo"><span class="linha"><span class="linha__in" data-split>A semana inteira</span></span></h2>
+        <p class="cabecalho__texto">
+          Cada dia tem a sua promoção. O dia de hoje aparece em destaque.
+          Os preços mudam de tempos em tempos — ligue e confirme o do dia.
         </p>
       </header>
 
-      <ul class="promos" id="promos">
-        <li class="promo" data-dia="1">
-          <p class="promo__dia">Segunda-feira</p>
-          <h3 class="promo__nome">Rodízio de pizzas</h3>
-          <!-- Quando souber o valor, descomente a linha abaixo e troque o numero.
-               O estilo do preco ja esta pronto na folha de estilo.
-          <p class="promo__preco"><span>R$</span>00,00</p>
-          -->
-          <p class="promo__obs">Exceto feriados e vésperas</p>
-          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
+      <ol class="semana" id="semana-lista">
+        <li class="dia" data-dia="1">
+          <span class="dia__nome">Segunda</span>
+          <span class="dia__oferta">
+            <span class="dia__titulo">Rodízio de pizzas</span>
+            <!-- Quando souber o valor, descomente e troque o numero.
+                 O estilo do preco ja esta pronto na folha de estilo.
+            <span class="dia__preco">R$ 00,00</span>
+            -->
+            <span class="dia__obs">Exceto feriados e vésperas</span>
+          </span>
+          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-        <li class="promo" data-dia="2">
-          <p class="promo__dia">Terça-feira</p>
-          <h3 class="promo__nome">Esfihas de carne e queijo</h3>
-          <p class="promo__obs">Unidade ou no pacote: 10 de carne + 2 de queijo</p>
-          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
+        <li class="dia" data-dia="2">
+          <span class="dia__nome">Terça</span>
+          <span class="dia__oferta">
+            <span class="dia__titulo">Esfihas de carne e queijo</span>
+            <span class="dia__obs">Unidade ou no pacote: 10 de carne + 2 de queijo</span>
+          </span>
+          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-        <li class="promo" data-dia="3">
-          <p class="promo__dia">Quarta-feira</p>
-          <h3 class="promo__nome">Pizzas para viagem</h3>
-          <p class="promo__obs">Sabores selecionados</p>
-          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
+        <li class="dia" data-dia="3">
+          <span class="dia__nome">Quarta</span>
+          <span class="dia__oferta">
+            <span class="dia__titulo">Pizzas para viagem</span>
+            <span class="dia__obs">Sabores selecionados</span>
+          </span>
+          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-        <li class="promo" data-dia="4">
-          <p class="promo__dia">Quinta-feira</p>
-          <h3 class="promo__nome">Rodízio com refrigerante à vontade</h3>
-          <p class="promo__obs">Exceto feriados e vésperas</p>
-          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
+        <li class="dia" data-dia="4">
+          <span class="dia__nome">Quinta</span>
+          <span class="dia__oferta">
+            <span class="dia__titulo">Rodízio com refrigerante à vontade</span>
+            <span class="dia__obs">Exceto feriados e vésperas</span>
+          </span>
+          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-        <li class="promo" data-dia="5">
-          <p class="promo__dia">Sexta-feira</p>
-          <h3 class="promo__nome">1 Coca-Cola de 1 litro grátis</h3>
-          <p class="promo__obs">Na compra de 1 pizza para viagem</p>
-          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
+        <li class="dia" data-dia="5">
+          <span class="dia__nome">Sexta</span>
+          <span class="dia__oferta">
+            <span class="dia__titulo">1 Coca-Cola de 1 litro grátis</span>
+            <span class="dia__obs">Na compra de 1 pizza para viagem</span>
+          </span>
+          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-        <li class="promo" data-dia="6">
-          <p class="promo__dia">Sábado</p>
-          <h3 class="promo__nome">1 chopp Brahma grátis</h3>
-          <p class="promo__obs">Na compra de 1 pizza, à noite</p>
-          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
+        <li class="dia" data-dia="6">
+          <span class="dia__nome">Sábado</span>
+          <span class="dia__oferta">
+            <span class="dia__titulo">1 chopp Brahma grátis</span>
+            <span class="dia__obs">Na compra de 1 pizza, à noite</span>
+          </span>
+          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-        <li class="promo" data-dia="0">
-          <p class="promo__dia">Domingo</p>
-          <h3 class="promo__nome">Rodízio com refrigerante à vontade</h3>
-          <p class="promo__obs">Exceto feriados e vésperas</p>
-          <a class="promo__link" href="tel:+551124528022">Consultar preço</a>
+        <li class="dia" data-dia="0">
+          <span class="dia__nome">Domingo</span>
+          <span class="dia__oferta">
+            <span class="dia__titulo">Rodízio com refrigerante à vontade</span>
+            <span class="dia__obs">Exceto feriados e vésperas</span>
+          </span>
+          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-      </ul>
-
-      <div class="aviso">
-        <p>Os preços mudam de tempos em tempos. Ligue e confirme o valor do dia.</p>
-        <a class="botao botao--principal" href="tel:+551124528022">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.4 11.4 0 0 0 .57 3.6 1 1 0 0 1-.25 1z"/></svg>
-          (11) 2452-8022
-        </a>
-      </div>
+      </ol>
     </div>
   </section>
 
   <!-- ============ CARDÁPIO ============ -->
-  <section class="secao secao--escura" id="cardapio">
-    <div class="container">
-      <header class="secao__cabecalho">
-        <p class="secao__sobretitulo">O que servimos</p>
-        <h2 class="secao__titulo"><span class="linha"><span class="linha__in" data-split>Cardápio</span></span></h2>
-        <p class="secao__texto">
-          Estamos montando o cardápio completo aqui no site. Por enquanto,
-          peça pelo telefone — a equipe passa todos os sabores do dia.
+  <section class="secao secao--papel" id="cardapio">
+    <div class="faixa-util">
+      <header class="cabecalho">
+        <p class="rotulo"><span class="rotulo__ponto" aria-hidden="true"></span>O que servimos</p>
+        <h2 class="titulo"><span class="linha"><span class="linha__in" data-split>Cardápio</span></span></h2>
+        <p class="cabecalho__texto">
+          O cardápio completo ainda está sendo montado. Por enquanto, peça pelo
+          telefone — a equipe passa todos os sabores do dia.
         </p>
       </header>
 
-      <div class="cardapio">
+      <div class="itens">
         <article class="item">
-          <h3>Rodízio de pizzas</h3>
-          <p>Salgadas e doces saindo do forno a noite toda, servidas na mesa.</p>
+          <span class="item__num">01</span>
+          <h3 class="item__nome">Rodízio de pizzas</h3>
+          <p class="item__desc">Salgadas e doces saindo do forno a noite toda, servidas na mesa.</p>
         </article>
         <article class="item">
-          <h3>Pizzas para viagem</h3>
-          <p>Retirada no balcão ou disk pizza pelo (11) 2452-6575.</p>
+          <span class="item__num">02</span>
+          <h3 class="item__nome">Pizzas para viagem</h3>
+          <p class="item__desc">Retirada no balcão ou disk pizza pelo (11) 2452-6575.</p>
         </article>
         <article class="item">
-          <h3>Esfihas</h3>
-          <p>De carne e de queijo, abertas, feitas no mesmo forno.</p>
+          <span class="item__num">03</span>
+          <h3 class="item__nome">Esfihas</h3>
+          <p class="item__desc">De carne e de queijo, abertas, feitas no mesmo forno.</p>
         </article>
         <article class="item">
-          <h3>Bebidas</h3>
-          <p>Refrigerantes, chopp Brahma e a opção de refrigerante à vontade no rodízio.</p>
+          <span class="item__num">04</span>
+          <h3 class="item__nome">Bebidas</h3>
+          <p class="item__desc">Refrigerantes, chopp Brahma e refrigerante à vontade no rodízio.</p>
         </article>
         <!-- Para adicionar sabores depois, copie um bloco:
         <article class="item">
-          <h3>Nome do sabor</h3>
-          <p>Ingredientes.</p>
+          <span class="item__num">05</span>
+          <h3 class="item__nome">Nome do sabor</h3>
+          <p class="item__desc">Ingredientes.</p>
         </article>
         -->
-      </div>
-
-      <div class="cardapio__cta">
-        <a class="botao botao--principal" href="tel:+551124528022">Pedir pelo telefone</a>
       </div>
     </div>
   </section>
 
   <!-- ============ UMA NOITE AQUI (pin scroll) ============ -->
   <section class="noite" id="noite">
-    <div class="container noite__cabecalho">
-      <p class="secao__sobretitulo">Da calçada até a mesa</p>
-      <h2 class="secao__titulo"><span class="linha"><span class="linha__in" data-split>Uma noite aqui</span></span></h2>
+    <div class="faixa-util noite__cabecalho">
+      <p class="rotulo"><span class="rotulo__ponto" aria-hidden="true"></span>Da calçada até a mesa</p>
+      <h2 class="titulo"><span class="linha"><span class="linha__in" data-split>Uma noite aqui</span></span></h2>
     </div>
 
     <div class="noite__palco" id="noitePalco">
 
       <div class="noite__cena" data-cena>
-        <div class="container noite__cena__in">
-        <button class="noite__foto" data-img="assets/img/fachada.jpg" data-leg="A casa na esquina da Av. Emilio Ribas, 3175" data-entra>
-          <img src="assets/img/fachada.jpg" alt="Fachada da pizzaria de dia, prédio amarelo e vermelho na esquina" loading="lazy">
-        </button>
-        <div class="noite__texto">
-          <span class="noite__num" data-entra>01</span>
-          <h3 class="noite__titulo" data-entra>A casa na esquina</h3>
-          <p class="noite__desc" data-entra>
-            Av. Emilio Ribas, 3175, em Vila Galvão. De dia dá para ver o prédio
-            amarelo e vermelho de longe, antes mesmo de chegar na porta.
-          </p>
-        </div>
-        </div>
-      </div>
-
-      <div class="noite__cena" data-cena>
-        <div class="container noite__cena__in">
-        <button class="noite__foto" data-img="assets/img/varanda.jpg" data-leg="O salão na hora do rodízio" data-entra>
-          <img src="assets/img/varanda.jpg" alt="Salão da pizzaria com mesas de madeira e clientes jantando" loading="lazy">
-        </button>
-        <div class="noite__texto">
-          <span class="noite__num" data-entra>02</span>
-          <h3 class="noite__titulo" data-entra>O salão vai enchendo</h3>
-          <p class="noite__desc" data-entra>
-            Mesa de madeira, ventilador ligado, piso quadriculado. O rodízio
-            começa e as pizzas passam de mesa em mesa a noite toda.
-          </p>
-        </div>
+        <div class="faixa-util noite__cena-in">
+          <button class="noite__foto" data-img="assets/img/fachada.jpg" data-leg="A casa na esquina da Av. Emilio Ribas, 3175" data-entra>
+            <img src="assets/img/fachada.jpg" alt="Fachada da pizzaria de dia, prédio amarelo e vermelho na esquina" loading="lazy">
+          </button>
+          <div class="noite__texto">
+            <span class="noite__num" data-entra>01</span>
+            <h3 class="noite__titulo" data-entra>A casa na esquina</h3>
+            <p class="noite__desc" data-entra>
+              Av. Emilio Ribas, 3175, em Vila Galvão. De dia dá para ver o prédio
+              amarelo e vermelho de longe, antes mesmo de chegar na porta.
+            </p>
+          </div>
         </div>
       </div>
 
       <div class="noite__cena" data-cena>
-        <div class="container noite__cena__in">
-        <button class="noite__foto" data-img="assets/img/mesa.jpg" data-leg="Salgada, doce, pão de alho e as entradas" data-entra>
-          <img src="assets/img/mesa.jpg" alt="Mesa com pizza salgada, pizza doce de banana e morango, pães de alho e sobremesas" loading="lazy">
-        </button>
-        <div class="noite__texto">
-          <span class="noite__num" data-entra>03</span>
-          <h3 class="noite__titulo" data-entra>A mesa fica assim</h3>
-          <p class="noite__desc" data-entra>
-            Salgada e doce no mesmo rodízio: calabresa, mussarela, banana com
-            chocolate, morango. Mais pão de alho e as entradas no meio.
-          </p>
-        </div>
+        <div class="faixa-util noite__cena-in">
+          <button class="noite__foto" data-img="assets/img/varanda.jpg" data-leg="O salão na hora do rodízio" data-entra>
+            <img src="assets/img/varanda.jpg" alt="Salão da pizzaria com mesas de madeira e clientes jantando" loading="lazy">
+          </button>
+          <div class="noite__texto">
+            <span class="noite__num" data-entra>02</span>
+            <h3 class="noite__titulo" data-entra>O salão vai enchendo</h3>
+            <p class="noite__desc" data-entra>
+              Mesa de madeira, ventilador ligado, piso quadriculado. O rodízio
+              começa e as pizzas passam de mesa em mesa a noite toda.
+            </p>
+          </div>
         </div>
       </div>
 
       <div class="noite__cena" data-cena>
-        <div class="container noite__cena__in">
-        <button class="noite__foto" data-img="assets/img/pizza-viagem.jpg" data-leg="A mesma pizza, na caixa, para viagem" data-entra>
-          <img src="assets/img/pizza-viagem.jpg" alt="Pizza meio calabresa e meio mussarela com azeitonas, na embalagem para viagem" loading="lazy">
-        </button>
-        <div class="noite__texto">
-          <span class="noite__num" data-entra>04</span>
-          <h3 class="noite__titulo" data-entra>E também sai para viagem</h3>
-          <p class="noite__desc" data-entra>
-            Não dá para ficar? A mesma pizza vai na caixa. Retirada no balcão
-            ou disk pizza pelo (11) 2452-6575.
-          </p>
+        <div class="faixa-util noite__cena-in">
+          <button class="noite__foto" data-img="assets/img/mesa.jpg" data-leg="Salgada, doce, pão de alho e as entradas" data-entra>
+            <img src="assets/img/mesa.jpg" alt="Mesa com pizza salgada, pizza doce de banana e morango, pães de alho e sobremesas" loading="lazy">
+          </button>
+          <div class="noite__texto">
+            <span class="noite__num" data-entra>03</span>
+            <h3 class="noite__titulo" data-entra>A mesa fica assim</h3>
+            <p class="noite__desc" data-entra>
+              Salgada e doce no mesmo rodízio: calabresa, mussarela, banana com
+              chocolate, morango. Mais pão de alho e as entradas no meio.
+            </p>
+          </div>
         </div>
+      </div>
+
+      <div class="noite__cena" data-cena>
+        <div class="faixa-util noite__cena-in">
+          <button class="noite__foto" data-img="assets/img/pizza-viagem.jpg" data-leg="A mesma pizza, na caixa, para viagem" data-entra>
+            <img src="assets/img/pizza-viagem.jpg" alt="Pizza meio calabresa e meio mussarela com azeitonas, na embalagem para viagem" loading="lazy">
+          </button>
+          <div class="noite__texto">
+            <span class="noite__num" data-entra>04</span>
+            <h3 class="noite__titulo" data-entra>E também sai para viagem</h3>
+            <p class="noite__desc" data-entra>
+              Não dá para ficar? A mesma pizza vai na caixa. Retirada no balcão
+              ou disk pizza pelo (11) 2452-6575.
+            </p>
+          </div>
         </div>
       </div>
 
     </div>
 
-    <p class="noite__contador" aria-hidden="true"><span id="cenaAtual">01</span> <i>/</i> 04</p>
+    <div class="faixa-util noite__rodape">
+      <p class="noite__contador" aria-hidden="true"><span id="cenaAtual">01</span> — 04</p>
+      <div class="noite__barra" aria-hidden="true"><span id="cenaBarra"></span></div>
+    </div>
   </section>
 
   <!-- ============ LOCAL ============ -->
-  <section class="secao secao--escura" id="local">
-    <div class="container">
-      <header class="secao__cabecalho">
-        <p class="secao__sobretitulo">Venha comer aqui</p>
-        <h2 class="secao__titulo"><span class="linha"><span class="linha__in" data-split>Onde estamos</span></span></h2>
+  <section class="secao" id="local">
+    <div class="faixa-util">
+      <header class="cabecalho">
+        <p class="rotulo"><span class="rotulo__ponto" aria-hidden="true"></span>Venha comer aqui</p>
+        <h2 class="titulo"><span class="linha"><span class="linha__in" data-split>Onde estamos</span></span></h2>
       </header>
 
       <div class="local">
         <div class="local__info">
           <div class="dado">
-            <h3>Endereço</h3>
-            <p>Av. Emilio Ribas, 3175<br>Vila Galvão — Guarulhos / SP</p>
-            <a class="link" href="https://www.google.com/maps/search/?api=1&query=Av.+Emilio+Ribas+3175+Vila+Galv%C3%A3o+Guarulhos+SP" target="_blank" rel="noopener">Abrir no Google Maps →</a>
+            <h3 class="dado__rotulo">Endereço</h3>
+            <p class="dado__valor">Av. Emilio Ribas, 3175<br>Vila Galvão — Guarulhos / SP</p>
+            <a class="elo" href="https://www.google.com/maps/search/?api=1&query=Av.+Emilio+Ribas+3175+Vila+Galv%C3%A3o+Guarulhos+SP" target="_blank" rel="noopener">Abrir no Google Maps</a>
           </div>
 
           <div class="dado">
-            <h3>Telefones</h3>
-            <p>
-              <a class="link" href="tel:+551124528022">(11) 2452-8022</a><br>
-              <a class="link" href="tel:+551124526575">(11) 2452-6575</a> — disk pizza
+            <h3 class="dado__rotulo">Telefones</h3>
+            <p class="dado__valor">
+              <a class="elo" href="tel:+551124528022">(11) 2452-8022</a><br>
+              <a class="elo" href="tel:+551124526575">(11) 2452-6575</a> <span class="dado__nota">disk pizza</span>
             </p>
           </div>
 
           <!-- TODO: confirmar com a pizzaria. Guias da cidade indicam
                terca a domingo, das 18h as 00h, mas nao batem entre si. -->
           <div class="dado">
-            <h3>Horário</h3>
-            <p>Confirme o horário pelo telefone.</p>
+            <h3 class="dado__rotulo">Horário</h3>
+            <p class="dado__valor">Confirme o horário pelo telefone.</p>
           </div>
         </div>
 
@@ -348,15 +348,16 @@
 </main>
 
 <footer class="rodape">
-  <div class="container rodape__inner">
-    <div>
-      <img src="assets/img/logo.jpg" alt="Logo da Pizza Mia" width="64" height="64" class="rodape__logo">
-      <p class="rodape__texto">
-        Av. Emilio Ribas, 3175 — Vila Galvão, Guarulhos / SP<br>
-        (11) 2452-8022 · (11) 2452-6575
-      </p>
-    </div>
-    <p class="rodape__creditos">© <span id="ano">2026</span> Pizza Mia. Todos os direitos reservados.</p>
+  <div class="faixa-util rodape__inner">
+    <a class="marca marca--rodape" href="#hero">
+      <img src="assets/img/logo.jpg" alt="Logo da Pizza Mia" width="40" height="40">
+      <span class="marca__nome">Pizza <em>Mia</em></span>
+    </a>
+    <p class="rodape__endereco">
+      Av. Emilio Ribas, 3175 — Vila Galvão, Guarulhos / SP<br>
+      (11) 2452-8022 · (11) 2452-6575
+    </p>
+    <p class="rodape__creditos">© <span id="ano">2026</span> Pizza Mia</p>
   </div>
 </footer>
 
@@ -373,8 +374,9 @@
   </figure>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="assets/vendor/gsap.min.js"></script>
+<script src="assets/vendor/ScrollTrigger.min.js"></script>
+<script src="assets/vendor/lenis.min.js"></script>
 <script src="assets/js/main.js"></script>
 </body>
 </html>

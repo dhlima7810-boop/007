@@ -1,138 +1,133 @@
 # Site da Pizza Mia
 
-Site institucional da **Pizza Mia** — pizzaria e rodízio em Vila Galvão, Guarulhos / SP.
+Site institucional da **Pizza Mia** — pizzaria e rodízio em Vila Galvão,
+Guarulhos / SP.
 
-Site estático: só HTML, CSS e JavaScript. Não precisa instalar nada nem rodar build.
+Site estático: HTML, CSS e JavaScript. Não tem build, não tem framework e não
+depende de CDN — as bibliotecas ficam em `assets/vendor/`.
+
+As regras do projeto estão no [`CLAUDE.md`](CLAUDE.md). A principal:
+**toda animação usa Lenis no scroll e GSAP no movimento.**
 
 ## Como ver no computador
 
-Abra o arquivo `index.html` no navegador.
-
-Se preferir um servidor local (o mapa e as fontes carregam melhor assim):
+Abra `index.html` no navegador, ou suba um servidor local (o mapa e as fontes
+carregam melhor assim):
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Depois acesse <http://localhost:8000>.
-
 ## Estrutura
 
 ```
-index.html              página única, com todas as seções
+index.html              página única
+CLAUDE.md               regras do projeto
 assets/
-  css/style.css         estilos (cores tiradas da marca: amarelo e vermelho)
-  js/main.js            animações GSAP, menu, destaque do dia, galeria
-  img/                  fotos da pizzaria + hero-poster.jpg
-  video/hero.mp4        vídeo de fundo do topo (e hero.webm, mesma coisa)
-                        gerado a partir de img/fachada-noite.jpg
-  favicon.png           ícone da aba
+  css/style.css         estilos
+  js/main.js            Lenis + GSAP + ScrollTrigger
+  img/                  fotos (cada foto aparece uma vez só no site)
+  vendor/               gsap, ScrollTrigger, lenis
+  favicon.png
 ```
+
+## Bibliotecas
+
+```bash
+npm install          # baixa para node_modules/
+```
+
+Os arquivos usados pela página ficam versionados em `assets/vendor/`, copiados
+de `node_modules/*/dist/`. `node_modules/` não vai para o repositório.
+
+| Lib | Versão |
+|---|---|
+| GSAP + ScrollTrigger | 3.13.0 |
+| Lenis | 1.3.11 |
+
+## Design
+
+A direção visual saiu de benchmarks de sites de banco de imagem (Adobe Stock e
+afins), conforme a skill `find-types`: superfície quase preta como padrão,
+tipografia contida, um único acento vibrante, raios de borda pequenos e
+hairlines no lugar de sombra.
+
+O que envelhecia a versão anterior era justamente o contrário — raio de 16px em
+tudo, sombra em cada card, fundo creme e cabeçalhos centralizados. Os tokens
+estão no `:root` do `style.css`.
+
+Mudanças de layout que vieram daí:
+
+- As promoções deixaram de ser sete cards e viraram **uma lista da semana**,
+  com fios finos separando os dias. Lê melhor e parece menos template.
+- Os cabeçalhos de seção foram para a **esquerda**, em vez de centralizados.
+- O cardápio virou uma grade de colunas com fios, sem caixas.
 
 ## Animação
 
-O GSAP e o ScrollTrigger vêm de CDN (`cdnjs`), carregados no fim do
-`index.html`. Não precisa instalar nada.
+O encaixe Lenis + GSAP + ScrollTrigger fica no topo do `main.js`, em um lugar
+só: o Lenis avisa o ScrollTrigger a cada quadro e o ticker do GSAP conduz o
+Lenis, então os dois andam no mesmo relógio.
 
-A abertura do topo segue esta ordem, e é ela que cria a tensão antes da
-primeira palavra:
+**Topo:** foto parada da fachada à noite. A abertura é encadeada — cortina
+preta, foto assentando de 14% maior, rótulo desfocado que entra, e só então as
+letras do título subindo de dentro de uma janela.
 
-1. a tela entra preta, com o vídeo já rodando por baixo;
-2. o vídeo começa 22% maior e vai assentando ao longo de 4 segundos;
-3. a cortina preta sobe;
-4. um risco amarelo se estica da esquerda para a direita;
-5. "Vila Galvão · Guarulhos · SP" aparece desfocado, com as letras muito
-   afastadas, e vai fechando o espaçamento até ficar nítido;
-6. só então as letras do título sobem de dentro de uma janela, uma a uma.
+**"Uma noite aqui":** seção presa na tela. O scroll deixa de rolar a página e
+passa a mover a câmera, uma cena de cada vez, da calçada até a mesa. O `scrub`
+é o que dá essa sensação: cada pixel rolado move um pedaço da linha do tempo.
+Dentro de cada cena os elementos entram com `stagger: 0.2` e `ease: power3.out`.
 
-Depois disso: barra de progresso no topo, letreiro amarelo rolando sem
-parar, parallax no vídeo, títulos de seção subindo da janela e o indicador
-"Role" que some assim que a página desce.
+A cena 01 entra **antes** do pin, enquanto a seção ainda sobe — sem isso, quem
+chega na seção encontra ela vazia.
 
-### A seção "Uma noite aqui" (pin scroll)
-
-É a seção presa na tela. Enquanto você rola, a página não anda: o scroll
-passa a mover as cenas, uma de cada vez, da calçada até a mesa.
-
-O que dá a sensação de câmera é o `scrub: 1` do ScrollTrigger. Cada pixel
-rolado corresponde a um pedaço da linha do tempo, e o atraso de 1 segundo
-faz a cena chegar amaciando, em vez de grudar no dedo. A cena anterior
-recua e some antes de a próxima entrar, para os dois textos nunca
-aparecerem juntos.
-
-Dentro de cada cena os elementos entram em sequência — foto, número,
-título, descrição — com `stagger: 0.2` e `ease: 'power3.out'`. A foto
-continua se aproximando devagar enquanto a cena está no ar.
-
-O pin só vale no desktop (`min-width: 860px`, via `gsap.matchMedia`). No
-celular a seção vira uma lista comum, com as mesmas entradas em sequência,
-porque prender a tela em aparelho pequeno atrapalha mais do que ajuda.
+O pin vale **também no celular**: com o Lenis no scroll, prender a tela em
+aparelho pequeno funciona bem.
 
 Para mexer nas cenas, cada uma é um bloco `.noite__cena` no `index.html`.
-Acrescentar ou tirar uma funciona sozinho: o JavaScript conta quantas
-existem e ajusta a altura do pin e o contador.
+Acrescentar ou tirar uma funciona sozinho — o JavaScript conta quantas existem
+e ajusta a altura do pin e o contador.
 
-**Se o GSAP não carregar**, o `main.js` tira a classe `js` do `<html>` e a
-página aparece inteira, sem animação nenhuma. Quem usa "reduzir movimento"
-no sistema também vê a versão parada, com o vídeo pausado.
-
-### Trocar o vídeo do topo
-
-O vídeo atual foi gerado a partir da própria foto da pizza, com uma
-aproximação lenta que vai e volta — por isso o loop não tem corte. Quando
-a pizzaria gravar um vídeo de verdade (o forno, a pizza sendo cortada, o
-salão cheio), é só substituir `assets/video/hero.mp4` e
-`assets/video/hero.webm` e trocar o `assets/img/hero-poster.jpg` por um
-quadro dele. Nada mais precisa mudar.
-
-Dicas para o vídeo novo: sem som, poucos segundos, movimento lento, e de
-preferência uma cena escura ou que escureça nas bordas, porque o texto fica
-por cima.
+**Degradação:** sem JavaScript, com as libs fora do ar ou com "reduzir
+movimento" ligado, o `main.js` tira a classe `js` e sai antes de animar. A
+página aparece inteira e parada, com as quatro cenas uma embaixo da outra.
 
 ## O que ainda falta preencher
 
-Estes pontos estão marcados com comentário `TODO` / `ATENÇÃO` no código:
+Marcado com `TODO` / comentário no código:
 
-1. **Preços** — o site não mostra valor nenhum, de propósito: os preços do
-   cartaz antigo não valem mais. Cada card de promoção tem um link
-   "Consultar preço" que liga para a pizzaria. Quando souber os valores,
-   abra `index.html` na seção `#promocoes`: dentro do card de segunda-feira
-   há uma linha comentada mostrando exatamente como colocar o preço. É só
-   descomentar e repetir nos outros dias.
-2. **Horário de funcionamento** — em `index.html`, seção `#local`. Hoje está
-   escrito "Aberto todos os dias. Confirme o horário pelo telefone."
-3. **Cardápio completo** — a seção `#cardapio` tem só as categorias. Dentro dela há
-   um bloco de exemplo comentado para copiar e colar a cada sabor novo.
-4. **Foto do cartaz de promoções** — o arquivo continua em
-   `assets/img/promocoes.jpg`, mas saiu da galeria porque mostra os preços
-   antigos. Quando houver cartaz novo, troque o arquivo e descomente o bloco
-   na seção `#galeria`.
-5. **Redes sociais e delivery** — se a pizzaria tiver Instagram, iFood ou 99Food,
-   dá para incluir os links no menu e no rodapé.
+1. **Preços** — o site não mostra nenhum, de propósito: os do cartaz antigo não
+   valem mais. Cada dia tem um link "Consultar preço" que liga. Dentro do bloco
+   de segunda-feira em `index.html` há uma linha comentada mostrando como pôr o
+   preço de volta.
+2. **Horário de funcionamento** — seção `#local`. Guias da cidade indicam terça
+   a domingo, das 18h às 00h, mas não batem entre si.
+3. **Cardápio completo** — a seção `#cardapio` tem só as categorias, com um
+   bloco de exemplo comentado para copiar.
+4. **Segunda unidade** — existe uma Pizza Mia na Av. São Paulo, 474, Cidade
+   Brasil, (11) 2425-5960. Ainda não está no site.
 
-## Dados usados no site
+## As fotos
 
-- **Endereço:** Av. Emilio Ribas, 3175 — Vila Galvão, Guarulhos / SP
-- **Telefones:** (11) 2452-8022 e (11) 2452-6575 (disk pizza)
+Cada foto aparece **uma única vez**:
+
+| Foto | Onde |
+|---|---|
+| `fachada-noite.jpg` | fundo do topo |
+| `fachada.jpg` | cena 01 — "A casa na esquina" |
+| `varanda.jpg` | cena 02 — "O salão vai enchendo" |
+| `mesa.jpg` | cena 03 — "A mesa fica assim" |
+| `pizza-viagem.jpg` | cena 04 — "E também sai para viagem" |
+| `logo.jpg` | cabeçalho e rodapé |
+
+**Para conseguir mais fotos:** peça na própria pizzaria, que tem as originais.
+As que aparecem no Tripadvisor, no Restaurant Guru e no Google são de clientes
+e pertencem a quem tirou. A página oficial no Facebook
+(`facebook.com/PizzariaMia`) tem fotos da própria casa — essas a pizzaria pode
+autorizar.
 
 ## Publicar de graça (GitHub Pages)
 
 1. No GitHub, vá em **Settings → Pages**.
 2. Em *Source*, escolha a branch do site e a pasta `/ (root)`.
-3. Salve. Em alguns minutos o site fica no ar no endereço que o GitHub mostrar.
-
-## Observação sobre as fotos
-
-As imagens em `assets/img/` foram recortadas das fotos enviadas pelo dono do
-projeto. Cada uma aparece **uma única vez** no site: a da pizza virou o vídeo
-do topo, e as outras cinco estão na galeria.
-
-Antes de publicar, vale confirmar com a pizzaria se pode usar as fotos de
-divulgação — as do combo vieram de material promocional do 99Food.
-
-**Para conseguir mais fotos:** o caminho certo é pedir na própria pizzaria,
-que tem as originais em boa resolução. As fotos que aparecem no Tripadvisor,
-no Restaurant Guru e no Google são de clientes e pertencem a quem tirou, então
-não dá para pegar de lá e publicar. A página oficial no Facebook
-(`facebook.com/PizzariaMia`) tem fotos da própria casa — essas a pizzaria pode
-autorizar.
+3. Salve. Em alguns minutos o site fica no ar.
