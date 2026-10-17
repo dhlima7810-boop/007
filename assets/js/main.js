@@ -68,21 +68,45 @@
   var ultimoFoco = null;
   var lenis = null;
 
+  var figura = lightbox ? lightbox.querySelector('.lightbox__figura') : null;
+
+  function travarFundo(travar) {
+    if (lenis) { lenis[travar ? 'stop' : 'start'](); }
+    else { document.body.style.overflow = travar ? 'hidden' : ''; }
+  }
+
   function abrirFoto(botao) {
     ultimoFoco = botao;
     lightboxImg.src = botao.dataset.img;
     lightboxImg.alt = botao.querySelector('img').alt;
     lightboxLeg.textContent = botao.dataset.leg || '';
     lightbox.hidden = false;
-    if (lenis) { lenis.stop(); } else { document.body.style.overflow = 'hidden'; }
+    travarFundo(true);
+
+    // a foto abria com corte seco; agora entra, como o resto do site
+    if (anima) {
+      gsap.fromTo(lightbox, { opacity: 0 },
+        { opacity: 1, duration: .7, ease: 'expo.out' });
+      gsap.fromTo(figura, { y: 34, scale: .98 },
+        { y: 0, scale: 1, duration: 1, ease: 'expo.out' });
+    }
     lightboxFechar.focus();
   }
 
   function fecharFoto() {
-    lightbox.hidden = true;
-    lightboxImg.removeAttribute('src');
-    if (lenis) { lenis.start(); } else { document.body.style.overflow = ''; }
-    if (ultimoFoco) { ultimoFoco.focus(); }
+    function terminar() {
+      lightbox.hidden = true;
+      lightboxImg.removeAttribute('src');
+      if (anima) { gsap.set([lightbox, figura], { clearProps: 'all' }); }
+      travarFundo(false);
+      if (ultimoFoco) { ultimoFoco.focus(); }
+    }
+
+    if (!anima) { terminar(); return; }
+
+    gsap.killTweensOf([lightbox, figura]);
+    gsap.to(lightbox, { opacity: 0, duration: .6, ease: 'power3.in', onComplete: terminar });
+    gsap.to(figura, { y: 20, scale: .99, duration: .6, ease: 'power3.in' });
   }
 
   if (lightbox) {
@@ -202,8 +226,8 @@
   var abertura = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
   abertura
-    .fromTo('.hero__media', { scale: 1.14 }, { scale: 1, duration: 3.6, ease: 'power2.out' }, 0)
-    .to('.hero__cortina', { opacity: 0, duration: 1.3, ease: 'power2.inOut' }, 0.2)
+    .fromTo('.hero__media', { scale: 1.14 }, { scale: 1, duration: 3.6, ease: 'expo.out' }, 0)
+    .to('.hero__cortina', { opacity: 0, duration: 1.4, ease: 'expo.inOut' }, 0.2)
     .fromTo('.hero__rotulo',
       { opacity: 0, y: 14, filter: 'blur(5px)' },
       { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1 }, 0.65);
@@ -211,33 +235,33 @@
   linhasTitulo.forEach(function (linha, i) {
     abertura.from(letrasDe(linha), {
       yPercent: 115, rotate: 4, opacity: 0,
-      duration: .95, ease: 'power4.out', stagger: 0.024
+      duration: 1.1, ease: 'expo.out', stagger: 0.045
     }, 1.05 + i * 0.2);
   });
 
   abertura
-    .to('.hero__texto', { opacity: 1, duration: .8 }, 1.75)
-    .from('.hero__texto', { y: 22, duration: .8 }, 1.75)
-    .to('.hero__acoes', { opacity: 1, duration: .1 }, 1.9)
-    .from('.hero__acoes .botao', { y: 20, opacity: 0, duration: .7, stagger: .1 }, 1.9)
-    .to('.rolar', { opacity: 1, duration: .7 }, 2.25);
+    .to('.hero__texto', { opacity: 1, duration: 1 }, 1.75)
+    .from('.hero__texto', { y: 22, duration: 1 }, 1.75)
+    .set('.hero__acoes', { opacity: 1 }, 1.9)
+    .from('.hero__acoes .botao', { y: 20, opacity: 0, duration: .9, stagger: .12 }, 1.9)
+    .to('.rolar', { opacity: 1, duration: .9 }, 2.4);
 
   gsap.fromTo('.rolar__bola',
-    { x: -12 }, { x: 34, duration: 1.6, repeat: -1, ease: 'power2.inOut' });
+    { x: -12 }, { x: 34, duration: 1.9, repeat: -1, ease: 'power3.inOut' });
 
   /* =======================================================
      9. Parallax do hero e saída do indicador
      ======================================================= */
   gsap.to('.rolar', {
-    opacity: 0, ease: 'none',
+    opacity: 0, duration: 1, ease: 'none',
     scrollTrigger: { trigger: '#hero', start: 'top top', end: '14% top', scrub: true }
   });
   gsap.to('.hero__media', {
-    yPercent: 12, ease: 'none',
+    yPercent: 12, duration: 1, ease: 'none',
     scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }
   });
   gsap.to('.hero__inner', {
-    y: 70, opacity: 0, ease: 'none',
+    y: 70, opacity: 0, duration: 1, ease: 'none',
     scrollTrigger: { trigger: '#hero', start: 'top top', end: '75% top', scrub: true }
   });
 
@@ -259,21 +283,21 @@
      ======================================================= */
   document.querySelectorAll('.titulo [data-split]').forEach(function (linha) {
     gsap.from(letrasDe(linha), {
-      yPercent: 110, opacity: 0, duration: .85, ease: 'power4.out', stagger: .02,
+      yPercent: 110, opacity: 0, duration: 1, ease: 'expo.out', stagger: .04,
       scrollTrigger: { trigger: linha, start: 'top 88%' }
     });
   });
 
   document.querySelectorAll('.cabecalho .rotulo, .noite__cabecalho .rotulo').forEach(function (el) {
     gsap.from(el, {
-      opacity: 0, x: -14, duration: .8, ease: 'power3.out',
+      opacity: 0, x: -14, duration: 1, ease: 'power3.out',
       scrollTrigger: { trigger: el, start: 'top 92%' }
     });
   });
 
   document.querySelectorAll('.cabecalho__texto').forEach(function (el) {
     gsap.from(el, {
-      opacity: 0, y: 18, duration: .8, ease: 'power3.out',
+      opacity: 0, y: 18, duration: 1, ease: 'power3.out',
       scrollTrigger: { trigger: el, start: 'top 90%' }
     });
   });
@@ -281,7 +305,7 @@
   function entrarEmGrupo(pai, filho, desloca, passo) {
     document.querySelectorAll(pai).forEach(function (p) {
       gsap.from(p.querySelectorAll(filho), {
-        y: desloca, opacity: 0, duration: .8, ease: 'power3.out',
+        y: desloca, opacity: 0, duration: 1, ease: 'power3.out',
         stagger: passo === undefined ? .07 : passo,
         scrollTrigger: { trigger: p, start: 'top 84%' }
       });
@@ -293,7 +317,7 @@
   entrarEmGrupo('.local__info', '.dado', 22);
 
   gsap.from('.local__mapa', {
-    opacity: 0, y: 28, duration: 1, ease: 'power3.out',
+    opacity: 0, y: 28, duration: 1.2, ease: 'power3.out',
     scrollTrigger: { trigger: '.local__mapa', start: 'top 86%' }
   });
 
@@ -333,7 +357,7 @@
         gsap.fromTo(entram,
           { autoAlpha: 0, y: 54 },
           {
-            autoAlpha: 1, y: 0, duration: .9, ease: 'power3.out', stagger: 0.2,
+            autoAlpha: 1, y: 0, duration: 1.1, ease: 'power3.out', stagger: 0.2,
             scrollTrigger: { trigger: secaoNoite, start: 'top 62%' }
           });
         return;
@@ -343,20 +367,20 @@
       marcos.push(pos);
 
       linha.to(cenas[i - 1], {
-        autoAlpha: 0, y: -36, scale: .97, duration: .45, ease: 'power3.in'
-      }, pos - 0.55);
+        autoAlpha: 0, y: -36, scale: .97, duration: .7, ease: 'power3.in'
+      }, pos - 0.85);
 
       linha.fromTo(entram,
         { autoAlpha: 0, y: 54 },
-        { autoAlpha: 1, y: 0, duration: .9, ease: 'power3.out', stagger: 0.2 },
+        { autoAlpha: 1, y: 0, duration: 1.1, ease: 'power3.out', stagger: 0.2 },
         pos);
 
       if (foto) {
-        linha.fromTo(foto, { scale: 1.07 }, { scale: 1, duration: 1.2, ease: 'none' }, pos);
+        linha.fromTo(foto, { scale: 1.07 }, { scale: 1, duration: 1.4, ease: 'power3.out' }, pos);
       }
     });
 
-    linha.to({}, { duration: .8 });   // respiro no fim, antes de soltar o pin
+    linha.to({}, { duration: 1 });    // respiro no fim, antes de soltar o pin
 
     ScrollTrigger.create({
       animation: linha,
@@ -383,8 +407,8 @@
      13. Barra de progresso da leitura
      ======================================================= */
   gsap.to('#progresso', {
-    scaleX: 1, ease: 'none',
-    scrollTrigger: { start: 'top top', end: 'max', scrub: .3 }
+    scaleX: 1, duration: 1, ease: 'none',
+    scrollTrigger: { start: 'top top', end: 'max', scrub: .6 }
   });
 
   // o pin muda a altura da página; recalcula depois que tudo carregou

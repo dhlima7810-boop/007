@@ -26,6 +26,32 @@ Sem exceção:
 abrir e fechar menu. O que a regra proíbe é animar entrada, saída e
 movimento ligado ao scroll fora do GSAP.
 
+### Tempo e curva
+
+Sites cinematográficos são lentos com intenção.
+
+- **Nada que entre ou saia em menos de 0.6s.** Vale para GSAP e para
+  `transition` no CSS. Entrada, saída, abrir, fechar, revelar, sumir.
+- **Ease só power3 ou expo** (`.out`, `.in`, `.inOut`). Nada de power2,
+  power4, back, elastic, bounce, nem a palavra `ease` solta no CSS.
+- No CSS as curvas vêm dos tokens `--saida` (expo.out) e `--dupla`
+  (expo.inOut), definidos no `:root`.
+
+Três exceções, e só estas:
+
+1. `ease: 'none'` em tween preso ao scroll — parallax, barra de progresso.
+   Ali a posição vem do scroll, não do relógio; uma curva faria o elemento
+   empurrar e recuar em relação ao dedo.
+2. `ease: 'none'` no letreiro em loop, que precisa de velocidade constante
+   ou pulsa a cada volta.
+3. Hover de **cor e borda** fica em 0.25s. É devolutiva de estado, não
+   entrada — acima de meio segundo o botão parece travado. Hover que
+   **move** (escala de foto, por exemplo) segue a regra dos 0.6s.
+
+Em tween preso ao scroll a `duration` só normaliza o mapa: quem manda na
+posição é o scroll. Ainda assim escreva um valor de 0.6s para cima, para o
+arquivo não ter número curto que confunda na próxima leitura.
+
 ## Sem componentes
 
 O projeto ainda **não** tem camada de componentes. Nada de React, Vue, web

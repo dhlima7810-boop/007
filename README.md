@@ -69,6 +69,10 @@ O encaixe Lenis + GSAP + ScrollTrigger fica no topo do `main.js`, em um lugar
 só: o Lenis avisa o ScrollTrigger a cada quadro e o ticker do GSAP conduz o
 Lenis, então os dois andam no mesmo relógio.
 
+**Tempo e curva:** nada entra ou sai em menos de 0.6s, e o ease é sempre
+power3 ou expo. As exceções (parallax, letreiro, hover de cor) estão listadas
+no `CLAUDE.md`.
+
 **Topo:** foto parada da fachada à noite. A abertura é encadeada — cortina
 preta, foto assentando de 14% maior, rótulo desfocado que entra, e só então as
 letras do título subindo de dentro de uma janela.
