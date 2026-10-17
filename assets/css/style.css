@@ -323,6 +323,7 @@ ol,ul{margin:0;padding:0;list-style:none}
   border:1px solid var(--fio);
 }
 .noite__foto img{width:100%;display:block;transition:transform .6s cubic-bezier(.22,1,.36,1)}
+.noite__foto--retrato{max-width:420px;margin-inline:auto}
 .noite__foto:hover img{transform:scale(1.03)}
 
 .noite__texto{display:grid;gap:.75rem;align-content:center}
@@ -366,13 +367,26 @@ ol,ul{margin:0;padding:0;list-style:none}
 .noite.pin-ativo .noite__palco{flex:1 1 auto;min-height:0;position:relative}
 .noite.pin-ativo .noite__cena{position:absolute;inset:0;margin:0;display:flex;align-items:center}
 .noite.pin-ativo .noite__cena-in{width:min(100% - var(--gutter) * 2, var(--larg))}
+/* a foto em pé é estreita: a coluna dela encolhe junto, senão abre um vão
+   entre a foto e o texto */
+@media (min-width:860px){
+  .noite.pin-ativo .noite__cena-in--retrato{
+    grid-template-columns:auto minmax(0,1fr);
+    gap:clamp(2.5rem,4.5vw,4rem);
+  }
+}
 .noite.pin-ativo .noite__foto{aspect-ratio:4/3;max-height:min(46vh,440px)}
+.noite.pin-ativo .noite__foto--retrato{
+  aspect-ratio:3/4;width:auto;height:min(54vh,500px);max-height:none;
+  justify-self:center;
+}
 .noite.pin-ativo .noite__foto img{width:100%;height:100%;object-fit:cover;max-height:none}
 .noite.pin-ativo .noite__rodape{flex:none;margin:0 auto clamp(1rem,3vh,2rem)}
 
 /* no celular as cenas são mais baixas, para caber foto e texto */
 @media (max-width:859px){
   .noite.pin-ativo .noite__foto{aspect-ratio:3/2;max-height:32svh}
+  .noite.pin-ativo .noite__foto--retrato{aspect-ratio:3/4;height:min(42svh,350px);max-height:none}
   .noite.pin-ativo .noite__num{font-size:1.8rem}
   .noite.pin-ativo .noite__titulo{font-size:1.45rem}
   .noite.pin-ativo .noite__desc{font-size:.92rem;line-height:1.5}

@@ -306,7 +306,12 @@
   var secaoNoite = document.getElementById('noite');
   var cenas = gsap.utils.toArray('#noitePalco .noite__cena');
   var contador = document.getElementById('cenaAtual');
+  var contadorTotal = document.getElementById('cenaTotal');
   var barra = document.getElementById('cenaBarra');
+
+  if (contadorTotal) {
+    contadorTotal.textContent = String(cenas.length).padStart(2, '0');
+  }
 
   if (secaoNoite && cenas.length) {
     secaoNoite.classList.add('pin-ativo');

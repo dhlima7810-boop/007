@@ -81,6 +81,11 @@ Dentro de cada cena os elementos entram com `stagger: 0.2` e `ease: power3.out`.
 A cena 01 entra **antes** do pin, enquanto a seção ainda sobe — sem isso, quem
 chega na seção encontra ela vazia.
 
+A moldura da foto é deitada (4:3) por padrão. A cena 03 usa
+`.noite__foto--retrato`, que inverte a proporção para 3:4 e manda pela altura
+em vez da largura — assim a foto em pé aparece inteira, sem corte, e a coluna
+dela encolhe junto para não abrir vão até o texto.
+
 O pin vale **também no celular**: com o Lenis no scroll, prender a tela em
 aparelho pequeno funciona bem.
 
@@ -116,8 +121,7 @@ Cada foto aparece **uma única vez**:
 | `fachada-noite.jpg` | fundo do topo |
 | `fachada.jpg` | cena 01 — "A casa na esquina" |
 | `salao.jpg` | cena 02 — "O salão vai enchendo" |
-| `mesa.jpg` | cena 03 — "A mesa fica assim" |
-| `pizza-viagem.jpg` | cena 04 — "E também sai para viagem" |
+| `pizza-viagem.jpg` | cena 03 — "E também sai para viagem" |
 | `logo.jpg` | cabeçalho e rodapé |
 
 **Para conseguir mais fotos:** peça na própria pizzaria, que tem as originais.
