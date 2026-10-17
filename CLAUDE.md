@@ -73,7 +73,12 @@ assets/vendor/        libs
 
 ## Conteúdo
 
-- Preços: **o site não mostra nenhum**, de propósito — os do cartaz antigo não
-  valem mais. Cada promoção tem um link "Consultar preço" que liga.
+- Preços das **pizzas**: vêm do cardápio da casa, fotografado em 7/2/2026, e
+  estão na seção `#cardapio`. A foto pegou só a coluna do meio — faltam os
+  sabores de A a E, a coluna da direita e as pizzas doces. Não invente os que
+  faltam: ou o dono manda uma foto do resto, ou eles ficam fora.
+- Preços das **promoções da semana**: continuam fora do site. Os do cartaz
+  antigo não valem mais e os atuais não são conhecidos. Cada dia tem um link
+  "Consultar preço" que liga.
 - Fotos: use só as que a pizzaria forneceu. Imagens de Tripadvisor, Google ou
   Restaurant Guru são de terceiros e não entram.

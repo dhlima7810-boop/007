@@ -278,16 +278,18 @@
     });
   });
 
-  function entrarEmGrupo(pai, filho, desloca) {
+  function entrarEmGrupo(pai, filho, desloca, passo) {
     document.querySelectorAll(pai).forEach(function (p) {
       gsap.from(p.querySelectorAll(filho), {
-        y: desloca, opacity: 0, duration: .8, ease: 'power3.out', stagger: .07,
+        y: desloca, opacity: 0, duration: .8, ease: 'power3.out',
+        stagger: passo === undefined ? .07 : passo,
         scrollTrigger: { trigger: p, start: 'top 84%' }
       });
     });
   }
   entrarEmGrupo('.semana', '.dia', 26);
   entrarEmGrupo('.itens', '.item', 24);
+  entrarEmGrupo('.sabores', '.sabor', 18, .022);
   entrarEmGrupo('.local__info', '.dado', 22);
 
   gsap.from('.local__mapa', {

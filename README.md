@@ -101,14 +101,16 @@ página aparece inteira e parada, com as quatro cenas uma embaixo da outra.
 
 Marcado com `TODO` / comentário no código:
 
-1. **Preços** — o site não mostra nenhum, de propósito: os do cartaz antigo não
-   valem mais. Cada dia tem um link "Consultar preço" que liga. Dentro do bloco
-   de segunda-feira em `index.html` há uma linha comentada mostrando como pôr o
-   preço de volta.
-2. **Horário de funcionamento** — seção `#local`. Guias da cidade indicam terça
+1. **Cardápio incompleto** — a foto do cardápio pegou só a coluna do meio
+   (33 sabores, de Frajola a Três queijos). Faltam os sabores de A a E, a
+   coluna da direita e as pizzas doces. Precisa de uma foto do resto.
+   Os ingredientes do **Hamburguer** estavam cobertos por uma fita na foto.
+2. **Preços das promoções da semana** — esses continuam fora do site: os do
+   cartaz antigo não valem mais. Cada dia tem um link "Consultar preço" que
+   liga. Dentro do bloco de segunda-feira em `index.html` há uma linha
+   comentada mostrando como pôr o preço de volta.
+3. **Horário de funcionamento** — seção `#local`. Guias da cidade indicam terça
    a domingo, das 18h às 00h, mas não batem entre si.
-3. **Cardápio completo** — a seção `#cardapio` tem só as categorias, com um
-   bloco de exemplo comentado para copiar.
 4. **Segunda unidade** — existe uma Pizza Mia na Av. São Paulo, 474, Cidade
    Brasil, (11) 2425-5960. Ainda não está no site.
 
