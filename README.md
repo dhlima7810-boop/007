@@ -115,7 +115,7 @@ Cada foto aparece **uma única vez**:
 |---|---|
 | `fachada-noite.jpg` | fundo do topo |
 | `fachada.jpg` | cena 01 — "A casa na esquina" |
-| `varanda.jpg` | cena 02 — "O salão vai enchendo" |
+| `salao.jpg` | cena 02 — "O salão vai enchendo" |
 | `mesa.jpg` | cena 03 — "A mesa fica assim" |
 | `pizza-viagem.jpg` | cena 04 — "E também sai para viagem" |
 | `logo.jpg` | cabeçalho e rodapé |
