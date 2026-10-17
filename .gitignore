@@ -1,3 +1,10 @@
 .DS_Store
 Thumbs.db
 node_modules/
+
+# screenshots de teste, caso um script seja rodado da raiz por engano
+*-cat.png
+*-menu*.png
+*-p[0-9].png
+*-t[0-9].png
+nb-*.png
