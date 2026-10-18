@@ -52,6 +52,28 @@ Em tween preso ao scroll a `duration` só normaliza o mapa: quem manda na
 posição é o scroll. Ainda assim escreva um valor de 0.6s para cima, para o
 arquivo não ter número curto que confunda na próxima leitura.
 
+## Composição da página
+
+A estrutura veio da referência que o dono mandou (o site da Tripletta),
+recomposta com conteúdo e cores da Pizza Mia:
+
+1. **Wordmark gigante** no topo, em caixa baixa, ocupando a largura toda da
+   tela, sobre a foto da fachada à noite. O nome é o hero.
+2. **As quatro ações** logo abaixo: rodízio, para viagem, disk pizza, onde
+   fica. Palavra enorme em caixa baixa + seta, com faixa de cor sangrando de
+   ponta a ponta no hover. É por aqui que a pessoa escolhe o que quer, antes
+   de qualquer outra coisa — não mexa na ordem sem motivo.
+3. **Letreiro** amarelo em movimento.
+4. Seções de conteúdo em **bandas alternadas** (`.secao--banda` = `tinta-2`).
+5. **Wordmark de novo** no rodapé, fechando o livro.
+
+Caixa baixa é só do wordmark e das quatro ações — esse é o registro da
+"voz grande" do site. O resto do nome da marca é maiúsculo.
+
+Quando chegarem mais fotos, as quatro ações podem receber uma foto cada,
+que cresce no hover no lugar da faixa de cor. Hoje não dá: cada foto já
+aparece uma vez e não sobra nenhuma.
+
 ## Sistema visual — "Fachada"
 
 A paleta e a tipografia vêm do sistema **Fachada**, construído a partir do

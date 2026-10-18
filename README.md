@@ -45,6 +45,22 @@ de `node_modules/*/dist/`. `node_modules/` não vai para o repositório.
 | GSAP + ScrollTrigger | 3.13.0 |
 | Lenis | 1.3.11 |
 
+## Estrutura da página
+
+A composição veio do site de referência que o dono mandou:
+
+| Peça | O que é |
+|---|---|
+| Wordmark gigante | o nome ocupa a tela toda, em caixa baixa, sobre a fachada |
+| As quatro ações | rodízio · para viagem · disk pizza · onde fica, com faixa de cor no hover |
+| Letreiro | faixa amarela em movimento contínuo |
+| Bandas alternadas | seções escuras alternando `tinta` e `tinta-2` |
+| Wordmark no rodapé | fecha o livro |
+
+As quatro ações são a espinha: é a primeira coisa depois do nome, e cada uma
+leva direto ao que a pessoa veio fazer. Quando chegarem mais fotos, cada ação
+pode receber uma, crescendo no hover no lugar da faixa de cor.
+
 ## Design — sistema "Fachada"
 
 A base veio de benchmarks de sites de banco de imagem (Adobe Stock e afins),

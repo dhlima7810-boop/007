@@ -203,11 +203,17 @@ ol,ul{margin:0;padding:0;list-style:none}
 .hero__inner{position:relative;z-index:1}
 .hero__rotulo{margin-bottom:clamp(1.25rem,3vh,2rem);color:var(--acento)}
 
-.hero__titulo{
+.marcaovo{
   font-family:var(--display);font-weight:var(--peso-titulo);
-  font-size:clamp(2.9rem,9vw,7.5rem);
-  text-transform:uppercase;letter-spacing:.005em;
-  text-shadow:0 2px 40px rgba(0,0,0,.45);
+  font-size:clamp(4.5rem,25vw,19rem);
+  text-transform:lowercase;letter-spacing:-.01em;
+  line-height:.82;
+  text-shadow:0 2px 50px rgba(0,0,0,.5);
+  margin-block:clamp(.5rem,2vh,1.5rem);
+}
+@media (min-width:860px){
+  /* as duas palavras lado a lado quando ha largura */
+  .marcaovo{display:flex;gap:.22em;align-items:baseline}
 }
 
 .hero__base{
@@ -232,6 +238,86 @@ ol,ul{margin:0;padding:0;list-style:none}
   width:34px;height:1px;background:var(--fio-forte);position:relative;overflow:hidden;
 }
 .rolar__bola{position:absolute;inset:0;width:12px;background:var(--acento)}
+
+/* ---------------- As quatro ações ----------------
+   Quatro palavras enormes em caixa baixa, cada uma com sua faixa de
+   cor entrando por tras no hover. A caixa baixa aqui e proposital: e
+   o mesmo registro do wordmark do topo e do rodape, e so dele.
+   ------------------------------------------------- */
+.acoes{border-top:1px solid var(--fio)}
+.acao{
+  position:relative;display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;gap:.5rem clamp(1rem,3vw,2.5rem);
+  width:min(100% - var(--gutter) * 2, var(--larg));margin-inline:auto;
+  padding:clamp(1.6rem,4vw,3rem) 0;
+  border-bottom:1px solid var(--fio);
+  text-decoration:none;color:var(--txt);
+  isolation:isolate;
+}
+/* a faixa sangra para fora do container, de ponta a ponta da tela */
+.acao__faixa{
+  position:absolute;z-index:-1;
+  top:0;bottom:0;left:50%;width:100vw;transform:translateX(-50%) scaleX(0);
+  transform-origin:left center;
+  transition:transform .7s var(--saida);
+}
+.acao:hover .acao__faixa{transform:translateX(-50%) scaleX(1)}
+.acao--1 .acao__faixa{background:var(--acento)}
+.acao--2 .acao__faixa{background:var(--papel)}
+.acao--3 .acao__faixa{background:var(--acao)}
+.acao--4 .acao__faixa{background:var(--tinta-3)}
+
+.acao__num{
+  font-family:var(--display);font-weight:var(--peso-rotulo);
+  font-size:.85rem;letter-spacing:.14em;color:var(--txt-3);
+  align-self:start;padding-top:.5em;
+  transition:color .25s var(--saida);
+}
+.acao__palavra{
+  font-family:var(--display);font-weight:var(--peso-titulo);
+  text-transform:lowercase;letter-spacing:-.005em;line-height:.9;
+  font-size:clamp(2.6rem,9vw,7rem);
+  padding-bottom:.08em;
+  transition:transform .7s var(--saida);
+}
+.acao:hover .acao__palavra{transform:translateX(clamp(.5rem,1.5vw,1.5rem))}
+.acao__nota{
+  grid-column:2;grid-row:2;
+  font-size:clamp(.85rem,1.1vw,.95rem);color:var(--txt-2);
+  transition:color .25s var(--saida);
+}
+.acao__seta{
+  display:grid;place-items:center;
+  width:clamp(2.4rem,4vw,3.4rem);height:clamp(2.4rem,4vw,3.4rem);
+  border:1.5px solid var(--fio-forte);border-radius:50%;
+  color:var(--txt);
+  transition:transform .7s var(--saida), border-color .25s var(--saida), color .25s var(--saida);
+}
+.acao__seta svg{width:55%;height:55%}
+.acao:hover .acao__seta{transform:translateX(clamp(.4rem,1vw,1rem))}
+
+/* no hover a faixa clara pede texto escuro */
+.acao--1:hover .acao__palavra,.acao--1:hover .acao__num,.acao--1:hover .acao__nota,.acao--1:hover .acao__seta,
+.acao--2:hover .acao__palavra,.acao--2:hover .acao__num,.acao--2:hover .acao__nota,.acao--2:hover .acao__seta{
+  color:var(--txt-escuro);
+}
+.acao--1:hover .acao__seta,.acao--2:hover .acao__seta{border-color:rgba(25,20,19,.35)}
+.acao--3:hover .acao__palavra,.acao--3:hover .acao__num,.acao--3:hover .acao__nota,.acao--3:hover .acao__seta{color:#fff}
+.acao--3:hover .acao__seta{border-color:rgba(255,255,255,.5)}
+.acao--4:hover .acao__num,.acao--4:hover .acao__nota{color:var(--txt-2)}
+.acao--4:hover .acao__seta{border-color:var(--acento);color:var(--acento)}
+
+@media (max-width:720px){
+  .acao{grid-template-columns:1fr auto}
+  .acao__num{grid-row:1;grid-column:1;align-self:center;padding-top:0;margin-bottom:.3rem}
+  .acao__palavra{grid-column:1;grid-row:2}
+  .acao__nota{grid-column:1;grid-row:3}
+  .acao__seta{grid-column:2;grid-row:1 / span 3}
+}
+
+/* ---------------- Bandas alternadas ---------------- */
+.secao--banda{background:var(--tinta-2)}
 
 /* ---------------- Letreiro ---------------- */
 .letreiro{

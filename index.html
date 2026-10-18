@@ -473,6 +473,7 @@
     </button>
 
     <nav class="nav" id="navegacao" aria-label="Menu principal">
+      <a href="#acoes">O que tem</a>
       <a href="#semana">A semana</a>
       <a href="#cardapio">Cardápio</a>
       <a href="#noite">Uma noite aqui</a>
@@ -495,22 +496,22 @@
     <div class="faixa-util hero__inner">
       <p class="rotulo hero__rotulo" data-entra>
         <span class="rotulo__ponto" aria-hidden="true"></span>
-        Vila Galvão · Guarulhos · SP
+        Vila Galvão · Guarulhos · desde a esquina da Emilio Ribas
       </p>
 
-      <h1 class="hero__titulo" aria-label="A pizza que o bairro conhece de nome">
-        <span class="linha"><span class="linha__in" data-split>A pizza que o bairro</span></span>
-        <span class="linha"><span class="linha__in linha__in--destaque" data-split>conhece de nome</span></span>
+      <h1 class="marcaovo" aria-label="Pizza Mia">
+        <span class="linha"><span class="linha__in" data-split>pizza</span></span>
+        <span class="linha"><span class="linha__in linha__in--destaque" data-split>mia</span></span>
       </h1>
 
       <div class="hero__base">
         <p class="hero__texto" data-entra>
-          Rodízio, esfihas e pizza para viagem direto do forno.
-          Promoção todo dia da semana.
+          A pizza que o bairro conhece de nome. Rodízio, esfihas e pizza para
+          viagem direto do forno, todos os dias das 18h à meia-noite.
         </p>
         <div class="hero__acoes" data-entra>
           <a class="botao botao--acento" href="tel:+551124528022">Disk Pizza (11) 2452-8022</a>
-          <a class="botao botao--chunky" href="#semana">Ver a semana</a>
+          <a class="botao botao--chunky" href="#acoes">O que tem aqui</a>
         </div>
       </div>
     </div>
@@ -518,6 +519,54 @@
     <a class="rolar" href="#semana" id="rolar" aria-label="Role para ver a semana">
       <span class="rolar__txt">Role</span>
       <span class="rolar__trilho" aria-hidden="true"><span class="rolar__bola"></span></span>
+    </a>
+  </section>
+
+
+  <!-- ============ AS QUATRO AÇÕES ============
+       A espinha da pagina: quatro palavras enormes em caixa baixa, cada
+       uma com sua faixa de cor que entra por tras no hover. E por aqui
+       que a pessoa escolhe o que quer, antes de qualquer outra coisa.
+       ========================================== -->
+  <section class="acoes" id="acoes" aria-label="O que a Pizza Mia tem">
+    <a class="acao acao--1" href="#semana">
+      <span class="acao__faixa" aria-hidden="true"></span>
+      <span class="acao__num" aria-hidden="true">01</span>
+      <h2 class="acao__palavra">rodízio</h2>
+      <span class="acao__nota">salgadas e doces a noite toda</span>
+      <span class="acao__seta" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </a>
+
+    <a class="acao acao--2" href="#cardapio">
+      <span class="acao__faixa" aria-hidden="true"></span>
+      <span class="acao__num" aria-hidden="true">02</span>
+      <h2 class="acao__palavra">para viagem</h2>
+      <span class="acao__nota">retirada no balcão</span>
+      <span class="acao__seta" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </a>
+
+    <a class="acao acao--3" href="tel:+551124528022">
+      <span class="acao__faixa" aria-hidden="true"></span>
+      <span class="acao__num" aria-hidden="true">03</span>
+      <h2 class="acao__palavra">disk pizza</h2>
+      <span class="acao__nota">(11) 2452-8022</span>
+      <span class="acao__seta" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </a>
+
+    <a class="acao acao--4" href="#local">
+      <span class="acao__faixa" aria-hidden="true"></span>
+      <span class="acao__num" aria-hidden="true">04</span>
+      <h2 class="acao__palavra">onde fica</h2>
+      <span class="acao__nota">Av. Emilio Ribas, 3175</span>
+      <span class="acao__seta" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
     </a>
   </section>
 
@@ -535,7 +584,7 @@
   </section>
 
   <!-- ============ A SEMANA ============ -->
-  <section class="secao" id="semana">
+  <section class="secao secao--banda" id="semana">
     <div class="faixa-util">
       <header class="cabecalho">
         <p class="rotulo"><span class="rotulo__ponto" aria-hidden="true"></span>Outlet na Pizza Mia</p>
@@ -598,7 +647,7 @@
   </section>
 
   <!-- ============ CARDÁPIO ============ -->
-  <section class="secao" id="cardapio">
+  <section class="secao secao--banda" id="cardapio">
     <div class="faixa-util">
       <header class="cabecalho">
         <p class="rotulo"><span class="rotulo__ponto" aria-hidden="true"></span>O que servimos</p>

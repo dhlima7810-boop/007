@@ -222,7 +222,7 @@
   /* =======================================================
      8. Abertura do hero
      ======================================================= */
-  var linhasTitulo = document.querySelectorAll('.hero__titulo [data-split]');
+  var linhasTitulo = document.querySelectorAll('.marcaovo [data-split]');
   var abertura = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
   abertura
@@ -311,6 +311,7 @@
       });
     });
   }
+  entrarEmGrupo('.acoes', '.acao', 34);
   entrarEmGrupo('.semana', '.carimbo', 26);
   entrarEmGrupo('.itens', '.item', 24);
   entrarEmGrupo('.ticket__lista', '.ticket__item', 18, .022);
