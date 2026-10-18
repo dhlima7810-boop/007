@@ -521,64 +521,138 @@
   }
 
   /* =======================================================
-     12b. O cardapio vira pagina no celular
+     12b. O cardapio: a capa que abre e o livro de paginas
 
-     Acima de 720px o cupom ja le como livro aberto, com o vinco no
-     meio. Abaixo disso vira coluna unica — e ai o dedo vira a folha:
-     os sabores sao repartidos em cadernos de 6 e a folha da vez gira
-     pela lombada para descobrir a de baixo.
+     Fechado, e uma capa de couro. Tocar em qualquer parte dela gira a
+     capa pela lombada e descobre o miolo.
 
-     O caderno e montado em JS de proposito. Sem JS, sem GSAP ou com
-     a janela larga, o que fica na tela e a lista inteira de uma vez,
-     que e o conteudo de verdade. A paginacao e conforto, nao suporte.
+     Aberto, os 111 itens viram paginas. Uma folha NUNCA mistura
+     secoes: cada uma pertence a uma e leva o nome dela no alto, senao
+     a pessoa perde o fio em catorze paginas. As abas pulam direto para
+     uma secao, e a passagem sequencial continua inteira — da para
+     percorrer tudo de ponta a ponta sem tocar numa aba.
+
+     Encostar num sabor NAO vira a pagina. A virada mora so nas duas
+     faixas de margem, que ficam fora do alcance de qualquer item: o
+     recuo lateral da folha (--faixa, no CSS) e o que garante isso.
+
+     Tudo isto e montado em JS de proposito. Sem JS, sem GSAP ou sob
+     movimento reduzido, o que fica na tela e a lista inteira de uma
+     vez, que e o conteudo de verdade. Capa e paginacao sao conforto,
+     nao suporte.
      ======================================================= */
-  var lista = document.querySelector('.ticket__lista');
+  // nomes curtos para as abas: "Pizzas com borda" nao cabe numa pilula
+  var ROTULO_ABA = {
+    salgadas: 'Salgadas', doces: 'Doces', bordas: 'Bordas',
+    esfihas: 'Esfihas', pacotes: 'Pacotes', bebidas: 'Bebidas'
+  };
 
-  if (lista && gsap.matchMedia) {
-    gsap.matchMedia().add('(max-width: 719px)', function () {
-      var itens = Array.prototype.slice.call(lista.querySelectorAll('.ticket__item'));
-      if (itens.length < 8) { return; }
+  var livro = document.getElementById('livro');
+  var miolo = document.getElementById('livroMiolo');
+  var capa = document.getElementById('livroCapa');
+
+  if (livro && miolo && capa && gsap.matchMedia) {
+    // Duas condicoes, nao uma sempre verdadeira: e a troca entre elas que
+    // remonta o livro quando a janela cruza os 720px. Com uma condicao so,
+    // o numero de itens por folha ficaria congelado na largura da chegada.
+    gsap.matchMedia().add({
+      estreito: '(max-width: 719px)',
+      largo: '(min-width: 720px)'
+    }, function (contexto) {
+      var porPagina = contexto.conditions.estreito ? 9 : 24;
+
+      var blocos = Array.prototype.slice.call(miolo.querySelectorAll('.secao-card'));
+      if (!blocos.length) { return; }
 
       // a entrada em grupo prendeu esses <li> num tween com opacity 0;
-      // sem soltar antes de mover, o cardapio some no celular
-      gsap.killTweensOf(itens);
-      gsap.set(itens, { clearProps: 'all' });
+      // sem soltar antes de mover, o cardapio some
+      var todos = miolo.querySelectorAll('.ticket__item');
+      gsap.killTweensOf(todos);
+      gsap.set(todos, { clearProps: 'all' });
 
-      var POR_PAGINA = 6;
+      var abas = document.createElement('nav');
+      abas.className = 'livro__abas';
+      abas.setAttribute('aria-label', 'Seções do cardápio');
+
       var caderno = document.createElement('div');
       caderno.className = 'ticket__caderno';
-      var folhas = [];
 
-      for (var i = 0; i < itens.length; i += POR_PAGINA) {
-        var folha = document.createElement('ol');
-        folha.className = 'ticket__folha';
-        folha.start = i + 1;
-        for (var k = i; k < Math.min(i + POR_PAGINA, itens.length); k++) {
-          folha.appendChild(itens[k]);
+      var folhas = [];
+      var porSecao = {};
+
+      blocos.forEach(function (bloco) {
+        var chave = bloco.dataset.secao;
+        var nome = bloco.dataset.nome;
+        var itens = Array.prototype.slice.call(bloco.querySelectorAll('.ticket__item'));
+        var nota = bloco.querySelector('.secao-card__nota');
+        porSecao[chave] = folhas.length;
+
+        for (var i = 0; i < itens.length; i += porPagina) {
+          var folha = document.createElement('div');
+          folha.className = 'ticket__folha';
+          folha.dataset.secao = chave;
+
+          var cabeca = document.createElement('p');
+          cabeca.className = 'ticket__folha__cabeca';
+          cabeca.textContent = nome;
+          folha.appendChild(cabeca);
+
+          if (i === 0 && nota) { folha.appendChild(nota.cloneNode(true)); }
+
+          var ol = document.createElement('ol');
+          ol.className = 'ticket__lista';
+          for (var k = i; k < Math.min(i + porPagina, itens.length); k++) {
+            ol.appendChild(itens[k]);
+          }
+          folha.appendChild(ol);
+          caderno.appendChild(folha);
+          folhas.push(folha);
         }
-        caderno.appendChild(folha);
-        folhas.push(folha);
-      }
+
+        var aba = document.createElement('button');
+        aba.type = 'button';
+        aba.className = 'livro__aba';
+        aba.textContent = ROTULO_ABA[chave] || nome;
+        aba.dataset.alvo = String(porSecao[chave]);
+        abas.appendChild(aba);
+      });
+
+      var seta = function (dir) {
+        return '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="' +
+          (dir > 0 ? 'M9 5l7 7-7 7' : 'M15 5l-7 7 7 7') +
+          '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      };
+
+      // as duas faixas de margem: e so aqui que se vira a pagina por toque
+      var faixaAnt = document.createElement('button');
+      faixaAnt.type = 'button';
+      faixaAnt.className = 'folha-virar folha-virar--ant';
+      faixaAnt.setAttribute('aria-label', 'Página anterior do cardápio');
+      faixaAnt.innerHTML = seta(-1);
+      var faixaProx = document.createElement('button');
+      faixaProx.type = 'button';
+      faixaProx.className = 'folha-virar folha-virar--prox';
+      faixaProx.setAttribute('aria-label', 'Próxima página do cardápio');
+      faixaProx.innerHTML = seta(1);
+      caderno.appendChild(faixaAnt);
+      caderno.appendChild(faixaProx);
 
       var nav = document.createElement('div');
       nav.className = 'ticket__nav';
       nav.innerHTML =
-        '<button type="button" class="ticket__virar" data-dir="-1" aria-label="Página anterior do cardápio">' +
-          '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-        '</button>' +
+        '<button type="button" class="ticket__virar" data-dir="-1" aria-label="Página anterior do cardápio">' + seta(-1) + '</button>' +
         '<p class="ticket__folio" aria-live="polite">Página <span></span> de ' + folhas.length + '</p>' +
-        '<button type="button" class="ticket__virar" data-dir="1" aria-label="Próxima página do cardápio">' +
-          '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-        '</button>';
+        '<button type="button" class="ticket__virar" data-dir="1" aria-label="Próxima página do cardápio">' + seta(1) + '</button>';
 
-      lista.parentNode.insertBefore(caderno, lista.nextSibling);
-      caderno.parentNode.insertBefore(nav, caderno.nextSibling);
-      lista.hidden = true;
+      blocos.forEach(function (b) { b.hidden = true; });
+      var pe = miolo.querySelector('.ticket__pe');
+      miolo.insertBefore(abas, pe);
+      miolo.insertBefore(caderno, pe);
+      miolo.insertBefore(nav, pe);
 
-      // A altura do caderno e a da folha mais alta, senao o pe do cupom
-      // sobe e desce a cada virada. Medir so depois de soltar as folhas
-      // do empilhamento: enquanto sao absolutas com inset:0 dentro de um
-      // pai sem altura, todas medem zero e o cupom fecha.
+      // A altura do caderno e a da folha mais alta. Medir so depois de
+      // soltar as folhas do empilhamento: enquanto sao absolutas com
+      // inset dentro de um pai sem altura, todas medem zero.
       caderno.classList.add('medindo');
       var alta = 0;
       folhas.forEach(function (f) { alta = Math.max(alta, f.offsetHeight); });
@@ -588,6 +662,7 @@
       var atual = 0, virando = false;
       var folio = nav.querySelector('.ticket__folio span');
       var botoes = Array.prototype.slice.call(nav.querySelectorAll('.ticket__virar'));
+      var listaAbas = Array.prototype.slice.call(abas.querySelectorAll('.livro__aba'));
 
       function pintar() {
         folhas.forEach(function (f, i) {
@@ -595,8 +670,13 @@
           f.setAttribute('aria-hidden', i === atual ? 'false' : 'true');
         });
         folio.textContent = String(atual + 1);
-        botoes[0].disabled = atual === 0;
-        botoes[1].disabled = atual === folhas.length - 1;
+        botoes[0].disabled = faixaAnt.disabled = atual === 0;
+        botoes[1].disabled = faixaProx.disabled = atual === folhas.length - 1;
+        var secaoAtual = folhas[atual].dataset.secao;
+        listaAbas.forEach(function (a) {
+          var dela = folhas[+a.dataset.alvo].dataset.secao;
+          a.setAttribute('aria-current', dela === secaoAtual ? 'true' : 'false');
+        });
       }
 
       function virar(destino) {
@@ -607,8 +687,7 @@
 
         // As duas folhas ficam visiveis durante a virada, e quem apaga a
         // que saiu e o pintar() no fim. Visibilidade so pela classe: posta
-        // inline, ela sobrevive ao clearProps e a folha nunca mais some —
-        // em tres viradas o caderno vira uma pilha de paginas sobrepostas.
+        // inline, ela sobrevive ao clearProps e a folha nunca mais some.
         entra.classList.add('e-a-folha');
 
         function fim() {
@@ -617,12 +696,10 @@
         }
 
         if (frente) {
-          // a folha da vez gira pela lombada e descobre a de baixo
           gsap.set(entra, { zIndex: 1, rotationY: 0, opacity: 1 });
           gsap.set(sai, Object.assign({ zIndex: 2 }, pivo));
           gsap.to(sai, { rotationY: -112, opacity: 0, duration: .9, ease: 'expo.inOut', onComplete: fim });
         } else {
-          // voltando, a folha anterior desce de volta por cima
           gsap.set(sai, { zIndex: 1 });
           gsap.set(entra, Object.assign({ zIndex: 2, rotationY: -112, opacity: 0 }, pivo));
           gsap.to(entra, { rotationY: 0, opacity: 1, duration: .9, ease: 'expo.inOut', onComplete: fim });
@@ -632,10 +709,15 @@
       botoes.forEach(function (b) {
         b.addEventListener('click', function () { virar(atual + (+b.dataset.dir)); });
       });
+      faixaProx.addEventListener('click', function () { virar(atual + 1); });
+      faixaAnt.addEventListener('click', function () { virar(atual - 1); });
+      listaAbas.forEach(function (a) {
+        a.addEventListener('click', function () { virar(+a.dataset.alvo); });
+      });
 
       // O gesto so e lido no soltar, e so se for claramente horizontal.
-      // Nada de preventDefault: a rolagem vertical com o dedo em cima do
-      // cardapio continua sendo do Lenis, como em qualquer outro lugar.
+      // Um toque parado tem dx pequeno e nao vira nada — e por isso que
+      // encostar num sabor para ler nao tira a folha do lugar.
       var px = null, py = null;
       caderno.addEventListener('pointerdown', function (e) { px = e.clientX; py = e.clientY; });
       caderno.addEventListener('pointercancel', function () { px = null; });
@@ -649,52 +731,136 @@
       });
 
       pintar();
+
+      // ---- a capa ----
+      var aberto = false;
+      function abrir() {
+        if (aberto) { return; }
+        aberto = true;
+        livro.classList.add('aberto');
+        capa.setAttribute('aria-expanded', 'true');
+        gsap.to(capa, {
+          rotationY: -118, opacity: 0,
+          transformOrigin: 'left center', transformPerspective: 1400,
+          duration: .9, ease: 'expo.inOut',
+          onComplete: function () { gsap.set(capa, { autoAlpha: 0 }); ScrollTrigger.refresh(); }
+        });
+        gsap.from(miolo, { opacity: .3, duration: .9, ease: 'power3.out' });
+      }
+      capa.addEventListener('click', abrir);
+
       ScrollTrigger.refresh();
 
-      // desmontagem: a janela alargou, o livro volta a ser lista
+      // desmontagem: a largura mudou de faixa, o livro e remontado
       return function () {
-        gsap.killTweensOf(folhas);
+        gsap.killTweensOf(folhas.concat([capa, miolo]));
         folhas.forEach(function (f) {
-          while (f.firstChild) { lista.appendChild(f.firstChild); }
+          var ol = f.querySelector('.ticket__lista');
+          var dona = miolo.querySelector('.secao-card[data-secao="' + f.dataset.secao + '"] .ticket__lista');
+          while (ol && ol.firstChild) { dona.appendChild(ol.firstChild); }
         });
-        gsap.set(lista.querySelectorAll('.ticket__item'), { clearProps: 'all' });
-        caderno.remove(); nav.remove(); lista.hidden = false;
+        blocos.forEach(function (b) { b.hidden = false; });
+        gsap.set(miolo.querySelectorAll('.ticket__item'), { clearProps: 'all' });
+        gsap.set(capa, { clearProps: 'all' });
+        livro.classList.remove('aberto');
+        capa.setAttribute('aria-expanded', 'false');
+        abas.remove(); caderno.remove(); nav.remove();
         ScrollTrigger.refresh();
       };
     });
   }
 
   /* =======================================================
-     13. A logo despencando
+     13. A logo despencando — e pousando no rodape
 
      E a logo do cabecalho em pessoa, a mesma que nasceu da lua: nao
-     existe copia. Cai girando, presa ao scroll, e subir a pagina faz a
-     queda voltar ate a vaga. Tween preso ao scroll — por isso ease
-     'none' (exceção 1 do CLAUDE.md).
+     existe copia. Cai girando, presa ao scroll, e subir a pagina faz
+     tudo voltar ate a vaga.
+
+     Sao duas quedas e um POUSO: no fim da pagina ela para ao lado do
+     wordmark do rodape, num tamanho tirado da altura dele. Ali e o fim
+     do site, entao ela para ali.
+
+     Queda, bamboleio e pouso moram numa linha do tempo SO. Em duas, o
+     bamboleio e o pouso disputariam o `x` do mesmo elemento e a logo
+     nunca chegaria no alvo.
+
+     Tween preso ao scroll — por isso ease 'none' em todos (exceção 1).
      ======================================================= */
   if (temLua) {
     gsap.set(logoTopo, { transformOrigin: 'center center' });
 
-    // Tres quedas ao longo da pagina. A primeira parte da propria vaga do
-    // cabecalho (y:0), porque agora quem cai e a logo de la — nao ha copia.
+    function balanco() { return Math.min(window.innerWidth * .2, 190); }
+
+    // O centro NATURAL da logo: o retangulo ja vem com a transformacao,
+    // entao desconta-se o x/y que o GSAP escreveu. Rotacao e escala giram
+    // em torno do centro e nao o deslocam, entao so a translacao conta.
+    function centroNatural() {
+      var r = logoTopo.getBoundingClientRect();
+      return {
+        x: r.left + r.width / 2 - (parseFloat(gsap.getProperty(logoTopo, 'x')) || 0),
+        y: r.top + r.height / 2 - (parseFloat(gsap.getProperty(logoTopo, 'y')) || 0)
+      };
+    }
+
+    // Onde ela para, no fim da pagina. O wordmark e lido agora, mas o
+    // alvo e calculado para o scroll MAXIMO: e la que a logo pousa, nao
+    // onde o rodape esta neste instante.
+    function pouso() {
+      var wm = document.querySelector('.rodape .wordmark');
+      var berco = centroNatural();
+      if (!wm) { return { x: 0, y: window.innerHeight + 180, escala: 1 }; }
+      var maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      var r = wm.getBoundingClientRect();
+      var topoNoFim = r.top + window.scrollY - maxScroll;
+      var tamanho = r.height * .78;                       // proporcional ao wordmark
+      return {
+        x: (r.right - tamanho * .72) - berco.x,
+        y: (topoNoFim + r.height / 2) - berco.y,
+        escala: tamanho / (logoTopo.offsetWidth || 36)
+      };
+    }
+
+    // Duas quedas e um pouso. A primeira parte da propria vaga do
+    // cabecalho (y:0), porque quem cai e a logo de la — nao ha copia.
     // O `.topo` e sticky e nao tem overflow:hidden, entao ela sai da caixa
     // do cabecalho sem ser cortada, e a origem dela acompanha o alto da
     // janela, que e o que faz a queda ler como queda.
+    //
+    // immediateRender:false de 1 em diante. O `fromTo` do GSAP escreve o
+    // estado inicial NA HORA EM QUE E CRIADO, nao quando chega a vez dele
+    // na linha do tempo — sem isso vale o `from` do ultimo e a logo nasce
+    // fora da tela, deixando o cabecalho sem logo nenhuma.
     var cair = gsap.timeline({
       scrollTrigger: { start: 'top top', end: 'max', scrub: .7, invalidateOnRefresh: true }
     });
-    // immediateRender:false a partir da segunda queda. O `fromTo` do GSAP
-    // escreve o estado inicial na HORA EM QUE E CRIADO, nao quando chega a
-    // vez dele na linha do tempo — entao as tres criadas em seguida deixam
-    // valer o `from` da ultima, e a logo nasce em y:-180, fora da tela, no
-    // topo da pagina. Sem isso o cabecalho carrega sem logo nenhuma.
-    for (var q = 0; q < 3; q++) {
+
+    [0, 1].forEach(function (q) {
       cair.fromTo(logoTopo,
         { y: q === 0 ? 0 : -180 },
         { y: function () { return window.innerHeight + 180; },
-          rotation: '+=760', duration: 1, ease: 'none',
-          immediateRender: q === 0 });
-    }
+          rotation: '+=760', duration: 1, ease: 'none', immediateRender: q === 0 }, q);
+      // o bamboleio: sem ele a queda vira um elevador descendo. Um tween
+      // por travessia, nunca `keyframes` — dentro de keyframes o GSAP
+      // interpola com easeEach, que cai no power1.inOut por padrao e o
+      // ease:'none' do tween nao alcanca.
+      cair.fromTo(logoTopo,
+        { x: q === 0 ? 0 : function () { return balanco(); } },
+        { x: function () { return q === 0 ? balanco() : -balanco() * .7; },
+          duration: 1, ease: 'none', immediateRender: q === 0 }, q);
+    });
+
+    cair.fromTo(logoTopo,
+      { y: -180 },
+      { y: function () { return pouso().y; },
+        // 640 e nao um numero qualquer: as duas quedas somam 1520 graus, e
+        // 1520+640 = 2160 = 6 voltas exatas. A logo pousa EM PE, que e o
+        // que se espera de quem parou.
+        rotation: '+=640', duration: 1, ease: 'none', immediateRender: false }, 2);
+    cair.to(logoTopo,
+      { x: function () { return pouso().x; },
+        scale: function () { return pouso().escala; },
+        duration: 1, ease: 'none' }, 2);
 
     // A vaga que a logo deixa no cabecalho se fecha por TRANSFORM no texto,
     // nunca animando largura, margem ou gap. Transform nao reflui: o texto
@@ -718,26 +884,6 @@
       });
     }
 
-    // O bamboleio lateral: sem ele a queda vira um elevador descendo.
-    //
-    // E uma sequencia de tweens de verdade, nao `keyframes`: dentro de
-    // keyframes o GSAP usa `easeEach`, que cai no power1.inOut por padrao
-    // — justamente a curva que a exceção 1 do CLAUDE.md manda evitar em
-    // tween preso ao scroll, e que o `ease:'none'` do tween nao alcanca.
-    //
-    // E a amplitude e funcao, reavaliada a cada refresh. Congelada na
-    // largura do carregamento, girar o aparelho de paisagem para retrato
-    // jogava a logo para fora da tela: medido, 6 de 60 amostras fora.
-    function balanco() { return Math.min(window.innerWidth * .2, 190); }
-    var bamboleio = gsap.timeline({
-      scrollTrigger: { start: 'top top', end: 'max', scrub: .7, invalidateOnRefresh: true }
-    });
-    [1, -.75, 1.05, -.5, .8, 0].forEach(function (fator) {
-      bamboleio.to(logoTopo, {
-        x: function () { return balanco() * fator; },
-        duration: 1, ease: 'none'
-      });
-    });
   }
 
   /* =======================================================

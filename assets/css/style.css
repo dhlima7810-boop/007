@@ -20,6 +20,11 @@
   --acao:#e01230;
   --acao-2:#ff2444;
 
+  /* a capa do cardapio: couro e ouro */
+  --couro:#3a2011;
+  --couro-claro:#5a3620;
+  --ouro:#c9a44a;
+
   /* texto */
   --txt:#f6f0e7;
   --txt-2:#a2958a;
@@ -541,54 +546,159 @@ ol,ul{margin:0;padding:0;list-style:none}
   .item__revela{opacity:1;transform:none}
 }
 
-/* ---------------- Ficha do cardápio (ticket) ----------------
-   Do sistema: nem cartao nem lista simples — um cupom de balcao. A
-   borda serrada em cima e embaixo e o que diz "comprovante" antes de
-   qualquer palavra: dois conic-gradient em mascara, um tri&acirc;ngulo por
-   dente. Em duas colunas o cupom le como um livro aberto, com o vinco
-   no meio. Encostar num sabor rasga a linha.
-   ------------------------------------------------------------- */
+/* ---------------- O cardápio: capa e folhas ----------------
+   Fechado e um cardapio de couro marrom com fio e cantoneiras
+   douradas e a logo no centro. Tocar em qualquer parte abre: a capa
+   gira pela lombada e descobre o miolo.
+
+   O miolo e livro, nao mais nota: a borda serrada do comprovante
+   saiu, porque folha de cardapio nao e cupom rasgado. Ficou o papel,
+   o vinco do meio nas duas colunas e a assinatura da casa no fim.
+
+   Sem JS, sem GSAP ou sob movimento reduzido a capa nao existe e a
+   lista inteira dos 111 itens aparece de uma vez. A capa e conforto,
+   nunca suporte.
+   ----------------------------------------------------------- */
+.livro{position:relative;margin-top:clamp(3rem,6vw,4.5rem);max-width:860px}
+
+.livro__capa{
+  display:none;
+  position:absolute;inset:0;z-index:3;
+  place-content:center;justify-items:center;gap:clamp(.9rem,2vw,1.4rem);
+  padding:clamp(2rem,6vw,3.5rem);
+  border:0;cursor:pointer;
+  border-radius:3px 8px 8px 3px;
+  background:
+    linear-gradient(118deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 38%),
+    linear-gradient(150deg, var(--couro-claro) 0%, var(--couro) 46%, #26150a 100%);
+  /* a lombada a esquerda e a sombra funda dao a espessura */
+  box-shadow:
+    inset 16px 0 20px -14px rgba(0,0,0,.95),
+    inset -2px 0 0 rgba(0,0,0,.4),
+    0 28px 64px rgba(0,0,0,.66);
+  -webkit-tap-highlight-color:transparent;
+}
+.js .livro__capa{display:grid}
+@media (prefers-reduced-motion:reduce){ .livro__capa{display:none !important} }
+.livro.aberto .livro__capa{pointer-events:none}
+
+/* moldura dourada e as quatro cantoneiras */
+.livro__ouro{
+  position:absolute;inset:clamp(13px,3%,24px);
+  border:2px solid var(--ouro);border-radius:2px;
+  pointer-events:none;
+}
+.livro__ouro::before,.livro__ouro::after,
+.livro__capa::before,.livro__capa::after{
+  content:'';position:absolute;width:26px;height:26px;
+  border:2px solid var(--ouro);pointer-events:none;
+}
+.livro__ouro::before{top:-9px;left:-9px;border-right:0;border-bottom:0}
+.livro__ouro::after{bottom:-9px;right:-9px;border-left:0;border-top:0}
+.livro__capa::before{
+  top:calc(clamp(13px,3%,24px) - 9px);right:calc(clamp(13px,3%,24px) - 9px);
+  border-left:0;border-bottom:0;
+}
+.livro__capa::after{
+  bottom:calc(clamp(13px,3%,24px) - 9px);left:calc(clamp(13px,3%,24px) - 9px);
+  border-right:0;border-top:0;
+}
+
+.livro__logo{
+  width:clamp(118px,19vw,196px);height:auto;border-radius:50%;
+  border:3px solid var(--ouro);
+  box-shadow:0 14px 38px rgba(0,0,0,.66), 0 0 0 9px rgba(201,164,74,.12);
+}
+/* os dois fios de ouro ancoram o bloco no meio de uma capa alta */
+.livro__titulo{
+  position:relative;
+  font-family:var(--display);font-weight:var(--peso-titulo);
+  text-transform:uppercase;letter-spacing:.16em;
+  font-size:clamp(1.9rem,5.4vw,3.2rem);line-height:1;
+  color:var(--ouro);
+  padding:.5rem 0;
+}
+.livro__titulo::before,.livro__titulo::after{
+  content:'';position:absolute;left:50%;transform:translateX(-50%);
+  width:clamp(120px,22vw,230px);height:1px;background:var(--ouro);opacity:.55;
+}
+.livro__titulo::before{top:0}
+.livro__titulo::after{bottom:0}
+.livro__dica{
+  font-size:.66rem;text-transform:uppercase;letter-spacing:.2em;
+  color:rgba(201,164,74,.72);
+}
+.livro__capa:hover .livro__dica{color:var(--ouro)}
+
+/* ---- o miolo: folha de papel ---- */
 .ticket{
-  --dente:11px;
+  --faixa:clamp(26px,5%,54px);
   position:relative;
   background:var(--papel);color:var(--txt-escuro);
-  max-width:760px;
-  margin-top:clamp(3rem,6vw,4.5rem);
-  padding:calc(var(--dente) + clamp(1.4rem,2.6vw,2rem)) clamp(1.5rem,3vw,2.25rem);
-  filter:drop-shadow(0 20px 44px rgba(0,0,0,.5));
-  /* a folha girando em rotationY sai da caixa e empurra o documento: entre
-     600 e 719px isso abria 36px de rolagem horizontal de verdade. O recorte
-     fica no cupom, que e a borda natural do livro. */
+  padding:clamp(1.4rem,2.6vw,2rem) clamp(1.1rem,2vw,1.6rem);
+  border-radius:3px 7px 7px 3px;
+  /* folhas empilhadas na borda direita */
+  box-shadow:
+    0 20px 44px rgba(0,0,0,.5),
+    3px 0 0 -1px rgba(25,20,19,.14),
+    7px 0 0 -2px rgba(25,20,19,.1);
   overflow:hidden;
-  /* corpo + um dente por tile, apontando para cima em cima e para baixo embaixo */
-  -webkit-mask:
-    linear-gradient(#000 0 0) 0 50%/100% calc(100% - var(--dente) * 2) no-repeat,
-    conic-gradient(from 135deg at 50% 0,#000 0 90deg,#0000 0) 0 0/var(--dente) var(--dente) repeat-x,
-    conic-gradient(from -45deg at 50% 100%,#000 0 90deg,#0000 0) 0 100%/var(--dente) var(--dente) repeat-x;
-  mask:
-    linear-gradient(#000 0 0) 0 50%/100% calc(100% - var(--dente) * 2) no-repeat,
-    conic-gradient(from 135deg at 50% 0,#000 0 90deg,#0000 0) 0 0/var(--dente) var(--dente) repeat-x,
-    conic-gradient(from -45deg at 50% 100%,#000 0 90deg,#0000 0) 0 100%/var(--dente) var(--dente) repeat-x;
 }
-.ticket__topo{
-  display:flex;align-items:baseline;justify-content:space-between;gap:1rem;
-  padding-bottom:.9rem;margin-bottom:.6rem;
-  border-bottom:2px dashed rgba(25,20,19,.3);
-}
-.ticket__topo::before{
-  content:'';position:absolute;left:0;right:0;top:var(--dente);height:4px;
+/* o fio vermelho da casa, no alto da folha */
+.ticket::before{
+  content:'';position:absolute;left:0;right:0;top:0;height:4px;
   background:var(--acao);
 }
-.ticket__selo{
-  font-family:var(--display);font-weight:var(--peso-rotulo);
-  font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--txt-escuro-2);flex:none;
-}
-.ticket__titulo{
+
+/* ---- cabeçalho de cada seção ---- */
+.secao-card__nome{
   font-family:var(--display);font-weight:var(--peso-titulo);
-  text-transform:uppercase;letter-spacing:.02em;
-  font-size:clamp(1.25rem,2.4vw,1.6rem);
+  text-transform:uppercase;letter-spacing:.03em;
+  font-size:clamp(1.15rem,2.2vw,1.5rem);
+  padding-bottom:.6rem;margin-bottom:.7rem;
+  border-bottom:2px dashed rgba(25,20,19,.3);
 }
+.secao-card__nota{
+  font-size:.74rem;line-height:1.6;color:var(--txt-escuro-2);
+  margin-bottom:.9rem;
+}
+
+/* ---- abas de seção, montadas em JS ---- */
+.livro__abas{
+  display:flex;flex-wrap:wrap;gap:.35rem;justify-content:center;
+  padding-bottom:.85rem;margin-bottom:.9rem;
+  border-bottom:1.5px dashed rgba(25,20,19,.26);
+}
+.livro__aba{
+  font-family:var(--display);font-weight:var(--peso-rotulo);
+  font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:.34rem .7rem;cursor:pointer;
+  color:var(--txt-escuro-2);background:transparent;
+  border:1.5px solid rgba(25,20,19,.22);border-radius:var(--r-pill);
+  transition:background .25s var(--saida), border-color .25s var(--saida), color .25s var(--saida);
+}
+.livro__aba:hover{border-color:var(--acao);color:var(--acao)}
+.livro__aba[aria-current="true"]{
+  background:var(--acao);border-color:var(--acao);color:#fff;
+}
+
+/* ---- as faixas de margem que viram a página ----
+   Encostar num sabor NAO vira a pagina: ler um preco nao pode tirar a
+   folha debaixo do dedo. A virada mora so nestas duas faixas de papel,
+   que ficam fora de qualquer .ticket__item. */
+.folha-virar{
+  position:absolute;top:0;bottom:0;z-index:2;
+  width:var(--faixa);padding:0;border:0;cursor:pointer;
+  background:transparent;color:rgba(25,20,19,.3);
+  display:grid;place-items:center;
+  transition:background .25s var(--saida), color .25s var(--saida);
+  -webkit-tap-highlight-color:transparent;
+}
+.folha-virar--ant{left:0}
+.folha-virar--prox{right:0}
+.folha-virar svg{width:18px;height:18px}
+.folha-virar:hover:not(:disabled){background:rgba(25,20,19,.05);color:var(--acao)}
+.folha-virar:disabled{opacity:.25;cursor:default}
 .ticket__lista{display:grid;position:relative}
 .ticket__item{
   display:grid;position:relative;
@@ -660,17 +770,26 @@ ol,ul{margin:0;padding:0;list-style:none}
   touch-action:pan-y;
 }
 .ticket__folha{
-  position:absolute;inset:0;margin:0;padding:0;list-style:none;
+  /* o recuo lateral e o que deixa as faixas de virar fora do alcance
+     dos itens: entre elas fica so o texto do cardapio */
+  position:absolute;inset:0 var(--faixa);margin:0;padding:0;list-style:none;
   visibility:hidden;backface-visibility:hidden;
   background:var(--papel);
+}
+.ticket__folha__cabeca{
+  font-family:var(--display);font-weight:var(--peso-titulo);
+  text-transform:uppercase;letter-spacing:.04em;
+  font-size:.82rem;color:var(--txt-escuro-2);
+  padding-bottom:.5rem;margin-bottom:.6rem;
+  border-bottom:1.5px solid rgba(25,20,19,.2);
 }
 .ticket__folha.e-a-folha{visibility:visible}
 /* so durante a medicao: soltas e empilhadas, cada folha mede a si mesma */
 .ticket__caderno.medindo .ticket__folha{position:static;visibility:visible}
 /* a lombada: o fio de onde a folha gira */
 .ticket__folha::before{
-  content:'';position:absolute;top:0;bottom:0;left:-.6rem;width:1.5px;
-  background:repeating-linear-gradient(rgba(25,20,19,.3) 0 5px,transparent 5px 10px);
+  content:'';position:absolute;top:0;bottom:0;left:-.5rem;width:1.5px;
+  background:repeating-linear-gradient(rgba(25,20,19,.28) 0 5px,transparent 5px 10px);
 }
 .ticket__nav{
   display:flex;align-items:center;justify-content:space-between;gap:1rem;
@@ -704,11 +823,12 @@ ol,ul{margin:0;padding:0;list-style:none}
 }
 
 @media (min-width:720px){
-  /* duas colunas dentro do ticket, lendo de cima para baixo */
-  .ticket{max-width:860px}
+  /* duas colunas, lendo de cima para baixo */
   .ticket__lista{grid-template-columns:1fr 1fr;column-gap:clamp(2.5rem,5vw,3.75rem)}
   .ticket__item{grid-column:auto}
-  /* o vinco do livro: fio pontilhado no meio e a sombra dos dois lados */
+  /* o vinco do livro: fio pontilhado no meio e a sombra dos dois lados.
+     Mora na propria lista, seja ela a lista solta (sem JS) ou a de
+     dentro de uma folha. */
   .ticket__lista::before{
     content:'';position:absolute;top:-.4rem;bottom:-.4rem;left:50%;
     border-left:1.5px dashed rgba(25,20,19,.32);transform:translateX(-50%);
@@ -736,7 +856,9 @@ ol,ul{margin:0;padding:0;list-style:none}
   border:1px solid var(--fio);
 }
 .noite__foto img{width:100%;display:block;transition:transform .8s var(--saida)}
-.noite__quadro--retrato{max-width:420px;margin-inline:auto}
+/* a foto de viagem e quase quadrada (768x750): o quadro acompanha a
+   proporcao real dela, senao a pizza sai cortada no enquadramento */
+.noite__quadro--quadrado{max-width:520px;margin-inline:auto}
 .noite__foto:hover img{transform:scale(1.03)}
 
 .noite__texto{display:grid;gap:.75rem;align-content:center}
@@ -849,14 +971,14 @@ ol,ul{margin:0;padding:0;list-style:none}
 /* a foto em pé é estreita: a coluna dela encolhe junto, senão abre um vão
    entre a foto e o texto */
 @media (min-width:860px){
-  .noite.pin-ativo .noite__cena-in--retrato{
+    .noite.pin-ativo .noite__cena-in--quadro{
     grid-template-columns:auto minmax(0,1fr);
     gap:clamp(2.5rem,4.5vw,4rem);
   }
 }
 .noite.pin-ativo .noite__quadro{aspect-ratio:4/3;max-height:min(46vh,440px)}
-.noite.pin-ativo .noite__quadro--retrato{
-  aspect-ratio:3/4;width:auto;height:min(54vh,500px);max-height:none;
+.noite.pin-ativo .noite__quadro--quadrado{
+  aspect-ratio:768/750;width:auto;height:min(52vh,470px);max-height:none;
   justify-self:center;
 }
 .noite.pin-ativo .noite__foto{width:100%;height:100%}
@@ -866,7 +988,7 @@ ol,ul{margin:0;padding:0;list-style:none}
 /* no celular as cenas são mais baixas, para caber foto e texto */
 @media (max-width:859px){
   .noite.pin-ativo .noite__quadro{aspect-ratio:3/2;max-height:32svh}
-  .noite.pin-ativo .noite__quadro--retrato{aspect-ratio:3/4;height:min(42svh,350px);max-height:none}
+  .noite.pin-ativo .noite__quadro--quadrado{aspect-ratio:768/750;height:min(38svh,320px);max-height:none}
   .noite.pin-ativo .noite__num{font-size:1.8rem}
   .noite.pin-ativo .noite__titulo{font-size:1.45rem}
   .noite.pin-ativo .noite__desc{font-size:.92rem;line-height:1.5}

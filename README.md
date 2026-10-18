@@ -73,25 +73,21 @@ e vermelho da esquina. O que ele trouxe de novo:
 | Peça | Onde |
 |---|---|
 | **Antonio** no lugar da Anton | toda a tipografia de display |
-| **Carimbo do dia** | seção "A semana inteira" |
-| **Cupom serrado** | seção "Cardápio" |
+| **Carimbo do dia** | seção "O que temos na semana" |
+| **Capa de couro e livro** | seção "Cardápio" |
 | **Botão chunky** amarelo | "Ver a semana" no topo |
 | **Wordmark de fecho** | rodapé |
 
-O cupom do cardápio ganhou borda serrada em cima e embaixo (dois
-`conic-gradient` numa `mask`, um triângulo por dente), fio vermelho no topo,
-vinco de livro entre as duas colunas e a assinatura da casa no pé. Encostar
-num sabor inclina a linha e abre embaixo uma faixa serrada — o comprovante
-rasgando. Tudo em CSS: é estado de hover, não entrada.
+O cardápio é um objeto: fechado, uma capa de couro marrom com fio e
+cantoneiras douradas e a logo no centro; tocar em qualquer parte abre o livro.
+São 111 itens em seis seções, repartidos em folhas — 8 páginas no desktop, 14
+no celular. As abas pulam direto para uma seção e a passagem sequencial
+continua inteira. **Encostar num sabor não vira a página**: a virada mora só
+nas faixas de margem, à direita dos preços e à esquerda dos nomes.
 
-No celular o cupom vira coluna única e o dedo vira a folha: 33 sabores em
-6 cadernos de 6, com setas e fólio para quem não descobre o gesto. É montado
-em JS — sem JS ou com a janela larga, a lista inteira aparece de uma vez.
-Na chegada a câmera sobe pela fachada, uma lua cheia desce no céu e vira a
-logo, que voa para a vaga do cabeçalho. Dali em diante é **essa mesma logo**
-que despenca pela página, três vezes ao longo da leitura — não há cópia. A
-sequência é pulável (rolar, clicar ou teclar encerra) e some inteira sob
-`prefers-reduced-motion`.
+A logo cai pela tela enquanto a página desce e **pousa ao lado do wordmark do
+rodapé**, num tamanho tirado da altura dele. Capa, folhas e queda somem sob
+`prefers-reduced-motion` — aí a lista inteira aparece de uma vez.
 
 Os subtítulos do cardápio e das três cenas só aparecem quando o ponteiro
 chega no nome. O espaço deles fica reservado desde o início (anima `opacity`
@@ -143,9 +139,10 @@ A cena 01 entra **antes** do pin, enquanto a seção ainda sobe — sem isso, qu
 chega na seção encontra ela vazia.
 
 A moldura da foto é deitada (4:3) por padrão. A cena 03 usa
-`.noite__foto--retrato`, que inverte a proporção para 3:4 e manda pela altura
-em vez da largura — assim a foto em pé aparece inteira, sem corte, e a coluna
-dela encolhe junto para não abrir vão até o texto.
+`.noite__quadro--quadrado`, que acompanha a proporção real da foto
+(768×750) e manda pela altura em vez da largura — assim a pizza aparece
+inteira, sem corte, e a coluna dela encolhe junto para não abrir vão até o
+texto.
 
 O pin vale **também no celular**: com o Lenis no scroll, prender a tela em
 aparelho pequeno funciona bem.
@@ -163,7 +160,7 @@ página aparece inteira e parada, com as quatro cenas uma embaixo da outra.
 Marcado com `TODO` / comentário no código:
 
 1. **Cardápio incompleto** — a foto do cardápio pegou só a coluna do meio
-   (33 sabores, de Frajola a Três queijos). Faltam os sabores de A a E, a
+   (111 itens em seis seções). O cardápio está completo; o que falta é a
    coluna da direita e as pizzas doces. Precisa de uma foto do resto.
    Os ingredientes do **Hamburguer** estavam cobertos por uma fita na foto.
 2. **Preços das promoções da semana** — esses continuam fora do site: os do
@@ -198,8 +195,8 @@ autorizar.
 ## Dados estruturados (JSON-LD)
 
 O `<head>` do `index.html` carrega um bloco `Restaurant` + `Menu` que diz em
-dados o que a página diz em texto: endereço, telefone, horário e os 33 sabores
-com preço. É o que faz buscador e assistente de IA responderem "que horas
+dados o que a página diz em texto: endereço, telefone, horário e os 111 itens
+do cardápio com preço, em seis `MenuSection`. É o que faz buscador e assistente de IA responderem "que horas
 abre" e "quanto custa a portuguesa" sem adivinhar.
 
 O bloco é **gerado a partir do próprio HTML**, lendo os

@@ -32,7 +32,7 @@ O GSAP escreve `transform` **inline** no elemento, e style inline ganha da
 folha de estilo. Então toda entrada em GSAP que mexa em `x`, `y`, `scale` ou
 `rotation` de um elemento que **também tem hover que move** precisa terminar
 com `clearProps: 'transform'`. Sem isso o hover simplesmente não acontece:
-o carimbo não levanta, a linha do cupom não rasga, e nada no console avisa.
+o carimbo não levanta, a linha do cardápio não rasga, e nada no console avisa.
 Vale hoje para `.carimbo`, `.carimbo__dia` e tudo que passa por
 `entrarEmGrupo`.
 
@@ -82,7 +82,7 @@ recomposta com conteúdo e cores da Pizza Mia:
 ### Caixa alta em tudo
 
 **Todo título, nome, rótulo e botão do site é maiúsculo.** Wordmark do hero,
-as quatro ações, títulos de seção, nomes do cardápio, sabores do cupom,
+as quatro ações, títulos de seção, nomes do cardápio, sabores e preços,
 carimbo "HOJE", wordmark do rodapé, links do menu. Não existe mais exceção
 em caixa baixa — a regra anterior, que reservava minúsculo ao wordmark,
 caiu a pedido do dono.
@@ -117,55 +117,79 @@ prédio amarelo e vermelho da esquina. Os tokens estão no `:root` do
   "Uma noite aqui", e só.
 - **Itálico é exceção**: só o carimbo "HOJE", que fica torto e itálico sobre
   o dia de hoje. A caixa, mesmo ali, é alta.
-- **Cupom**: o cardápio é um comprovante de balcão — papel claro sobre fundo
-  escuro, **borda serrada em cima e embaixo** (dois `conic-gradient` em
-  `mask`, um triângulo por dente), fio vermelho no topo, pontilhado entre
-  nome e preço e o nome da casa assinando no pé. Em duas colunas o cupom lê
-  como **livro aberto**, com o vinco pontilhado no meio. O papel é o objeto,
-  não a seção.
+- **Cardápio**: é um cardápio de verdade, não uma nota. Fechado, uma capa de
+  **couro marrom com fio e cantoneiras douradas** e a logo no centro; aberto,
+  folhas de papel com o vinco no meio e a assinatura da casa no pé. A borda
+  serrada de comprovante **saiu**: folha de cardápio não é cupom rasgado.
 - **Encostar num sabor rasga a linha**: a linha inclina, desloca e abre
-  embaixo uma faixa serrada. É hover de estado, feito em CSS — não gaste
-  GSAP com isso.
+  embaixo uma faixa serrada. Vale para **todos os 111 itens**, não só para as
+  pizzas. É hover de estado, feito em CSS — não gaste GSAP com isso.
 - **Preço em `tabular-nums`, não em monoespaçada.** A monoespaçada alinhava
   as colunas mas era larga demais: `R$ 58,00` comia a linha no celular e o
   nome do sabor quebrava em duas. `font-variant-numeric: tabular-nums` na
   fonte do corpo dá o mesmo alinhamento numa largura bem menor.
-- **O cupom recorta o que sai dele** (`overflow:hidden`). A folha girando em
-  `rotationY` transborda a caixa e empurra o documento: sem o recorte isso
+- **O cardápio recorta o que sai dele** (`overflow:hidden`). A folha girando
+  em `rotationY` transborda a caixa e empurra o documento: sem o recorte isso
   abria **36px de rolagem horizontal de verdade** entre 600 e 719px — faixa
   que uma varredura de larguras "redondas" não pega. Varra de 20 em 20px.
 - **Raio pequeno** (4–8px) e pílula. Não voltar para raio grande nem sombra.
 
-## O cardápio vira página no celular
+## O cardápio: a capa que abre e o livro
 
-Acima de 720px o cupom já lê como livro aberto, com o vinco no meio. Abaixo
-disso vira coluna única, e aí **o dedo vira a folha**: os sabores são
-repartidos em cadernos de 6 e a folha da vez gira pela lombada para
-descobrir a de baixo.
+São **111 itens** em seis seções. Uma lista corrida com 111 linhas não se lê,
+então o cardápio é um objeto: fechado é uma capa, aberto é um livro.
 
-O caderno é montado em JS, dentro de um `gsap.matchMedia()`, e desmontado
-quando a janela alarga. Sem JS, sem GSAP ou com a janela larga, o que fica
-na tela é **a lista inteira de uma vez** — a paginação é conforto, não
-suporte.
+**A capa** é um `<button>` — tocar em qualquer parte dela gira a capa pela
+lombada (`rotationY`, origem à esquerda) e descobre o miolo. Sendo botão, o
+teclado e o leitor de tela chegam junto, com `aria-expanded`.
 
-Três coisas que não dá para mexer sem quebrar:
+**O miolo** reparte os itens em folhas: ~24 por folha em duas colunas acima de
+720px, ~9 em coluna única abaixo. **Nenhuma folha mistura seções** — cada uma
+pertence a uma e leva o nome dela no alto, senão a pessoa perde o fio em
+catorze páginas.
+
+**As abas** (Salgadas · Doces · Bordas · Esfihas · Pacotes · Bebidas) pulam
+direto. **A passagem sequencial continua inteira**: dá para percorrer tudo de
+ponta a ponta sem tocar numa aba, e ela segue funcionando depois de usar uma.
+
+### Onde se toca para virar
+
+**Encostar num sabor não vira a página.** Ler um preço não pode tirar a folha
+debaixo do dedo. A virada mora só nas duas faixas de margem:
+
+- **faixa da direita**, depois dos preços → próxima
+- **faixa da esquerda**, antes dos nomes → anterior
+
+O que garante isso é o **recuo lateral da folha** (`inset: 0 var(--faixa)`):
+as faixas ficam fora do alcance de qualquer `.ticket__item`. Se esse recuo
+sumir, as faixas passam por baixo dos itens e o toque volta a virar página.
+
+O gesto de arrasto continua valendo nos dois sentidos, e só é lido no soltar,
+e só se for claramente horizontal — um toque parado tem `dx` pequeno e não
+vira nada.
+
+### Três coisas que não dá para mexer sem quebrar
 
 1. **Visibilidade da folha é só da classe `e-a-folha`.** Posta inline, ela
    sobrevive ao `clearProps` e a folha nunca mais some: em três viradas o
    caderno vira uma pilha de páginas sobrepostas.
 2. **A altura do caderno é medida com as folhas soltas** (classe `medindo`).
-   Enquanto são `position:absolute` com `inset:0` dentro de um pai sem
-   altura, todas medem zero e o cupom fecha.
+   Enquanto são `position:absolute` com `inset` dentro de um pai sem altura,
+   todas medem zero e o cardápio fecha.
 3. **`touch-action: pan-y` no caderno.** Entrega a rolagem vertical ao
-   navegador (e ao Lenis) e guarda o arrasto horizontal para a virada. Sem
-   isso o navegador reivindica o gesto lateral como rolagem e dispara
-   `pointercancel` no meio.
+   navegador (e ao Lenis) e guarda o arrasto horizontal para a virada.
 
-O gesto só é lido no soltar, e só se for claramente horizontal. Nada de
-`preventDefault`: rolar a página com o dedo em cima do cardápio continua
-sendo do Lenis, como em qualquer outro lugar. Os dois botões de seta e o
-fólio ("Página 3 de 6") existem para quem não descobre o gesto e para o
-teclado.
+### O `matchMedia` precisa de duas condições
+
+`gsap.matchMedia()` recebe `{ estreito, largo }`, não uma condição sempre
+verdadeira. É a **troca entre elas** que remonta o livro quando a janela cruza
+os 720px; com uma condição só, o número de itens por folha fica congelado na
+largura da chegada.
+
+Capa e paginação são montadas em JS **de propósito**. Sem JS, sem GSAP ou sob
+`prefers-reduced-motion` não há capa nem folhas: a lista inteira dos 111 itens
+aparece de uma vez. São conforto, nunca suporte.
+
 
 ## Abertura: a lua vira a logo
 
@@ -209,12 +233,24 @@ de ser em GSAP: posto no CSS, o cabeçalho carregaria sem logo em toda máquina
 sem JS. Qualquer caminho novo que esconda essa logo precisa de um caminho que
 a reacenda — e o teste das três degradações é o que pega isso.
 
-## A logo despencando
+## A logo despencando — e pousando no rodapé
 
 Quem despenca é a **própria `.marca__logo`**, a mesma que nasceu da lua. Não
-existe cópia. São três travessias presas ao scroll: a primeira sai da própria
-vaga do cabeçalho, as outras duas entram por cima. Subir a página devolve a
-logo à vaga.
+existe cópia. São **duas quedas e um pouso**: no fim da página ela para ao
+lado do wordmark do rodapé, num tamanho tirado da altura dele (78%). Ali é o
+fim do site, então ela para ali. Subir a página devolve tudo à vaga.
+
+Ela pousa **em pé**: as duas quedas somam 1520 graus e o pouso soma 640, o que
+dá 2160 — seis voltas exatas. Mexeu nos graus de uma queda, acerte o pouso.
+
+**Queda, bamboleio e pouso moram numa linha do tempo só.** Em duas, o
+bamboleio e o pouso disputariam o `x` do mesmo elemento e a logo nunca
+chegaria no alvo.
+
+O alvo do pouso é calculado para o **scroll máximo**, não para onde o rodapé
+está no instante do tween. E o centro natural da logo sai do retângulo menos
+o `x`/`y` que o GSAP escreveu — rotação e escala giram em torno do centro e
+não o deslocam, então só a translação conta.
 
 O `.topo` é `sticky` e não tem `overflow:hidden`, então ela sai da caixa do
 cabeçalho sem ser cortada, e a origem dela acompanha o alto da janela — é
@@ -397,10 +433,17 @@ assets/vendor/        libs
 
 ## Conteúdo
 
-- Preços das **pizzas**: vêm do cardápio da casa, fotografado em 7/2/2026, e
-  estão na seção `#cardapio`. A foto pegou só a coluna do meio — faltam os
-  sabores de A a E, a coluna da direita e as pizzas doces. Não invente os que
-  faltam: ou o dono manda uma foto do resto, ou eles ficam fora.
+- **O cardápio está completo**: as duas faces do impresso foram fotografadas
+  e transcritas — 66 pizzas salgadas, 9 doces, 2 bordas, 17 esfihas por
+  unidade, 8 pacotes e 9 bebidas. Os preços das pizzas terminam em `,99`; os
+  das esfihas e bebidas, não. Não invente item nenhum: o que não estava na
+  foto não entra.
+- **O horário do impresso é diferente do que vai no site.** O cardápio diz
+  "Dom a Qui 18h–23h, Sex e Sáb 18h–24h". O site diz "todos os dias, 18h à
+  meia-noite", e **é o que vale** — decisão do dono em 18/10/2026. Não troque
+  com base no impresso.
+- **Não entra** a linha "preços sujeitos a alteração sem aviso prévio", embora
+  esteja impressa no cardápio. Decisão do dono: os preços não mudam sem aviso.
 - Preços das **promoções da semana**: continuam fora do site. Os do cartaz
   antigo não valem mais e os atuais não são conhecidos. Cada dia tem um link
   "Consultar preço" que liga.
@@ -422,7 +465,7 @@ assets/vendor/        libs
 ## Dados estruturados e publicação
 
 O `index.html` tem um bloco JSON-LD (`Restaurant` + `Menu`) no `<head>`. Ele é
-**gerado a partir do próprio HTML** da página, lendo os `<li class="sabor">`,
+**gerado a partir do próprio HTML** da página, lendo os `<li class="ticket__item">` das seis seções,
 para nunca divergir do que está na tela. Mexeu nos sabores, regere — a receita
 está no README.
 
