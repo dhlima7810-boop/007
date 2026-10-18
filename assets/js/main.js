@@ -13,7 +13,13 @@
                 typeof window.ScrollTrigger !== 'undefined' &&
                 typeof window.Lenis !== 'undefined';
   var menosMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var anima = temLibs && !menosMovimento;
+
+  // A rede de seguranca do <head> ja pode ter revelado tudo, se as libs
+  // demoraram demais. Nesse caso nao se reesconde para animar: piscaria a
+  // pagina na cara de quem acabou de esperar. Segue parado, como nas
+  // outras degradacoes.
+  if (window.__pmRede) { clearTimeout(window.__pmRede); }
+  var anima = temLibs && !menosMovimento && !window.__pmRevelou;
 
   if (!anima) {
     // sem libs ou com movimento reduzido: mostra tudo, parado
@@ -313,6 +319,19 @@
   ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(function (evt) {
     window.addEventListener(evt, pularAbertura, { once: true, passive: true });
   });
+
+  // Chegando FORA do topo — F5 no meio da pagina, ou um link /#cardapio — a
+  // abertura nao tem sentido: a lua acenderia por cima da secao que a
+  // pessoa pediu, e o voo miraria uma .marca__logo que a queda ja deslocou
+  // pelo scroll, terminando fora da tela. O cabecalho ficaria sem logo
+  // nenhuma. Nesse caso a linha do tempo vai direto para o fim.
+  // A conferencia se repete no `load` porque o navegador restaura o scroll
+  // depois, e as vezes so entao a pagina sai do topo.
+  function conferirEntrada() {
+    if (window.scrollY > 40 || location.hash) { pularAbertura(); }
+  }
+  conferirEntrada();
+  window.addEventListener('load', conferirEntrada);
 
   /* =======================================================
      9. Parallax do hero e saída do indicador
@@ -668,6 +687,24 @@
         { y: function () { return window.innerHeight + 180; },
           rotation: '+=760', duration: 1, ease: 'none',
           immediateRender: q === 0 });
+    }
+
+    // A vaga que a logo deixa no cabecalho se fecha por TRANSFORM no texto,
+    // nunca animando largura, margem ou gap. Transform nao reflui: o texto
+    // desliza os 36px da logo mais o espaco e para exatamente onde ela
+    // estava. Animar layout faria o navegador recalcular a caixa a cada
+    // quadro — e e dai que vem o tremor.
+    var nomeMarca = document.querySelector('.marca__nome');
+    if (nomeMarca) {
+      gsap.to(nomeMarca, {
+        x: function () {
+          var r = logoTopo.getBoundingClientRect();
+          var pai = getComputedStyle(logoTopo.parentElement);
+          return -(r.width + (parseFloat(pai.columnGap || pai.gap) || 0));
+        },
+        ease: 'none',
+        scrollTrigger: { start: 'top top', end: '+=420', scrub: .7, invalidateOnRefresh: true }
+      });
     }
 
     // o bamboleio lateral: sem ele a queda vira um elevador descendo

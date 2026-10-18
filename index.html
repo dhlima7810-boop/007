@@ -454,7 +454,22 @@
 }
 </script>
 
-<script>document.documentElement.className = 'js';</script>
+<script>
+(function () {
+  var r = document.documentElement;
+  r.className = 'js';
+  // Rede de seguranca. O CSS esconde sob `.js` a cortina do hero e todo
+  // [data-entra]; quem reacende e o main.js, que vem DEPOIS de tres
+  // <script> bloqueantes das libs. Se essas libs penderem (rede ruim, nao
+  // falha instantanea), o hero fica preto e o botao do telefone invisivel
+  // durante toda a espera. Passados 2,5s sem sinal do main.js, a pagina
+  // volta ao estado parado e legivel.
+  window.__pmRede = setTimeout(function () {
+    r.classList.remove('js');
+    window.__pmRevelou = true;
+  }, 2500);
+})();
+</script>
 </head>
 <body>
 

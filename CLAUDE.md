@@ -216,9 +216,16 @@ O `.topo` é `sticky` e não tem `overflow:hidden`, então ela sai da caixa do
 cabeçalho sem ser cortada, e a origem dela acompanha o alto da janela — é
 isso que faz a queda ler como queda.
 
-Enquanto ela está fora, fica uma vaga de 36px antes de "PIZZA MIA" no
-cabeçalho. Lê como recuo, não como buraco. Fechar a vaga exigiria animar
-layout, que treme.
+### A vaga se fecha por transform, nunca por layout
+
+Quando a logo sai, o texto "PIZZA MIA" **desliza por `transform`** até o lugar
+onde ela estava — os 36px da logo mais o `gap` do `.marca`, lidos do próprio
+elemento em vez de escritos à mão.
+
+Não anime `width`, `margin` nem `gap` para fechar essa vaga. Qualquer um
+desses força o navegador a recalcular a caixa a cada quadro, e é exatamente
+daí que vem o tremor. `transform` não reflui: a largura do `.marca` fica
+constante do começo ao fim, e o texto anda liso.
 
 ### A armadilha do `immediateRender`
 
@@ -266,6 +273,37 @@ A página precisa continuar legível e utilizável nas três situações:
    a ser o do navegador e nenhuma linha do tempo roda.
 
 Nunca deixe conteúdo visível só por efeito de animação.
+
+### A rede de segurança do `.js`
+
+As três situações acima só valem **depois que o `main.js` consegue rodar** — e
+ele vem atrás de três `<script>` bloqueantes das libs. Se essas libs penderem
+(rede ruim, não falha instantânea), o CSS já escondeu a cortina do hero e todo
+`[data-entra]` sob `.js`, e não há quem reacenda: o hero fica preto e **o botão
+do telefone fica invisível** durante toda a espera. Medido: com as libs
+penduradas 7s, opacidade 0 no CTA até o fim.
+
+Por isso o script inline do `<head>` arma um `setTimeout` de 2,5s
+(`window.__pmRede`). Passado esse tempo sem sinal do `main.js`, ele tira a
+classe `js` e a página volta ao estado parado e legível. O `main.js` cancela
+esse timer ao começar; se ele já tiver disparado (`window.__pmRevelou`), o
+`main.js` **não reesconde para animar** — isso piscaria a página na cara de
+quem acabou de esperar.
+
+Os 2,5s são um meio-termo: carga normal termina muito antes (a rede não
+dispara), e numa conexão lenta mas funcionando o visitante perde a abertura,
+o que é melhor que uma tela preta. Não suba esse número sem medir.
+
+### Chegar fora do topo não roda a abertura
+
+F5 no meio da página, ou um link `/#cardapio`, carregam a página já rolada. A
+sequência da lua ali não tem sentido: ela acenderia por cima da seção que a
+pessoa pediu. Medido antes da correção: o disco branco tapando o título
+CARDÁPIO.
+
+`conferirEntrada()` manda a linha do tempo direto para o fim quando
+`scrollY > 40` ou existe um `location.hash`. A conferência se repete no
+`load`, porque o navegador às vezes só restaura o scroll depois.
 
 ### Subtítulo que aparece no hover
 
