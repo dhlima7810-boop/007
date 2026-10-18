@@ -52,6 +52,29 @@ Em tween preso ao scroll a `duration` só normaliza o mapa: quem manda na
 posição é o scroll. Ainda assim escreva um valor de 0.6s para cima, para o
 arquivo não ter número curto que confunda na próxima leitura.
 
+## Sistema visual — "Fachada"
+
+A paleta e a tipografia vêm do sistema **Fachada**, construído a partir do
+prédio amarelo e vermelho da esquina. Os tokens estão no `:root` do
+`style.css`.
+
+- **Display: Antonio**, não Anton. Mesmo desenho condensado, do mesmo autor,
+  mas com pesos intermediários. **Título em 600** (`--peso-titulo`), **rótulo
+  em 500** (`--peso-rotulo`). Todo uso de `var(--display)` precisa declarar um
+  dos dois — sem isso o navegador cai no 400 e a página fica desuniforme.
+- **Vermelho é só para pedir** (telefone, disk pizza). **Amarelo é para
+  navegar** (`.botao--chunky`, pílula de borda grossa). Não inverta.
+- **Carimbo do dia**: na seção da semana, cada dia tem uma pílula torta que
+  gira entre amarelo, vermelho e papel. A cor marca o dia, não hierarquia.
+  Não espalhe essa rotação em qualquer lista — ela vale ali e nas cenas de
+  "Uma noite aqui", e só.
+- **Minúsculo e itálico é exceção**: o carimbo "hoje" e o wordmark do rodapé.
+  O nome da marca é maiúsculo em todo o resto.
+- **Ticket**: o cardápio é uma ficha de balcão — papel claro sobre fundo
+  escuro, canto cortado por `clip-path`, pontilhado entre nome e preço. O
+  papel é o objeto, não a seção.
+- **Raio pequeno** (4–8px) e pílula. Não voltar para raio grande nem sombra.
+
 ## Sem componentes
 
 O projeto ainda **não** tem camada de componentes. Nada de React, Vue, web

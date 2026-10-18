@@ -16,7 +16,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Figtree:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Antonio:wght@500;600;700&family=Figtree:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/vendor/lenis.css">
 <link rel="stylesheet" href="assets/css/style.css">
 
@@ -510,7 +510,7 @@
         </p>
         <div class="hero__acoes" data-entra>
           <a class="botao botao--acento" href="tel:+551124528022">Disk Pizza (11) 2452-8022</a>
-          <a class="botao botao--fantasma" href="#semana">Ver a semana</a>
+          <a class="botao botao--chunky" href="#semana">Ver a semana</a>
         </div>
       </div>
     </div>
@@ -547,72 +547,58 @@
       </header>
 
       <ol class="semana" id="semana-lista">
-        <li class="dia" data-dia="1">
-          <span class="dia__nome">Segunda</span>
-          <span class="dia__oferta">
-            <span class="dia__titulo">Rodízio de pizzas</span>
-            <!-- Quando souber o valor, descomente e troque o numero.
-                 O estilo do preco ja esta pronto na folha de estilo.
-            <span class="dia__preco">R$ 00,00</span>
-            -->
-            <span class="dia__obs">Exceto feriados e vésperas</span>
-          </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+        <li class="carimbo" data-dia="1">
+          <span class="carimbo__dia">Segunda</span>
+          <h3 class="carimbo__titulo">Rodízio de pizzas</h3>
+          <!-- Quando souber o valor, descomente a linha abaixo e troque o numero.
+               O estilo do preco ja esta pronto na folha de estilo.
+          <p class="carimbo__preco">R$ 00,00</p>
+          -->
+          <p class="carimbo__obs">Exceto feriados e vésperas</p>
+          <a class="carimbo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-        <li class="dia" data-dia="2">
-          <span class="dia__nome">Terça</span>
-          <span class="dia__oferta">
-            <span class="dia__titulo">Esfihas de carne e queijo</span>
-            <span class="dia__obs">Unidade ou no pacote: 10 de carne + 2 de queijo</span>
-          </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+        <li class="carimbo" data-dia="2">
+          <span class="carimbo__dia">Terça</span>
+          <h3 class="carimbo__titulo">Esfihas de carne e queijo</h3>
+          <p class="carimbo__obs">Unidade ou no pacote: 10 de carne + 2 de queijo</p>
+          <a class="carimbo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-        <li class="dia" data-dia="3">
-          <span class="dia__nome">Quarta</span>
-          <span class="dia__oferta">
-            <span class="dia__titulo">Pizzas para viagem</span>
-            <span class="dia__obs">Sabores selecionados</span>
-          </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+        <li class="carimbo" data-dia="3">
+          <span class="carimbo__dia">Quarta</span>
+          <h3 class="carimbo__titulo">Pizzas para viagem</h3>
+          <p class="carimbo__obs">Sabores selecionados</p>
+          <a class="carimbo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-        <li class="dia" data-dia="4">
-          <span class="dia__nome">Quinta</span>
-          <span class="dia__oferta">
-            <span class="dia__titulo">Rodízio com refrigerante à vontade</span>
-            <span class="dia__obs">Exceto feriados e vésperas</span>
-          </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+        <li class="carimbo" data-dia="4">
+          <span class="carimbo__dia">Quinta</span>
+          <h3 class="carimbo__titulo">Rodízio com refrigerante à vontade</h3>
+          <p class="carimbo__obs">Exceto feriados e vésperas</p>
+          <a class="carimbo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-        <li class="dia" data-dia="5">
-          <span class="dia__nome">Sexta</span>
-          <span class="dia__oferta">
-            <span class="dia__titulo">1 Coca-Cola de 1 litro grátis</span>
-            <span class="dia__obs">Na compra de 1 pizza para viagem</span>
-          </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+        <li class="carimbo" data-dia="5">
+          <span class="carimbo__dia">Sexta</span>
+          <h3 class="carimbo__titulo">1 Coca-Cola de 1 litro grátis</h3>
+          <p class="carimbo__obs">Na compra de 1 pizza para viagem</p>
+          <a class="carimbo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-        <li class="dia" data-dia="6">
-          <span class="dia__nome">Sábado</span>
-          <span class="dia__oferta">
-            <span class="dia__titulo">1 chopp Brahma grátis</span>
-            <span class="dia__obs">Na compra de 1 pizza, à noite</span>
-          </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+        <li class="carimbo" data-dia="6">
+          <span class="carimbo__dia">Sábado</span>
+          <h3 class="carimbo__titulo">1 chopp Brahma grátis</h3>
+          <p class="carimbo__obs">Na compra de 1 pizza, à noite</p>
+          <a class="carimbo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
-        <li class="dia" data-dia="0">
-          <span class="dia__nome">Domingo</span>
-          <span class="dia__oferta">
-            <span class="dia__titulo">Rodízio com refrigerante à vontade</span>
-            <span class="dia__obs">Exceto feriados e vésperas</span>
-          </span>
-          <a class="dia__link" href="tel:+551124528022">Consultar preço</a>
+        <li class="carimbo" data-dia="0">
+          <span class="carimbo__dia">Domingo</span>
+          <h3 class="carimbo__titulo">Rodízio com refrigerante à vontade</h3>
+          <p class="carimbo__obs">Exceto feriados e vésperas</p>
+          <a class="carimbo__link" href="tel:+551124528022">Consultar preço</a>
         </li>
       </ol>
     </div>
   </section>
 
   <!-- ============ CARDÁPIO ============ -->
-  <section class="secao secao--papel" id="cardapio">
+  <section class="secao" id="cardapio">
     <div class="faixa-util">
       <header class="cabecalho">
         <p class="rotulo"><span class="rotulo__ponto" aria-hidden="true"></span>O que servimos</p>
@@ -652,179 +638,213 @@
          sabores de A a E, a coluna da direita e as pizzas doces.
          Para acrescentar um sabor, copie um item da lista abaixo.
          ========================================================= -->
-    <div class="sabores-bloco">
-      <div class="sabores-topo">
-        <h3 class="sabores-titulo">Pizzas salgadas</h3>
-        <p class="sabores-nota">Preços do cardápio da casa. Confirme pelo telefone antes de pedir.</p>
+    <div class="ticket">
+      <div class="ticket__topo">
+        <h3 class="ticket__titulo">Pizzas salgadas</h3>
       </div>
 
-    <ol class="sabores">
-      <li class="sabor">
-        <span class="sabor__nome">Frajola</span>
-        <span class="sabor__preco">R$ 58,00</span>
-        <span class="sabor__ing">frango, palmito e catupiry</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Frango c/ catupiry</span>
-        <span class="sabor__preco">R$ 58,00</span>
-        <span class="sabor__ing">frango com catupiry</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Giselda</span>
-        <span class="sabor__preco">R$ 66,00</span>
-        <span class="sabor__ing">frango, milho, ervilha, palmito e mussarela</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Gorgonzola</span>
-        <span class="sabor__preco">R$ 66,00</span>
-        <span class="sabor__ing">gorgonzola</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Kani I</span>
-        <span class="sabor__preco">R$ 62,00</span>
-        <span class="sabor__ing">kani acebolado</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Kani II</span>
-        <span class="sabor__preco">R$ 60,00</span>
-        <span class="sabor__ing">kani e mussarela</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Kani III</span>
-        <span class="sabor__preco">R$ 62,00</span>
-        <span class="sabor__ing">kani e catupiry</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Lazanha</span>
-        <span class="sabor__preco">R$ 56,00</span>
-        <span class="sabor__ing">presunto, mussarela, catupiry, molho bolonhesa e parmesão</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Lisboense</span>
-        <span class="sabor__preco">R$ 62,00</span>
-        <span class="sabor__ing">presunto e mussarela</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Lombo I</span>
-        <span class="sabor__preco">R$ 66,00</span>
-        <span class="sabor__ing">lombo acebolado</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Lombo II</span>
-        <span class="sabor__preco">R$ 68,00</span>
-        <span class="sabor__ing">lombo e mussarela</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Lombo III</span>
-        <span class="sabor__preco">R$ 60,00</span>
-        <span class="sabor__ing">lombo e catupiry</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Marguerita</span>
-        <span class="sabor__preco">R$ 57,00</span>
-        <span class="sabor__ing">mussarela, manjericão e rodelas de tomate</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Marilu</span>
-        <span class="sabor__preco">R$ 62,00</span>
-        <span class="sabor__ing">frango, milho e catupiry</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Milho verde I</span>
-        <span class="sabor__preco">R$ 58,00</span>
-        <span class="sabor__ing">milho verde e mussarela</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Milho verde II</span>
-        <span class="sabor__preco">R$ 63,00</span>
-        <span class="sabor__ing">milho verde e catupiry</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Moda da casa</span>
-        <span class="sabor__preco">R$ 63,00</span>
-        <span class="sabor__ing">calabresa moída, palmito, cebola e mussarela</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Mussarela</span>
-        <span class="sabor__preco">R$ 63,00</span>
-        <span class="sabor__ing">mussarela</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Napolitana</span>
-        <span class="sabor__preco">R$ 61,00</span>
-        <span class="sabor__ing">mussarela, tomate e parmesão</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Palmito I</span>
-        <span class="sabor__preco">R$ 50,00</span>
-        <span class="sabor__ing">palmito e mussarela</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Palmito II</span>
-        <span class="sabor__preco">R$ 58,00</span>
-        <span class="sabor__ing">palmito e catupiry</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Hamburguer</span>
-        <span class="sabor__preco">R$ 58,00</span>
-        <!-- ingredientes cobertos por uma fita na foto do cardapio -->
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Peito de peru I</span>
-        <span class="sabor__preco">R$ 72,00</span>
-        <span class="sabor__ing">peito de peru, champignon, ervilha, mussarela e parmesão</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Peito de peru II</span>
-        <span class="sabor__preco">R$ 72,00</span>
-        <span class="sabor__ing">peito de peru, milho, ervilha e catupiry</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Pepperoni</span>
-        <span class="sabor__preco">R$ 72,00</span>
-        <span class="sabor__ing">mussarela, salame e pepperoni</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Pizzaiolo</span>
-        <span class="sabor__preco">R$ 65,00</span>
-        <span class="sabor__ing">mussarela, milho, catupiry e bacon</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Portuguesa</span>
-        <span class="sabor__preco">R$ 66,00</span>
-        <span class="sabor__ing">presunto, ovos, cebola e mussarela</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Provolone</span>
-        <span class="sabor__preco">R$ 66,00</span>
-        <span class="sabor__ing">provolone</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Quatro queijos</span>
-        <span class="sabor__preco">R$ 58,00</span>
-        <span class="sabor__ing">parmesão, provolone, mussarela e catupiry</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Requinte</span>
-        <span class="sabor__preco">R$ 68,00</span>
-        <span class="sabor__ing">presunto, ovos, palmito, cebola, catupiry e bacon</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Roma</span>
-        <span class="sabor__preco">R$ 68,00</span>
-        <span class="sabor__ing">aliche, mussarela, tomate e parmesão</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Siciliana</span>
-        <span class="sabor__preco">R$ 52,00</span>
-        <span class="sabor__ing">mussarela, champignon e bacon</span>
-      </li>
-      <li class="sabor">
-        <span class="sabor__nome">Três queijos</span>
-        <span class="sabor__preco">R$ 57,00</span>
-        <span class="sabor__ing">provolone, mussarela e catupiry</span>
-      </li>
-    </ol>
+      <ol class="ticket__lista">
+        <li class="ticket__item">
+          <span class="ticket__nome">Frajola</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 58,00</span>
+          <span class="ticket__ing">frango, palmito e catupiry</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Frango c/ catupiry</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 58,00</span>
+          <span class="ticket__ing">frango com catupiry</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Giselda</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 66,00</span>
+          <span class="ticket__ing">frango, milho, ervilha, palmito e mussarela</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Gorgonzola</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 66,00</span>
+          <span class="ticket__ing">gorgonzola</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Kani I</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 62,00</span>
+          <span class="ticket__ing">kani acebolado</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Kani II</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 60,00</span>
+          <span class="ticket__ing">kani e mussarela</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Kani III</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 62,00</span>
+          <span class="ticket__ing">kani e catupiry</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Lazanha</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 56,00</span>
+          <span class="ticket__ing">presunto, mussarela, catupiry, molho bolonhesa e parmesão</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Lisboense</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 62,00</span>
+          <span class="ticket__ing">presunto e mussarela</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Lombo I</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 66,00</span>
+          <span class="ticket__ing">lombo acebolado</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Lombo II</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 68,00</span>
+          <span class="ticket__ing">lombo e mussarela</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Lombo III</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 60,00</span>
+          <span class="ticket__ing">lombo e catupiry</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Marguerita</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 57,00</span>
+          <span class="ticket__ing">mussarela, manjericão e rodelas de tomate</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Marilu</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 62,00</span>
+          <span class="ticket__ing">frango, milho e catupiry</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Milho verde I</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 58,00</span>
+          <span class="ticket__ing">milho verde e mussarela</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Milho verde II</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 63,00</span>
+          <span class="ticket__ing">milho verde e catupiry</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Moda da casa</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 63,00</span>
+          <span class="ticket__ing">calabresa moída, palmito, cebola e mussarela</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Mussarela</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 63,00</span>
+          <span class="ticket__ing">mussarela</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Napolitana</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 61,00</span>
+          <span class="ticket__ing">mussarela, tomate e parmesão</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Palmito I</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 50,00</span>
+          <span class="ticket__ing">palmito e mussarela</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Palmito II</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 58,00</span>
+          <span class="ticket__ing">palmito e catupiry</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Hamburguer</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 58,00</span>
+          <!-- ingredientes cobertos por uma fita na foto do cardapio -->
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Peito de peru I</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 72,00</span>
+          <span class="ticket__ing">peito de peru, champignon, ervilha, mussarela e parmesão</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Peito de peru II</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 72,00</span>
+          <span class="ticket__ing">peito de peru, milho, ervilha e catupiry</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Pepperoni</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 72,00</span>
+          <span class="ticket__ing">mussarela, salame e pepperoni</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Pizzaiolo</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 65,00</span>
+          <span class="ticket__ing">mussarela, milho, catupiry e bacon</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Portuguesa</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 66,00</span>
+          <span class="ticket__ing">presunto, ovos, cebola e mussarela</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Provolone</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 66,00</span>
+          <span class="ticket__ing">provolone</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Quatro queijos</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 58,00</span>
+          <span class="ticket__ing">parmesão, provolone, mussarela e catupiry</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Requinte</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 68,00</span>
+          <span class="ticket__ing">presunto, ovos, palmito, cebola, catupiry e bacon</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Roma</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 68,00</span>
+          <span class="ticket__ing">aliche, mussarela, tomate e parmesão</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Siciliana</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 52,00</span>
+          <span class="ticket__ing">mussarela, champignon e bacon</span>
+        </li>
+        <li class="ticket__item">
+          <span class="ticket__nome">Três queijos</span>
+          <span class="ticket__pontos" aria-hidden="true"></span>
+          <span class="ticket__preco">R$ 57,00</span>
+          <span class="ticket__ing">provolone, mussarela e catupiry</span>
+        </li>
+      </ol>
+
+      <p class="ticket__pe">Preços do cardápio da casa · confirme pelo telefone antes de pedir</p>
     </div>
     </div>
   </section>
@@ -941,11 +961,10 @@
 </main>
 
 <footer class="rodape">
+  <div class="faixa-util">
+    <p class="wordmark">pizza <em>mia</em></p>
+  </div>
   <div class="faixa-util rodape__inner">
-    <a class="marca marca--rodape" href="#hero">
-      <img src="assets/img/logo.jpg" alt="Logo da Pizza Mia" width="40" height="40">
-      <span class="marca__nome">Pizza <em>Mia</em></span>
-    </a>
     <p class="rodape__endereco">
       Av. Emilio Ribas, 3175 — Vila Galvão, Guarulhos / SP<br>
       (11) 2452-8022 · todos os dias, das 18h à meia-noite<br>

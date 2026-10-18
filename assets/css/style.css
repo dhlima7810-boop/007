@@ -30,15 +30,14 @@
   /* traços */
   --fio:rgba(246,240,231,.14);
   --fio-forte:rgba(246,240,231,.3);
-  --fio-escuro:rgba(25,20,19,.14);
 
   /* raios pequenos: a cara "moderna" vem daqui */
   --r:4px;
-  --r-md:6px;
+  --r-md:8px;
   --r-pill:999px;
 
   /* medidas */
-  --larg:1240px;
+  --larg:1180px;
   --gutter:clamp(1.25rem, 5vw, 3.5rem);
   --sec-y:clamp(5.5rem, 11vw, 9.5rem);
   --topo-h:68px;
@@ -47,7 +46,12 @@
   --saida:cubic-bezier(.16,1,.3,1);
   --dupla:cubic-bezier(.87,0,.13,1);
 
-  --display:'Anton', Impact, 'Arial Narrow Bold', sans-serif;
+  /* Antonio: mesmo desenho condensado da Anton, do mesmo autor, mas com
+     pesos intermediarios. Titulo em 600, rotulo em 500 — a forma continua
+     reconhecivel e o texto fala em vez de gritar. */
+  --display:'Antonio', 'Arial Narrow', Impact, sans-serif;
+  --peso-titulo:600;
+  --peso-rotulo:500;
   --corpo:'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -91,10 +95,10 @@ ol,ul{margin:0;padding:0;list-style:none}
 
 /* ---------------- Tipografia ---------------- */
 .titulo{
-  font-family:var(--display);
+  font-family:var(--display);font-weight:var(--peso-titulo);
   font-size:clamp(2.4rem,6.5vw,5rem);
   text-transform:uppercase;
-  letter-spacing:-.005em;
+  letter-spacing:.01em;
 }
 .rotulo{
   display:flex;align-items:center;gap:.6rem;
@@ -123,6 +127,15 @@ ol,ul{margin:0;padding:0;list-style:none}
 .botao--fantasma{border-color:var(--fio-forte);color:var(--txt)}
 .botao--fantasma:hover{border-color:var(--acento);color:var(--acento)}
 
+/* Do sistema: pilula de borda grossa amarela para navegar. Vermelho
+   solido fica reservado para pedir — telefone e disk pizza. */
+.botao--chunky{
+  font-family:var(--display);font-weight:var(--peso-titulo);
+  text-transform:uppercase;letter-spacing:.04em;font-size:1.02rem;
+  border:2px solid var(--acento);color:var(--acento);background:transparent;
+}
+.botao--chunky:hover{background:var(--acento);color:var(--txt-escuro)}
+
 /* ---------------- Barra de progresso ---------------- */
 .progresso{
   position:fixed;top:0;left:0;height:2px;width:100%;z-index:70;
@@ -143,7 +156,8 @@ ol,ul{margin:0;padding:0;list-style:none}
 .marca{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--txt)}
 .marca img{width:36px;height:36px;border-radius:50%;object-fit:cover}
 .marca__nome{
-  font-family:var(--display);font-size:1.3rem;letter-spacing:.01em;text-transform:uppercase;
+  font-family:var(--display);font-weight:var(--peso-titulo);
+  font-size:1.35rem;letter-spacing:.02em;text-transform:uppercase;
 }
 .marca__nome em{color:var(--acento);font-style:normal}
 
@@ -154,11 +168,11 @@ ol,ul{margin:0;padding:0;list-style:none}
 }
 .nav a:hover{color:var(--txt)}
 .nav__cta{
-  color:var(--txt) !important;font-weight:700 !important;
-  border:1px solid var(--fio-forte);border-radius:var(--r-pill);
-  padding:.5rem 1.1rem;
+  background:var(--acao);color:#fff !important;font-weight:700 !important;
+  border:1px solid transparent;border-radius:var(--r-pill);
+  padding:.55rem 1.15rem;
 }
-.nav__cta:hover{border-color:var(--acento);color:var(--acento) !important}
+.nav__cta:hover{background:var(--acao-2);color:#fff !important}
 
 .menu-btn{
   display:none;width:40px;height:34px;background:none;border:0;cursor:pointer;
@@ -190,9 +204,9 @@ ol,ul{margin:0;padding:0;list-style:none}
 .hero__rotulo{margin-bottom:clamp(1.25rem,3vh,2rem);color:var(--acento)}
 
 .hero__titulo{
-  font-family:var(--display);
+  font-family:var(--display);font-weight:var(--peso-titulo);
   font-size:clamp(2.9rem,9vw,7.5rem);
-  text-transform:uppercase;letter-spacing:-.012em;
+  text-transform:uppercase;letter-spacing:.005em;
   text-shadow:0 2px 40px rgba(0,0,0,.45);
 }
 
@@ -229,15 +243,12 @@ ol,ul{margin:0;padding:0;list-style:none}
 .marquee__grupo{display:flex;align-items:center;gap:1.6rem;padding-right:1.6rem;flex:none}
 .marquee__grupo b{
   font-family:var(--display);font-size:clamp(1rem,2vw,1.3rem);text-transform:uppercase;
-  font-weight:400;white-space:nowrap;letter-spacing:.01em;
+  font-weight:var(--peso-titulo);white-space:nowrap;letter-spacing:.02em;
 }
 .marquee__grupo i{width:4px;height:4px;border-radius:50%;background:var(--acao);flex:none}
 
 /* ---------------- Seções ---------------- */
 .secao{padding:var(--sec-y) 0}
-.secao--papel{background:var(--papel);color:var(--txt-escuro)}
-.secao--papel .rotulo{color:var(--txt-escuro-2)}
-.secao--papel .cabecalho__texto{color:var(--txt-escuro-2)}
 
 /* cabeçalho alinhado à esquerda, no lugar do centralizado de antes */
 .cabecalho{
@@ -247,50 +258,76 @@ ol,ul{margin:0;padding:0;list-style:none}
 }
 .cabecalho__texto{color:var(--txt-2);font-size:1.02rem;max-width:52ch}
 
-/* ---------------- A semana (lista, no lugar dos cards) ---------------- */
-.semana{border-top:1px solid var(--fio)}
-.dia{
+/* ---------------- A semana (carimbo do dia) ----------------
+   Do sistema: cada dia ganha um carimbo colorido, girando entre
+   amarelo, vermelho e papel. A cor marca o dia, nao hierarquia —
+   por isso a rotacao e por posicao, nao por importancia.
+   ----------------------------------------------------------- */
+.semana{
   display:grid;
-  grid-template-columns:minmax(7.5rem,1fr) minmax(0,3fr) auto;
-  align-items:baseline;gap:1rem 2rem;
-  padding:clamp(1.4rem,2.6vw,2rem) 0;
-  border-bottom:1px solid var(--fio);
-  position:relative;
-  transition:background .6s var(--saida);
+  grid-template-columns:repeat(auto-fit,minmax(min(215px,100%),1fr));
+  gap:clamp(1rem,2vw,1.5rem);
 }
-.dia::before{
-  content:'';position:absolute;left:calc(var(--gutter) * -.5);right:calc(var(--gutter) * -.5);
-  top:0;bottom:0;background:var(--tinta-2);opacity:0;z-index:-1;
-  transition:opacity .6s var(--saida);border-radius:var(--r);
+.carimbo{
+  background:var(--tinta-2);
+  border:1.5px dashed var(--fio-forte);
+  border-radius:var(--r-md);
+  padding:clamp(1.1rem,2vw,1.4rem);
+  display:flex;flex-direction:column;align-items:flex-start;
+  transition:border-color .25s var(--saida), background .25s var(--saida);
 }
-.dia:hover::before{opacity:1}
-.dia__nome{
-  font-family:var(--display);font-size:clamp(1.1rem,2vw,1.5rem);
-  text-transform:uppercase;color:var(--txt-2);letter-spacing:.01em;
+.carimbo:hover{border-color:var(--acento)}
+
+.carimbo__dia{
+  display:inline-block;
+  font-family:var(--display);font-weight:var(--peso-rotulo);
+  text-transform:uppercase;font-size:.74rem;letter-spacing:.09em;
+  padding:.32rem .75rem;border-radius:var(--r-pill);
+  margin-bottom:.9rem;transform:rotate(-3deg);
 }
-.dia__oferta{display:grid;gap:.4rem}
-.dia__titulo{font-size:clamp(1.1rem,2.1vw,1.45rem);font-weight:700;line-height:1.25}
-.dia__preco{
-  font-family:var(--display);font-size:clamp(1.6rem,3vw,2.2rem);
-  color:var(--acento);line-height:1;
+/* a rotacao de cor: amarelo, vermelho, papel */
+.carimbo:nth-child(3n+1) .carimbo__dia{background:var(--acento);color:var(--txt-escuro)}
+.carimbo:nth-child(3n+2) .carimbo__dia{background:var(--acao);color:#fff}
+.carimbo:nth-child(3n+3) .carimbo__dia{background:var(--papel);color:var(--txt-escuro)}
+
+.carimbo__titulo{
+  font-family:var(--display);font-weight:var(--peso-titulo);
+  text-transform:uppercase;letter-spacing:.015em;
+  font-size:clamp(1.05rem,1.9vw,1.25rem);line-height:1.15;
+  margin-bottom:.5rem;
 }
-.dia__obs{color:var(--txt-3);font-size:.92rem;line-height:1.45}
-.dia__link{
-  font-size:.82rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--txt-2);text-decoration:none;white-space:nowrap;
+.carimbo__preco{
+  font-family:var(--display);font-weight:var(--peso-titulo);
+  font-size:1.7rem;line-height:1;color:var(--acento);
+  margin-bottom:.5rem;letter-spacing:.01em;
+}
+.carimbo__obs{color:var(--txt-2);font-size:.86rem;line-height:1.5;margin-bottom:1.1rem}
+.carimbo__link{
+  margin-top:auto;
+  font-size:.76rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--txt-2);text-decoration:none;
   border-bottom:1px solid var(--fio-forte);padding-bottom:3px;
   transition:color .25s var(--saida), border-color .25s var(--saida);
 }
-.dia__link:hover{color:var(--acento);border-color:var(--acento)}
+.carimbo__link:hover{color:var(--acento);border-color:var(--acento)}
 
-.dia--hoje .dia__nome{color:var(--acento)}
-.dia--hoje::before{opacity:1;background:var(--tinta-2)}
-.dia--hoje .dia__titulo::after{
+/* hoje: borda inteira em vez de tracejada, e o carimbo "hoje" torto.
+   No desktop ocupa duas colunas — alem de destacar o dia mais util,
+   fecha a grade de 7 em duas linhas cheias de 4. */
+.carimbo--hoje{
+  border-style:solid;border-color:var(--acento);background:var(--tinta-3);
+  position:relative;
+}
+.carimbo--hoje::after{
   content:'hoje';
-  display:inline-block;margin-left:.7rem;vertical-align:middle;
-  font-family:var(--corpo);font-size:.62rem;font-weight:900;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--txt-escuro);
-  background:var(--acento);border-radius:var(--r-pill);padding:.22rem .55rem;
+  position:absolute;top:.9rem;right:1rem;
+  font-family:var(--corpo);font-weight:700;font-style:italic;text-transform:lowercase;
+  font-size:.78rem;color:var(--acento);
+  border:1.5px dashed var(--acento);border-radius:var(--r-pill);
+  padding:.15rem .6rem;transform:rotate(-4deg);
+}
+@media (min-width:860px){
+  .carimbo--hoje{grid-column:span 2}
 }
 
 /* ---------------- Cardápio ---------------- */
@@ -308,48 +345,72 @@ ol,ul{margin:0;padding:0;list-style:none}
 @media (min-width:1100px){ .itens{grid-template-columns:repeat(4,1fr)} }
 .item{max-width:34ch}
 .item__num{
-  display:block;font-family:var(--display);font-size:.9rem;
-  color:var(--acao);margin-bottom:.9rem;letter-spacing:.1em;
+  display:block;font-family:var(--display);font-weight:var(--peso-rotulo);
+  font-size:.9rem;color:var(--acao);margin-bottom:.9rem;letter-spacing:.1em;
 }
 .item__nome{
   font-size:clamp(1.15rem,2vw,1.35rem);font-weight:700;font-family:var(--corpo);
   margin-bottom:.55rem;line-height:1.25;
 }
-.item__desc{color:var(--txt-escuro-2);font-size:.95rem;line-height:1.6}
+.item__desc{color:var(--txt-2);font-size:.95rem;line-height:1.6}
 
-/* ---------------- Pizzas salgadas ---------------- */
-.sabores-bloco{margin-top:clamp(3rem,6vw,4.5rem)}
-.sabores-topo{
-  display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;
-  gap:.5rem 2rem;margin-bottom:1.5rem;
+/* ---------------- Ficha do cardápio (ticket) ----------------
+   Do sistema: nem cartao nem lista simples — um ticket de balcao,
+   com canto cortado e linha pontilhada entre nome e preco. O papel
+   deixou de ser a secao inteira e virou o objeto; e ele que respira
+   dentro do escuro.
+   ------------------------------------------------------------- */
+.ticket{
+  background:var(--papel);color:var(--txt-escuro);
+  border-radius:var(--r-md) var(--r-md) 0 var(--r-md);
+  max-width:760px;
+  margin-top:clamp(3rem,6vw,4.5rem);
+  padding:clamp(1.5rem,3vw,2.25rem);
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%);
 }
-.sabores-titulo{
-  font-family:var(--display);text-transform:uppercase;letter-spacing:-.005em;
-  font-size:clamp(1.4rem,2.6vw,1.9rem);
+.ticket__topo{
+  padding-bottom:.9rem;margin-bottom:.6rem;
+  border-bottom:2px dashed rgba(25,20,19,.25);
 }
-.sabores-nota{color:var(--txt-escuro-2);font-size:.86rem}
-
-/* duas colunas no desktop, lendo de cima para baixo, como num cardápio */
-.sabores{columns:2;column-gap:clamp(2.5rem,5vw,4.5rem)}
-.sabor{
-  break-inside:avoid;
-  display:grid;grid-template-columns:minmax(0,1fr) auto;
-  gap:.2rem .9rem;
-  padding:.8rem 0;
-  border-bottom:1px solid var(--fio-escuro);
+.ticket__titulo{
+  font-family:var(--display);font-weight:var(--peso-titulo);
+  text-transform:uppercase;letter-spacing:.02em;
+  font-size:clamp(1.25rem,2.4vw,1.6rem);
 }
-.sabor__nome{font-weight:700;font-size:1.02rem;line-height:1.3}
-.sabor__preco{
-  font-family:var(--display);font-size:1.1rem;letter-spacing:.01em;
-  color:var(--acao);white-space:nowrap;align-self:start;
+.ticket__lista{display:grid}
+.ticket__item{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:baseline;gap:0 .55rem;
+  padding:.65rem 0;
 }
-.sabor__ing{
+.ticket__nome{font-weight:700;font-size:.98rem;line-height:1.25}
+.ticket__pontos{
+  border-bottom:1px dotted rgba(25,20,19,.45);
+  transform:translateY(-.28em);
+  min-width:1.5rem;
+}
+.ticket__preco{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-weight:700;font-size:.92rem;white-space:nowrap;
+}
+.ticket__ing{
   grid-column:1 / -1;
-  color:var(--txt-escuro-2);font-size:.87rem;line-height:1.45;
+  color:var(--txt-escuro-2);font-size:.82rem;line-height:1.45;
+  margin-top:.15rem;
+}
+.ticket__pe{
+  margin-top:1.1rem;padding-top:1rem;
+  border-top:2px dashed rgba(25,20,19,.25);
+  font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--txt-escuro-2);
 }
 
-@media (max-width:860px){
-  .sabores{columns:1}
+@media (min-width:720px){
+  /* duas colunas dentro do ticket, lendo de cima para baixo */
+  .ticket{max-width:860px}
+  .ticket__lista{grid-template-columns:1fr 1fr;column-gap:clamp(2rem,4vw,3rem)}
+  .ticket__item{grid-column:auto}
 }
 
 /* ---------------- Uma noite aqui (pin scroll) ---------------- */
@@ -372,11 +433,16 @@ ol,ul{margin:0;padding:0;list-style:none}
 
 .noite__texto{display:grid;gap:.75rem;align-content:center}
 .noite__num{
-  font-family:var(--display);font-size:clamp(2.2rem,5vw,3.4rem);
-  line-height:1;color:var(--acento);letter-spacing:.01em;
+  font-family:var(--display);font-weight:var(--peso-rotulo);
+  font-size:clamp(2.2rem,5vw,3.4rem);
+  line-height:1;color:var(--acento);letter-spacing:.06em;
 }
+/* a mesma rotacao de cor do carimbo da semana, aplicada as cenas */
+.noite__cena:nth-child(3n+2) .noite__num{color:var(--papel)}
+.noite__cena:nth-child(3n+3) .noite__num{color:var(--acao-2)}
 .noite__titulo{
-  font-family:var(--display);text-transform:uppercase;letter-spacing:-.005em;
+  font-family:var(--display);font-weight:var(--peso-titulo);
+  text-transform:uppercase;letter-spacing:.01em;
   font-size:clamp(1.7rem,3.6vw,2.7rem);
 }
 .noite__desc{color:var(--txt-2);font-size:1rem;line-height:1.65;max-width:44ch}
@@ -386,7 +452,8 @@ ol,ul{margin:0;padding:0;list-style:none}
   margin-top:clamp(2.5rem,5vw,3.5rem);
 }
 .noite__contador{
-  font-family:var(--display);font-size:.9rem;letter-spacing:.22em;color:var(--txt-3);
+  font-family:var(--display);font-weight:var(--peso-rotulo);
+  font-size:.9rem;letter-spacing:.22em;color:var(--txt-3);
   flex:none;
 }
 .noite__contador span{color:var(--acento)}
@@ -469,7 +536,8 @@ ol,ul{margin:0;padding:0;list-style:none}
   color:var(--acento);margin-bottom:1rem;
 }
 .legal__titulo{
-  font-family:var(--display);text-transform:uppercase;letter-spacing:-.005em;
+  font-family:var(--display);font-weight:var(--peso-titulo);
+  text-transform:uppercase;letter-spacing:.01em;
   font-size:clamp(2rem,5vw,3.25rem);margin-bottom:.75rem;
 }
 .legal__data{color:var(--txt-3);font-size:.85rem;margin-bottom:clamp(2.5rem,5vw,3.5rem)}
@@ -500,6 +568,18 @@ ol,ul{margin:0;padding:0;list-style:none}
 
 /* ---------------- Rodapé ---------------- */
 .rodape{border-top:1px solid var(--fio);padding:clamp(2.5rem,5vw,3.5rem) 0}
+
+/* Do sistema: wordmark gigante em caixa baixa. E a unica vez que
+   "pizza mia" aparece minusculo no site inteiro — por isso fecha,
+   em vez de repetir o logo do topo. */
+.wordmark{
+  font-family:var(--display);font-weight:var(--peso-titulo);
+  text-transform:lowercase;letter-spacing:.005em;
+  font-size:clamp(3rem,11vw,6.5rem);line-height:.88;
+  margin-bottom:clamp(1.75rem,4vw,2.5rem);
+  color:var(--txt);
+}
+.wordmark em{color:var(--acento);font-style:normal}
 .rodape__inner{
   display:flex;flex-wrap:wrap;gap:1.5rem 2rem;
   align-items:center;justify-content:space-between;

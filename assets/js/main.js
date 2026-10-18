@@ -55,8 +55,8 @@
      3. Destaque do dia de hoje
      ======================================================= */
   var hoje = String(new Date().getDay()); // 0 = domingo
-  var diaHoje = document.querySelector('.dia[data-dia="' + hoje + '"]');
-  if (diaHoje) { diaHoje.classList.add('dia--hoje'); }
+  var diaHoje = document.querySelector('.carimbo[data-dia="' + hoje + '"]');
+  if (diaHoje) { diaHoje.classList.add('carimbo--hoje'); }
 
   /* =======================================================
      4. Lightbox das fotos
@@ -311,9 +311,9 @@
       });
     });
   }
-  entrarEmGrupo('.semana', '.dia', 26);
+  entrarEmGrupo('.semana', '.carimbo', 26);
   entrarEmGrupo('.itens', '.item', 24);
-  entrarEmGrupo('.sabores', '.sabor', 18, .022);
+  entrarEmGrupo('.ticket__lista', '.ticket__item', 18, .022);
   entrarEmGrupo('.local__info', '.dado', 22);
 
   gsap.from('.local__mapa', {

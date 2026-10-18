@@ -45,12 +45,33 @@ de `node_modules/*/dist/`. `node_modules/` não vai para o repositório.
 | GSAP + ScrollTrigger | 3.13.0 |
 | Lenis | 1.3.11 |
 
-## Design
+## Design — sistema "Fachada"
 
-A direção visual saiu de benchmarks de sites de banco de imagem (Adobe Stock e
-afins), conforme a skill `find-types`: superfície quase preta como padrão,
-tipografia contida, um único acento vibrante, raios de borda pequenos e
-hairlines no lugar de sombra.
+A base veio de benchmarks de sites de banco de imagem (Adobe Stock e afins),
+pela skill `find-types`: superfície quase preta, tipografia contida, acento
+único, raio pequeno e hairline no lugar de sombra.
+
+Por cima disso entrou o sistema **Fachada**, tirado do próprio prédio amarelo
+e vermelho da esquina. O que ele trouxe de novo:
+
+| Peça | Onde |
+|---|---|
+| **Antonio** no lugar da Anton | toda a tipografia de display |
+| **Carimbo do dia** | seção "A semana inteira" |
+| **Ticket de balcão** | seção "Cardápio" |
+| **Botão chunky** amarelo | "Ver a semana" no topo |
+| **Wordmark minúsculo** | rodapé |
+
+Duas coisas do sistema **não** foram adotadas como estavam:
+
+1. Os *story cards* do sistema são blocos de cor chapada, porque o documento
+   não tinha fotos. A seção "Uma noite aqui" tem fotos reais da casa e um pin
+   scroll — trocar foto por gradiente pioraria o site. Adotei a ideia pela
+   cor: o número de cada cena gira entre amarelo, papel e vermelho, igual ao
+   carimbo da semana.
+2. A escala `--space-*` não entrou. O CSS já usa `clamp()` direto em cada
+   lugar, que é mais fino que uma escala de cinco degraus. Trocar daria
+   trabalho e nenhuma diferença visível.
 
 O que envelhecia a versão anterior era justamente o contrário — raio de 16px em
 tudo, sombra em cada card, fundo creme e cabeçalhos centralizados. Os tokens
