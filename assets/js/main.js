@@ -559,7 +559,10 @@
       estreito: '(max-width: 719px)',
       largo: '(min-width: 720px)'
     }, function (contexto) {
-      var porPagina = contexto.conditions.estreito ? 9 : 24;
+      // Acima de 720px o livro abre em DUAS paginas, com a dobradica na
+      // lombada do meio: 12 itens de cada lado, os mesmos 24 de antes.
+      var espalhado = !!contexto.conditions.largo;
+      var porPagina = espalhado ? 12 : 9;
 
       var blocos = Array.prototype.slice.call(miolo.querySelectorAll('.secao-card'));
       if (!blocos.length) { return; }
@@ -575,47 +578,99 @@
       abas.setAttribute('aria-label', 'Seções do cardápio');
 
       var caderno = document.createElement('div');
-      caderno.className = 'ticket__caderno';
+      caderno.className = 'ticket__caderno' + (espalhado ? ' ticket__caderno--espalhado' : '');
+      var areaLivro = document.createElement('div');
+      areaLivro.className = 'ticket__livro';
+      caderno.appendChild(areaLivro);
 
-      var folhas = [];
-      var porSecao = {};
+      // 1. as paginas. Nenhuma mistura secoes: cada uma pertence a uma e
+      //    leva o nome dela no alto.
+      var paginas = [];
 
       blocos.forEach(function (bloco) {
         var chave = bloco.dataset.secao;
         var nome = bloco.dataset.nome;
         var itens = Array.prototype.slice.call(bloco.querySelectorAll('.ticket__item'));
         var nota = bloco.querySelector('.secao-card__nota');
-        porSecao[chave] = folhas.length;
+        var primeira = paginas.length;
 
         for (var i = 0; i < itens.length; i += porPagina) {
-          var folha = document.createElement('div');
-          folha.className = 'ticket__folha';
-          folha.dataset.secao = chave;
+          var pag = document.createElement('div');
+          pag.className = 'ticket__pag';
+          pag.dataset.secao = chave;
 
           var cabeca = document.createElement('p');
           cabeca.className = 'ticket__folha__cabeca';
           cabeca.textContent = nome;
-          folha.appendChild(cabeca);
+          pag.appendChild(cabeca);
 
-          if (i === 0 && nota) { folha.appendChild(nota.cloneNode(true)); }
+          if (i === 0 && nota) { pag.appendChild(nota.cloneNode(true)); }
 
           var ol = document.createElement('ol');
           ol.className = 'ticket__lista';
           for (var k = i; k < Math.min(i + porPagina, itens.length); k++) {
             ol.appendChild(itens[k]);
           }
-          folha.appendChild(ol);
-          caderno.appendChild(folha);
-          folhas.push(folha);
+          pag.appendChild(ol);
+          paginas.push(pag);
         }
 
         var aba = document.createElement('button');
         aba.type = 'button';
         aba.className = 'livro__aba';
         aba.textContent = ROTULO_ABA[chave] || nome;
-        aba.dataset.alvo = String(porSecao[chave]);
+        aba.dataset.pag = String(primeira);
+        aba.dataset.secao = chave;
         abas.appendChild(aba);
       });
+
+      // 2. as folhas. Espalhado, cada folha tem duas faces: a frente e a
+      //    pagina da direita e o verso a da esquerda depois que ela vira.
+      //    A face 0 e o lado de dentro da capa, em branco — e por causa
+      //    dela que o livro ja abre com as duas paginas cheias, e ela
+      //    nunca chega a aparecer, porque nao se volta aquem da primeira.
+      var folhas = [];
+      var faces = null;
+
+      function montarFace(pag, qual) {
+        var f = document.createElement('div');
+        f.className = 'ticket__face ticket__face--' + qual;
+        if (pag) { f.appendChild(pag); }
+        return f;
+      }
+
+      if (espalhado) {
+        faces = [null].concat(paginas);
+        if (faces.length % 2) { faces.push(null); }
+        for (var f = 0; f < faces.length; f += 2) {
+          var folha = document.createElement('div');
+          folha.className = 'ticket__folha';
+          folha.appendChild(montarFace(faces[f], 'frente'));
+          folha.appendChild(montarFace(faces[f + 1], 'verso'));
+          areaLivro.appendChild(folha);
+          folhas.push(folha);
+        }
+      } else {
+        paginas.forEach(function (pag) {
+          var folha = document.createElement('div');
+          folha.className = 'ticket__folha';
+          folha.dataset.secao = pag.dataset.secao;
+          folha.appendChild(montarFace(pag, 'frente'));
+          areaLivro.appendChild(folha);
+          folhas.push(folha);
+        });
+      }
+
+      // o primeiro e o ultimo estado do livro, e em que estado cada
+      // pagina aparece. Espalhado, a pagina p esta na abertura
+      // ceil((p+1)/2); solta, ela e a propria folha p.
+      var primeiro = espalhado ? 1 : 0;
+      var ultimo = espalhado ? Math.ceil(paginas.length / 2) : paginas.length - 1;
+      function aberturaDa(p) { return espalhado ? Math.ceil((p + 1) / 2) : p; }
+      function visiveis(i) {
+        if (!espalhado) { return [paginas[i]]; }
+        return [faces[2 * i - 1], faces[2 * i]].filter(Boolean);
+      }
 
       var seta = function (dir) {
         return '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="' +
@@ -641,7 +696,8 @@
       nav.className = 'ticket__nav';
       nav.innerHTML =
         '<button type="button" class="ticket__virar" data-dir="-1" aria-label="Página anterior do cardápio">' + seta(-1) + '</button>' +
-        '<p class="ticket__folio" aria-live="polite">Página <span></span> de ' + folhas.length + '</p>' +
+        '<p class="ticket__folio" aria-live="polite">Página <span></span> de ' +
+        (espalhado ? ultimo : paginas.length) + '</p>' +
         '<button type="button" class="ticket__virar" data-dir="1" aria-label="Próxima página do cardápio">' + seta(1) + '</button>';
 
       blocos.forEach(function (b) { b.hidden = true; });
@@ -655,7 +711,8 @@
       // inset dentro de um pai sem altura, todas medem zero.
       caderno.classList.add('medindo');
       var alta = 0;
-      folhas.forEach(function (f) { alta = Math.max(alta, f.offsetHeight); });
+      var todasFaces = Array.prototype.slice.call(caderno.querySelectorAll('.ticket__face'));
+      todasFaces.forEach(function (f) { alta = Math.max(alta, f.offsetHeight); });
       caderno.classList.remove('medindo');
       caderno.style.height = alta + 'px';
 
@@ -671,8 +728,8 @@
       // baixa), entao vale para todas — e e um numero so, igual em
       // qualquer pagina: a fita nao muda ao virar.
       var recuo = 0;
-      folhas.forEach(function (f) {
-        var l = f.querySelector('.ticket__lista');
+      paginas.forEach(function (p) {
+        var l = p.querySelector('.ticket__lista');
         if (l) { recuo = Math.max(recuo, l.offsetTop); }
       });
       recuo = Math.max(0, recuo - 10);
@@ -688,23 +745,40 @@
       var fechada = Math.max(540, Math.min(miolo.offsetHeight, window.innerHeight * .86));
       gsap.set(miolo, { height: fechada });
 
-      var atual = 0, virando = false;
+      var atual = primeiro, virando = false;
       var folio = nav.querySelector('.ticket__folio span');
       var botoes = Array.prototype.slice.call(nav.querySelectorAll('.ticket__virar'));
       var listaAbas = Array.prototype.slice.call(abas.querySelectorAll('.livro__aba'));
 
       function pintar() {
-        folhas.forEach(function (f, i) {
-          f.classList.toggle('e-a-folha', i === atual);
-          f.setAttribute('aria-hidden', i === atual ? 'false' : 'true');
+        if (espalhado) {
+          // A pilha e que decide o que se ve: as folhas ja viradas ficam
+          // a esquerda, com a ultima por cima; as que faltam ficam a
+          // direita, com a da vez por cima. Nenhuma precisa sumir.
+          folhas.forEach(function (f, k) {
+            var virada = k < atual;
+            gsap.set(f, {
+              rotationY: virada ? -180 : 0,
+              zIndex: virada ? k + 1 : folhas.length - k
+            });
+            sombra(f, 0);
+          });
+        } else {
+          folhas.forEach(function (f, k) {
+            f.classList.toggle('e-a-folha', k === atual);
+          });
+        }
+        var aberta = visiveis(atual);
+        paginas.forEach(function (p) {
+          p.setAttribute('aria-hidden', aberta.indexOf(p) < 0 ? 'true' : 'false');
         });
-        folio.textContent = String(atual + 1);
-        botoes[0].disabled = faixaAnt.disabled = atual === 0;
-        botoes[1].disabled = faixaProx.disabled = atual === folhas.length - 1;
-        var secaoAtual = folhas[atual].dataset.secao;
+        folio.textContent = String(espalhado ? atual : atual + 1);
+        botoes[0].disabled = faixaAnt.disabled = atual === primeiro;
+        botoes[1].disabled = faixaProx.disabled = atual === ultimo;
+        var secoes = aberta.map(function (p) { return p.dataset.secao; });
         listaAbas.forEach(function (a) {
-          var dela = folhas[+a.dataset.alvo].dataset.secao;
-          a.setAttribute('aria-current', dela === secaoAtual ? 'true' : 'false');
+          a.setAttribute('aria-current',
+            secoes.indexOf(a.dataset.secao) >= 0 ? 'true' : 'false');
         });
       }
 
@@ -728,17 +802,38 @@
       }
 
       function montar(destino) {
-        var sai = folhas[atual], entra = folhas[destino], frente = destino > atual;
+        var frente = destino > atual;
+        var movida;
 
-        // As duas folhas ficam visiveis durante a virada, e quem apaga a
-        // que saiu e o pintar() no fim. Visibilidade so pela classe: posta
-        // inline, ela sobrevive ao clearProps e a folha nunca mais some.
-        entra.classList.add('e-a-folha');
-
-        var movida = frente ? sai : entra;
-        var parada = frente ? entra : sai;
-        gsap.set(parada, { zIndex: 1, rotationY: 0 });
-        gsap.set(movida, { zIndex: 2, rotationY: frente ? 0 : -180 });
+        if (espalhado) {
+          // A folha que anima e a ULTIMA a virar, indo, e a PRIMEIRA a
+          // desvirar, voltando. Num salto de aba as outras mudam de
+          // estado na hora e so uma folha atravessa — um livro nao
+          // folheia catorze paginas de uma vez.
+          var alvo = frente ? destino - 1 : destino;
+          movida = folhas[alvo];
+          folhas.forEach(function (f, k) {
+            if (k === alvo) { return; }
+            var virada = k < destino;
+            gsap.set(f, {
+              rotationY: virada ? -180 : 0,
+              zIndex: virada ? k + 1 : folhas.length - k
+            });
+          });
+          gsap.set(movida, {
+            zIndex: folhas.length + 10,
+            rotationY: frente ? 0 : -180
+          });
+        } else {
+          var sai = folhas[atual], entra = folhas[destino];
+          // As duas folhas ficam visiveis durante a virada, e quem apaga a
+          // que saiu e o pintar() no fim. Visibilidade so pela classe: posta
+          // inline, ela sobrevive ao clearProps e a folha nunca mais some.
+          entra.classList.add('e-a-folha');
+          movida = frente ? sai : entra;
+          gsap.set(frente ? entra : sai, { zIndex: 1, rotationY: 0 });
+          gsap.set(movida, { zIndex: 2, rotationY: frente ? 0 : -180 });
+        }
 
         return {
           frente: frente,
@@ -749,8 +844,7 @@
             sombra(movida, g);
           },
           fim: function (chegou) {
-            gsap.set([sai, entra], { clearProps: 'transform,opacity,zIndex' });
-            sombra(sai, 0); sombra(entra, 0);
+            sombra(movida, 0);
             if (chegou) { atual = destino; }
             virando = false; pintar();
           }
@@ -761,7 +855,7 @@
       // meio e a folha parece saltar. A power3 sai, acelera e assenta —
       // o jeito de quem passa o dedo.
       function virar(destino) {
-        if (virando || destino === atual || destino < 0 || destino >= folhas.length) { return; }
+        if (virando || destino === atual || destino < primeiro || destino > ultimo) { return; }
         virando = true;
         var v = montar(destino);
         var g = { r: v.de };
@@ -779,7 +873,7 @@
       faixaProx.addEventListener('click', function () { virar(atual + 1); });
       faixaAnt.addEventListener('click', function () { virar(atual - 1); });
       listaAbas.forEach(function (a) {
-        a.addEventListener('click', function () { virar(+a.dataset.alvo); });
+        a.addEventListener('click', function () { virar(aberturaDa(+a.dataset.pag)); });
       });
 
       // ---- o arrasto: a folha SEGUE O DEDO ----
@@ -799,7 +893,13 @@
       // sabor para ler nao tira a folha do lugar.
       var toque = null;
 
-      function largura() { return caderno.offsetWidth || window.innerWidth || 1; }
+      // a distancia de um giro inteiro e a largura da FOLHA, nao a do
+      // caderno: espalhado ela e a metade, e e essa metade que o dedo
+      // tem de atravessar
+      function largura() {
+        var w = areaLivro.offsetWidth || caderno.offsetWidth || window.innerWidth || 1;
+        return espalhado ? w / 2 : w;
+      }
       function agora() { return window.performance ? performance.now() : Date.now(); }
 
       caderno.addEventListener('pointerdown', function (e) {
@@ -819,7 +919,7 @@
           // rolagem vertical, e nenhum dos dois vira pagina
           if (Math.abs(dx) < 12 || Math.abs(dx) <= Math.abs(dy)) { return; }
           var destino = atual + (dx < 0 ? 1 : -1);
-          if (destino < 0 || destino >= folhas.length) { toque = null; return; }
+          if (destino < primeiro || destino > ultimo) { toque = null; return; }
           virando = true;
           toque.frente = dx < 0;
           toque.virada = montar(destino);
@@ -905,9 +1005,9 @@
       // desmontagem: a largura mudou de faixa, o livro e remontado
       return function () {
         gsap.killTweensOf(folhas.concat([capa, miolo]));
-        folhas.forEach(function (f) {
-          var ol = f.querySelector('.ticket__lista');
-          var dona = miolo.querySelector('.secao-card[data-secao="' + f.dataset.secao + '"] .ticket__lista');
+        paginas.forEach(function (p) {
+          var ol = p.querySelector('.ticket__lista');
+          var dona = miolo.querySelector('.secao-card[data-secao="' + p.dataset.secao + '"] .ticket__lista');
           while (ol && ol.firstChild) { dona.appendChild(ol.firstChild); }
         });
         blocos.forEach(function (b) { b.hidden = false; });

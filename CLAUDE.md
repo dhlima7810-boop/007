@@ -165,10 +165,44 @@ O dono recusou duas vezes a capa chapada. O que ficou de pé:
   abrir, no mesmo tempo da capa girando. Aqui animar altura sai barato: o
   caderno já tem altura fixa em px e nada dentro dele reflui a cada quadro.
 
-**O miolo** reparte os itens em folhas: ~24 por folha em duas colunas acima de
-720px, ~9 em coluna única abaixo. **Nenhuma folha mistura seções** — cada uma
-pertence a uma e leva o nome dela no alto, senão a pessoa perde o fio em
-catorze páginas.
+### O livro abre em duas páginas
+
+Acima de 720px o cardápio é um **livro aberto**, e a dobradiça é a **lombada
+do meio**: quem gira é a metade direita, que atravessa e pousa como metade
+esquerda. Abaixo de 720px cabe uma página só, e aí a folha ocupa a largura
+toda e gira pela borda esquerda, varrendo para fora.
+
+Foi isso que resolveu o "é muito grande": no feitio antigo a folha varria a
+**largura inteira** a cada virada. Espalhado, só metade se move.
+
+A montagem é em duas etapas, e nesta ordem:
+
+1. **as páginas** (`.ticket__pag`) — 12 itens cada quando espalhado, 9 em
+   coluna única no estreito. **Nenhuma mistura seções**: cada uma pertence a
+   uma e leva o nome dela no alto, senão a pessoa perde o fio.
+2. **as folhas** (`.ticket__folha`) — espalhado, cada folha tem **duas
+   faces**: a frente é sempre a página da direita, o verso sempre a da
+   esquerda. É por isso que o respiro da lombada pode ser fixo em cada uma.
+
+A face 0 é **o lado de dentro da capa, em branco**. Ela existe para o livro
+já abrir com as duas páginas cheias (a abertura começa em 1, não em 0) e
+nunca chega a aparecer, porque não se volta aquém da primeira.
+
+Numa pilha assim **não há folha escondida**: as já viradas ficam à esquerda,
+com a última por cima; as que faltam ficam à direita, com a da vez por cima.
+Quem decide o que se vê é o `z-index` mais o `backface-visibility`. A classe
+`e-a-folha` continua existindo, mas **só no estreito**, onde a folha é uma
+página só e as outras precisam sumir de verdade.
+
+Num salto de aba **só uma folha atravessa**: as outras mudam de estado na
+hora. Um livro não folheia catorze páginas de uma vez.
+
+O `.ticket__caderno--espalhado` vem do mesmo `matchMedia` que monta o livro,
+nunca de uma media query solta — uma media query poderia discordar do JS.
+
+As duas colunas do CSS valem agora só para a **lista solta** (`.secao-card
+.ticket__lista`), a dos 111 itens sem JS. Com o livro montado, as duas
+colunas da tela são as duas páginas abertas.
 
 **As abas** (Salgadas · Doces · Bordas · Esfihas · Pacotes · Bebidas) pulam
 direto. **A passagem sequencial continua inteira**: dá para percorrer tudo de
@@ -198,7 +232,9 @@ Agora é `pointerdown` → `pointermove` → `pointerup`:
 
 - no `pointermove`, assim que o gesto se mostra horizontal (|dx| > 12px e
   |dx| > |dy|), a folha passa a ser desenhada quadro a quadro em
-  `rotationY = dx / largura × -180`, com a sombra acompanhando;
+  `rotationY = dx / largura × -180`, com a sombra acompanhando. A `largura`
+  é a da **folha**, não a do caderno: espalhado ela é a metade, e é essa
+  metade que o dedo tem de atravessar;
 - no `pointerup`, passou de 35% do caminho **ou** veio rápido (acima de
   0,5px/ms) completa; senão volta. Os dois assentam **de onde o dedo
   largou**, não do zero.
@@ -224,10 +260,13 @@ Três coisas fazem a diferença, e as três são fáceis de desfazer sem percebe
    vertical — que é exatamente o que uma folha faz.
 2. **A perspectiva mora no contêiner**, no CSS do `.ticket__caderno`, nunca
    em `transformPerspective` por tween. Por tween, cada folha ganha o seu
-   próprio ponto de fuga e a virada lê como carta girando no vazio.
-3. **A sombra corre junto do giro** (`--sombra-folha`, no `::after`), com
-   pico na vertical. Sem ela, uma folha girando lê como imagem plana
-   inclinando.
+   próprio ponto de fuga e a virada lê como carta girando no vazio. Com o
+   livro espalhado o ponto de fuga vai para o **meio**, que é onde fica a
+   lombada; à esquerda ele torceria as duas metades para o mesmo lado.
+3. **A sombra corre junto do giro** (`--sombra-folha`, com pico na
+   vertical). Sem ela, uma folha girando lê como imagem plana inclinando.
+   Ela fica na **face**, nunca na folha: coplanares dentro de um pai
+   `preserve-3d` brigam por profundidade e piscam.
 
 `power3.inOut`, não `expo.inOut`: a expo tem um talo quase reto no meio e a
 folha parece saltar. A power3 sai, acelera e assenta — o jeito de quem passa
@@ -254,23 +293,26 @@ destes três lugares:
 Geometria fixa, nenhum `transform` que a virada toque, e
 `pointer-events:none`, senão ela rouba o toque dos itens.
 
-Ela começa **onde o vão das colunas começa** (`--fita-y`, escrito em JS), e
+Ela começa **onde a lista da página começa** (`--fita-y`, escrito em JS), e
 não no alto da folha: acima disso o nome da seção e a nota ocupam a largura
 inteira e a fita passava por cima do texto. O recuo é o maior de todas as
-folhas — um número só, igual em qualquer página.
+páginas — um número só, igual em qualquer abertura.
 
-**Só acima de 720px**, onde existem duas colunas, e **só com o livro
-aberto**: fechado, o miolo tem altura de capa e a fita sobraria pendurada no
-vazio.
+**Só acima de 720px**, onde o livro abre em duas páginas e ela cai bem na
+lombada, e **só com o livro aberto**: fechado, o miolo tem altura de capa e a
+fita sobraria pendurada no vazio.
 
 ### Três coisas que não dá para mexer sem quebrar
 
-1. **Visibilidade da folha é só da classe `e-a-folha`.** Posta inline, ela
-   sobrevive ao `clearProps` e a folha nunca mais some: em três viradas o
-   caderno vira uma pilha de páginas sobrepostas.
-2. **A altura do caderno é medida com as folhas soltas** (classe `medindo`).
-   Enquanto são `position:absolute` com `inset` dentro de um pai sem altura,
-   todas medem zero e o cardápio fecha.
+1. **No estreito, visibilidade da folha é só da classe `e-a-folha`.** Posta
+   inline, ela sobrevive ao `clearProps` e a folha nunca mais some: em três
+   viradas o caderno vira uma pilha de páginas sobrepostas. (Espalhado não
+   há folha escondida — quem resolve é a pilha.)
+2. **A altura do caderno é medida com as folhas soltas** (classe `medindo`),
+   e quem mede é a **face**, não a folha. Enquanto são `position:absolute`
+   com `inset` dentro de um pai sem altura, todas medem zero e o cardápio
+   fecha. Espalhado a medição tem de ser na **largura de verdade** (metade),
+   senão a página mede mais larga, sai mais baixa, e o conteúdo é cortado.
 3. **`touch-action: pan-y` no caderno.** Entrega a rolagem vertical ao
    navegador (e ao Lenis) e guarda o arrasto horizontal para a virada.
 

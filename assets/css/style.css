@@ -831,9 +831,19 @@ ol,ul{margin:0;padding:0;list-style:none}
 }
 .ticket__assina em{color:var(--acao);font-style:normal}
 
-/* ---- o caderno: as folhas empilhadas no celular ----
-   Montado em JS. As folhas ocupam o mesmo espaco e so a da vez fica
-   visivel; a virada e do GSAP, girando pela lombada da esquerda. */
+/* ---- o caderno: o livro que vira a pagina ----
+   Montado em JS, em dois feitios:
+
+   - ACIMA de 720px o livro fica ABERTO EM DUAS PAGINAS e a dobradica e a
+     lombada do meio. Quem gira e a metade direita, que atravessa e pousa
+     como metade esquerda. Metade da largura se move, nao a largura
+     inteira: era essa a reclamacao do dono — "e muito grande".
+   - ABAIXO de 720px cabe uma pagina so: a folha ocupa a largura toda e
+     gira pela borda esquerda, varrendo para fora.
+
+   O feitio vem da classe .ticket__caderno--espalhado, posta pelo mesmo
+   matchMedia que monta o livro — nunca de uma media query solta, que
+   poderia discordar do JS. */
 .ticket__caderno{
   position:relative;margin-top:.2rem;
   /* A perspectiva mora no CONTEINER, nao em cada tween. Posta por tween,
@@ -848,28 +858,81 @@ ol,ul{margin:0;padding:0;list-style:none}
      gesto lateral como rolagem e dispara pointercancel no meio. */
   touch-action:pan-y;
 }
+/* aberto em duas paginas o ponto de fuga vai para o meio, que e onde fica
+   a lombada; a esquerda ele torceria as duas metades para o mesmo lado */
+.ticket__caderno--espalhado{perspective:2100px;perspective-origin:center center}
 /* so enquanto o dedo (ou o mouse) conduz a folha: sem isso o arrasto no
    desktop sai selecionando os nomes e os precos pelo caminho */
 .ticket__caderno.arrastando{user-select:none;-webkit-user-select:none}
 
-.ticket__folha{
-  /* o recuo lateral e o que deixa as faixas de virar fora do alcance
-     dos itens: entre elas fica so o texto do cardapio */
-  position:absolute;inset:0 var(--faixa);margin:0;padding:0;list-style:none;
-  visibility:hidden;backface-visibility:hidden;
+/* a area do livro: o recuo lateral e o que deixa as faixas de virar fora
+   do alcance dos itens — entre elas fica so o texto do cardapio */
+.ticket__livro{
+  position:absolute;inset:0 var(--faixa);
+  transform-style:preserve-3d;
   background:var(--papel);
+}
+
+.ticket__folha{
+  position:absolute;top:0;bottom:0;left:0;right:0;
+  margin:0;padding:0;list-style:none;
+  transform-style:preserve-3d;
   transform-origin:left center;
   will-change:transform;
 }
+/* espalhado: a folha e a METADE DIREITA, com a dobradica na lombada */
+.ticket__caderno--espalhado .ticket__folha{left:50%;right:0}
+
+/* uma pagina so: a folha e a propria pagina, e quem esconde as outras e a
+   classe e-a-folha. Posta inline, a visibilidade sobrevive ao clearProps
+   e a folha nunca mais some. */
+.ticket__caderno:not(.ticket__caderno--espalhado) .ticket__folha{visibility:hidden}
+.ticket__caderno:not(.ticket__caderno--espalhado) .ticket__folha.e-a-folha{visibility:visible}
+/* a lombada da folha solta: o fio de onde ela gira */
+.ticket__caderno:not(.ticket__caderno--espalhado) .ticket__folha::before{
+  content:'';position:absolute;top:0;bottom:0;left:-.5rem;width:1.5px;z-index:2;
+  background:repeating-linear-gradient(rgba(25,20,19,.28) 0 5px,transparent 5px 10px);
+}
+
+/* as duas faces da folha. Espalhado, a FRENTE e sempre a pagina da direita
+   e o VERSO sempre a da esquerda — e so a frente aparece com a folha em pe
+   e so o verso com ela virada. Por isso o respiro da lombada pode ser fixo
+   em cada uma. */
+.ticket__face{
+  position:absolute;inset:0;overflow:hidden;
+  background:var(--papel);
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+}
+.ticket__face--verso{transform:rotateY(180deg)}
+.ticket__caderno--espalhado .ticket__face--frente{padding-left:clamp(1rem,2.2vw,1.9rem)}
+.ticket__caderno--espalhado .ticket__face--verso{padding-right:clamp(1rem,2.2vw,1.9rem)}
+/* o vinco de papel junto da lombada: a pagina curva para dentro ali */
+.ticket__caderno--espalhado .ticket__face::before{
+  content:'';position:absolute;top:0;bottom:0;width:18px;pointer-events:none;
+}
+.ticket__caderno--espalhado .ticket__face--frente::before{
+  left:0;background:linear-gradient(90deg,rgba(75,38,16,.15),rgba(75,38,16,0));
+}
+.ticket__caderno--espalhado .ticket__face--verso::before{
+  right:0;background:linear-gradient(270deg,rgba(75,38,16,.15),rgba(75,38,16,0));
+}
 /* A sombra que corre pela folha enquanto ela levanta. E ela que da volume:
    sem sombra, uma folha girando le como imagem plana inclinando. A opacidade
-   e conduzida pelo GSAP, junto do giro. */
-.ticket__folha::after{
+   e conduzida pelo GSAP, junto do giro, pela --sombra-folha posta na folha
+   e herdada pelas duas faces. Fica na FACE, e nao na folha: coplanares num
+   pai preserve-3d brigam por profundidade e piscam. */
+.ticket__face::after{
   content:'';position:absolute;inset:0;pointer-events:none;
   opacity:var(--sombra-folha,0);
   background:linear-gradient(90deg,
     rgba(25,20,19,.42) 0%, rgba(25,20,19,.16) 26%, rgba(25,20,19,0) 62%);
 }
+.ticket__caderno--espalhado .ticket__face--verso::after{
+  background:linear-gradient(270deg,
+    rgba(25,20,19,.42) 0%, rgba(25,20,19,.16) 26%, rgba(25,20,19,0) 62%);
+}
+.ticket__pag{height:100%}
+
 .ticket__folha__cabeca{
   font-family:var(--display);font-weight:var(--peso-titulo);
   text-transform:uppercase;letter-spacing:.04em;
@@ -877,13 +940,19 @@ ol,ul{margin:0;padding:0;list-style:none}
   padding-bottom:.5rem;margin-bottom:.6rem;
   border-bottom:1.5px solid rgba(25,20,19,.2);
 }
-.ticket__folha.e-a-folha{visibility:visible}
-/* so durante a medicao: soltas e empilhadas, cada folha mede a si mesma */
-.ticket__caderno.medindo .ticket__folha{position:static;visibility:visible}
-/* a lombada: o fio de onde a folha gira */
-.ticket__folha::before{
-  content:'';position:absolute;top:0;bottom:0;left:-.5rem;width:1.5px;
-  background:repeating-linear-gradient(rgba(25,20,19,.28) 0 5px,transparent 5px 10px);
+
+/* so durante a medicao: as folhas saem do empilhamento e cada face mede a
+   si mesma na largura que vai ter de verdade. Enquanto sao absolutas com
+   inset dentro de um pai sem altura, todas medem zero e o cardapio fecha. */
+.ticket__caderno.medindo .ticket__livro{
+  position:absolute;left:var(--faixa);right:var(--faixa);top:0;bottom:auto;height:auto;
+}
+.ticket__caderno.medindo .ticket__folha{
+  position:static;visibility:visible;transform:none;
+}
+.ticket__caderno.medindo.ticket__caderno--espalhado .ticket__folha{width:50%}
+.ticket__caderno.medindo .ticket__face{
+  position:static;transform:none;backface-visibility:visible;
 }
 .ticket__nav{
   display:flex;align-items:center;justify-content:space-between;gap:1rem;
@@ -918,8 +987,13 @@ ol,ul{margin:0;padding:0;list-style:none}
 
 @media (min-width:720px){
   /* duas colunas, lendo de cima para baixo */
-  .ticket__lista{grid-template-columns:1fr 1fr;column-gap:clamp(2.5rem,5vw,3.75rem)}
-  .ticket__item{grid-column:auto}
+  /* Duas colunas valem para a lista SOLTA — a dos 111 itens que aparece
+     sem JS. Com o livro montado cada pagina ja e uma coluna, e as duas
+     colunas da tela viram as duas paginas abertas. */
+  .secao-card .ticket__lista{
+    grid-template-columns:1fr 1fr;column-gap:clamp(2.5rem,5vw,3.75rem);
+  }
+  .secao-card .ticket__item{grid-column:auto}
 }
 
 /* ---------------- o marca-pagina de fita ----------------
