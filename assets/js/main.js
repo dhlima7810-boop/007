@@ -333,6 +333,13 @@
   conferirEntrada();
   window.addEventListener('load', conferirEntrada);
 
+  // Redimensionar a janela no meio da abertura move a vaga do cabecalho,
+  // mas o voo ja mirou a posicao antiga: no cross-fade as duas logos
+  // aparecem em lugares DIFERENTES (medido: 41px de distancia aos 4,8s),
+  // e isso quebra a regra de uma logo so. A abertura e enfeite — diante de
+  // um resize ela vai direto para o fim, onde as duas coincidem.
+  window.addEventListener('resize', pularAbertura);
+
   /* =======================================================
      9. Parallax do hero e saída do indicador
      ======================================================= */
@@ -698,21 +705,38 @@
     if (nomeMarca) {
       gsap.to(nomeMarca, {
         x: function () {
-          var r = logoTopo.getBoundingClientRect();
+          // offsetWidth, nunca getBoundingClientRect: o retangulo inclui a
+          // ROTACAO da queda, e uma logo de 36px girada mede ate 49px de
+          // caixa. A cada refresh do ScrollTrigger com a logo girada o
+          // texto deslizava mais do que devia e ficava desalinhado para
+          // sempre. offsetWidth e a largura de layout, imune ao transform.
           var pai = getComputedStyle(logoTopo.parentElement);
-          return -(r.width + (parseFloat(pai.columnGap || pai.gap) || 0));
+          return -(logoTopo.offsetWidth + (parseFloat(pai.columnGap || pai.gap) || 0));
         },
         duration: 1, ease: 'none',
         scrollTrigger: { start: 'top top', end: '+=420', scrub: .7, invalidateOnRefresh: true }
       });
     }
 
-    // o bamboleio lateral: sem ele a queda vira um elevador descendo
-    var balanco = Math.min(window.innerWidth * .2, 190);
-    gsap.to(logoTopo, {
-      keyframes: { x: [0, balanco, -balanco * .75, balanco * 1.05, -balanco * .5, balanco * .8, 0] },
-      duration: 1, ease: 'none',
-      scrollTrigger: { start: 'top top', end: 'max', scrub: .7 }
+    // O bamboleio lateral: sem ele a queda vira um elevador descendo.
+    //
+    // E uma sequencia de tweens de verdade, nao `keyframes`: dentro de
+    // keyframes o GSAP usa `easeEach`, que cai no power1.inOut por padrao
+    // — justamente a curva que a exceção 1 do CLAUDE.md manda evitar em
+    // tween preso ao scroll, e que o `ease:'none'` do tween nao alcanca.
+    //
+    // E a amplitude e funcao, reavaliada a cada refresh. Congelada na
+    // largura do carregamento, girar o aparelho de paisagem para retrato
+    // jogava a logo para fora da tela: medido, 6 de 60 amostras fora.
+    function balanco() { return Math.min(window.innerWidth * .2, 190); }
+    var bamboleio = gsap.timeline({
+      scrollTrigger: { start: 'top top', end: 'max', scrub: .7, invalidateOnRefresh: true }
+    });
+    [1, -.75, 1.05, -.5, .8, 0].forEach(function (fator) {
+      bamboleio.to(logoTopo, {
+        x: function () { return balanco() * fator; },
+        duration: 1, ease: 'none'
+      });
     });
   }
 

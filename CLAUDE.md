@@ -231,6 +231,36 @@ desses força o navegador a recalcular a caixa a cada quadro, e é exatamente
 daí que vem o tremor. `transform` não reflui: a largura do `.marca` fica
 constante do começo ao fim, e o texto anda liso.
 
+### Medir a logo é `offsetWidth`, não o retângulo
+
+O retângulo (`getBoundingClientRect`) inclui a **rotação da queda**: uma logo
+de 36px girada mede até 49px de caixa. A vaga do cabeçalho media por ali e,
+a cada refresh do ScrollTrigger com a logo girada, o texto deslizava mais do
+que devia e ficava desalinhado para sempre. `offsetWidth` é a largura de
+layout, imune ao transform.
+
+### O bamboleio não pode usar `keyframes`
+
+Dentro de `keyframes` o GSAP interpola com `easeEach`, que cai no
+**power1.inOut** por padrão — justamente a curva que a exceção 1 proíbe em
+tween preso ao scroll. O `ease: 'none'` do tween **não alcança** os trechos
+entre quadros-chave. Por isso o bamboleio é uma sequência de `.to()` de
+verdade, cada um com seu `ease: 'none'`.
+
+A amplitude é **função**, com `invalidateOnRefresh`. Congelada na largura do
+carregamento, girar o aparelho de paisagem para retrato jogava a logo para
+fora da tela — medido: 6 de 60 amostras fora.
+
+### Resize no meio da abertura: vai direto para o fim
+
+O voo mira a vaga do cabeçalho lida **no instante do tween**. Redimensionar a
+janela depois disso move a vaga, mas o voo segue para a posição antiga, e no
+cross-fade as duas logos aparecem em **lugares diferentes** — medido, 41px de
+distância aos 4,8s. Isso quebra a regra de uma logo só.
+
+A abertura é enfeite: diante de um `resize` ela pula para o fim, onde as duas
+coincidem.
+
 ### A armadilha do `immediateRender`
 
 `fromTo` escreve o estado inicial **no instante em que é criado**, não quando
