@@ -733,19 +733,6 @@
       caderno.classList.remove('medindo');
       caderno.style.height = alta + 'px';
 
-      // A fita de marca-pagina desce pelo vao das duas colunas e sai pela
-      // base. Ela mora no .livro, fora do caderno, justamente para nao
-      // entrar na perspectiva das folhas: assim nenhum destes numeros
-      // muda ao virar a pagina — a fita continua fita. A classe so entra
-      // com o livro montado, entao sem JS nao ha fita.
-      // Ela desce do alto da pagina, como fita presa na cabeca da lombada,
-      // e sai pela base. No livro aberto nada de texto chega ao vao: as
-      // duas faces tem respiro na lombada, e e por ali que ela passa.
-      livro.style.setProperty('--fita-y', (miolo.offsetTop + caderno.offsetTop) + 'px');
-      livro.style.setProperty('--fita-h', (alta + 54) + 'px');
-      livro.classList.add('livro--fita');
-      var fita = livro.querySelector('.livro__fita');
-
       // As duas alturas do livro. Fechado ele e so a capa: as abas, a
       // navegacao e o pe saem do fluxo (CSS), e a altura cai para a do
       // caderno. Ao abrir, a altura cresce no mesmo tempo da capa virando.
@@ -763,16 +750,11 @@
 
       // o livro fechado ou aberto, em estado parado. Quem abre e fecha de
       // verdade e a folha 0 virando; isto so assenta o resultado.
-      // o quanto o livro desliza para a capa ficar no meio da tela com ele
-      // fechado: um quarto da largura, que e metade de uma pagina
-      function deslize() { return (areaLivro.offsetWidth || 0) * .25; }
-
       function vestir() {
         var aberto = atual > 0;
         livro.classList.toggle('aberto', aberto);
         capa.setAttribute('aria-expanded', aberto ? 'true' : 'false');
         gsap.set(papel, { autoAlpha: aberto ? 1 : 0 });
-        gsap.set(fita, { autoAlpha: aberto ? 1 : 0, x: 0 });
         if (espalhado) { gsap.set(areaLivro, { xPercent: aberto ? 0 : -25 }); }
         if (aberto) { gsap.set(miolo, { clearProps: 'height' }); }
         else { gsap.set(miolo, { height: alturaFechada }); }
@@ -883,12 +865,6 @@
             var k = destino > 0 ? t : 1 - t;   // 0 = fechado, 1 = aberto
             gsap.set(miolo, { height: alturaFechada + (alturaAberta - alturaFechada) * k });
             gsap.set(papel, { autoAlpha: k });
-            // a fita acompanha o livro deslizando: ela esta DENTRO dele, e
-            // parada no meio da tela ficaria por cima do texto da pagina
-            gsap.set(fita, {
-              autoAlpha: k,
-              x: espalhado ? -deslize() * (1 - k) : 0
-            });
             if (espalhado) { gsap.set(areaLivro, { xPercent: -25 * (1 - k) }); }
           },
           fim: function (chegou) {
@@ -1042,9 +1018,6 @@
         // a capa volta para o lugar dela no HTML, antes do miolo
         livro.insertBefore(capa, miolo);
         livro.classList.remove('aberto');
-        livro.classList.remove('livro--fita');
-        livro.style.removeProperty('--fita-y');
-        livro.style.removeProperty('--fita-h');
         capa.setAttribute('aria-expanded', 'false');
         abas.remove(); caderno.remove(); nav.remove();
         ScrollTrigger.refresh();

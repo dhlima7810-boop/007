@@ -554,8 +554,8 @@ ol,ul{margin:0;padding:0;list-style:none}
 
    O miolo e livro, nao mais nota: a borda serrada do comprovante
    saiu, porque folha de cardapio nao e cupom rasgado. Ficou o papel,
-   a fita de marca-pagina no vao das duas colunas e a assinatura da
-   casa no fim.
+   a divisa de lombada entre as duas paginas e a assinatura da casa no
+   fim.
 
    Sem JS, sem GSAP ou sob movimento reduzido a capa nao existe e a
    lista inteira dos 111 itens aparece de uma vez. A capa e conforto,
@@ -928,15 +928,35 @@ ol,ul{margin:0;padding:0;list-style:none}
 .ticket__face--verso{transform:rotateY(180deg)}
 .ticket__caderno--espalhado .ticket__face--frente{padding-left:clamp(1rem,2.2vw,1.9rem)}
 .ticket__caderno--espalhado .ticket__face--verso{padding-right:clamp(1rem,2.2vw,1.9rem)}
-/* o vinco de papel junto da lombada: a pagina curva para dentro ali */
+/* ---- a divisa: o vinco onde as duas paginas se encontram ----
+   Nao e um enfeite posto no meio da tela: e a propria pagina curvando
+   para dentro da lombada, mais o fio onde o papel dobra. Por isso mora
+   NA FACE e gira junto com ela — a folha que levanta leva o seu vinco,
+   como papel de verdade. */
 .ticket__caderno--espalhado .ticket__face::before{
-  content:'';position:absolute;top:0;bottom:0;width:18px;pointer-events:none;
+  content:'';position:absolute;top:0;bottom:0;width:34px;pointer-events:none;
 }
 .ticket__caderno--espalhado .ticket__face--frente::before{
-  left:0;background:linear-gradient(90deg,rgba(75,38,16,.15),rgba(75,38,16,0));
+  left:0;
+  background:
+    linear-gradient(90deg, rgba(60,32,14,.55) 0 1.5px, rgba(60,32,14,0) 1.5px),
+    linear-gradient(90deg, rgba(75,38,16,.26) 0%, rgba(75,38,16,.1) 38%, rgba(75,38,16,0) 100%);
 }
 .ticket__caderno--espalhado .ticket__face--verso::before{
-  right:0;background:linear-gradient(270deg,rgba(75,38,16,.15),rgba(75,38,16,0));
+  right:0;
+  background:
+    linear-gradient(270deg, rgba(60,32,14,.55) 0 1.5px, rgba(60,32,14,0) 1.5px),
+    linear-gradient(270deg, rgba(75,38,16,.26) 0%, rgba(75,38,16,.1) 38%, rgba(75,38,16,0) 100%);
+}
+/* a calha da lombada, atras das folhas: so aparece quando uma pagina
+   levanta e descobre o fundo do livro. O translateZ a empurra para tras
+   das folhas — coplanares num pai preserve-3d brigam e piscam. */
+.ticket__caderno--espalhado .ticket__livro::before{
+  content:'';position:absolute;top:0;bottom:0;left:50%;width:34px;
+  transform:translateX(-50%) translateZ(-1px);pointer-events:none;
+  background:linear-gradient(90deg,
+    rgba(38,21,10,0) 0%, rgba(38,21,10,.3) 40%,
+    rgba(38,21,10,.5) 50%, rgba(38,21,10,.3) 60%, rgba(38,21,10,0) 100%);
 }
 /* A sombra que corre pela folha enquanto ela levanta. E ela que da volume:
    sem sombra, uma folha girando le como imagem plana inclinando. A opacidade
@@ -1016,50 +1036,6 @@ ol,ul{margin:0;padding:0;list-style:none}
     grid-template-columns:1fr 1fr;column-gap:clamp(2.5rem,5vw,3.75rem);
   }
   .secao-card .ticket__item{grid-column:auto}
-}
-
-/* ---------------- o marca-pagina de fita ----------------
-   Esta fita entrou no lugar do vinco tracejado com sombra que ficava no
-   meio das duas colunas: durante a virada aquele fio lia como uma linha
-   de fechamento da pagina, e a sombra nao se explicava.
-
-   A FITA CONTINUA FITA: ela nao gira, nao afunila e nao encolhe ao
-   passar as paginas. Isso e requisito, e e o que decide onde ela mora —
-   no .livro, e em nenhum dos tres lugares abaixo:
-
-   - dentro do .ticket__caderno ela entraria no mesmo espaco 3D das
-     folhas (perspective + preserve-3d) e a perspectiva a afunilaria a
-     cada virada;
-   - dentro de uma .ticket__folha ela giraria junto e sumiria com a folha;
-   - dentro do .ticket o overflow:hidden (o recorte que segura a folha
-     girando) cortaria a ponta em V.
-
-   Geometria fixa: largura e comprimento em px, posicao no vao, nenhum
-   transform que a virada toque. Mais pointer-events:none, senao ela
-   rouba o toque dos itens, e z-index entre o papel e a capa (que e 3),
-   para a fita ficar SOBRE a folha, como fita de verdade sobre a pagina.
-
-   O --fita-y e o --fita-h sao escritos pelo JS a partir do caderno, e
-   a classe .livro--fita so entra quando o livro e montado: sem JS, sem
-   GSAP ou sob movimento reduzido nao ha caderno nem fita.
-
-   So acima de 720px: abaixo ha uma coluna so e nao existe vao, e a fita
-   passaria por cima do texto.
-   ------------------------------------------------------- */
-.livro__fita{display:none}
-@media (min-width:720px){
-  /* so com o livro aberto: fechado, o miolo tem altura de capa e a fita
-     sobraria para fora dela, pendurada no vazio */
-  .js .livro--fita.aberto .livro__fita{
-    display:block;position:absolute;z-index:2;pointer-events:none;
-    left:50%;width:17px;margin-left:-8.5px;
-    top:var(--fita-y,0);height:var(--fita-h,0);
-    background:linear-gradient(90deg,
-      #5d0813 0%, #96101f 30%, #ab1526 52%, #7c0c18 78%, #4e070f 100%);
-    /* a ponta recortada em V, como as de livro antigo */
-    clip-path:polygon(0 0, 100% 0, 100% calc(100% - 17px), 50% 100%, 0 calc(100% - 17px));
-    box-shadow:3px 0 10px rgba(25,20,19,.26);
-  }
 }
 
 /* ---------------- Uma noite aqui (pin scroll) ---------------- */

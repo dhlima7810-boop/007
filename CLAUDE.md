@@ -119,7 +119,7 @@ prédio amarelo e vermelho da esquina. Os tokens estão no `:root` do
   o dia de hoje. A caixa, mesmo ali, é alta.
 - **Cardápio**: é um cardápio de verdade, não uma nota. Fechado, uma capa de
   **couro marrom espessa, com o ouro na ponta** e a logo no centro; aberto,
-  folhas de papel com a **fita de marca-página** no vão das colunas e a
+  folhas de papel com a **divisa da lombada** entre as duas páginas e a
   assinatura da casa no pé. A borda serrada de comprovante **saiu**: folha de
   cardápio não é cupom rasgado.
 - **Encostar num sabor rasga a linha**: a linha inclina, desloca e abre
@@ -160,8 +160,7 @@ as três correm junto do giro:
   cortaria a sombra projetada, e separado ele pode acender e apagar em GSAP;
 - **a área do livro desliza** um quarto da largura (`xPercent: -25`), que é
   meia página: é isso que deixa a capa no meio da tela com o livro fechado e
-  a traz para o lugar da página da direita ao abrir. A fita acompanha o
-  deslize — parada no meio da tela ela ficaria por cima do texto.
+  a traz para o lugar da página da direita ao abrir.
 
 Nada disso tem tween próprio: tudo é função do ângulo da folha 0, para abrir
 no dedo ficar igual a abrir no toque.
@@ -302,35 +301,29 @@ folha parece saltar. A power3 sai, acelera e assenta — o jeito de quem passa
 o dedo. A virada por faixa, seta ou aba leva **0.8s**; a do arrasto não tem
 duração nenhuma, porque quem manda é o dedo.
 
-### A fita de marca-página continua fita
+### A divisa é o vinco, não um enfeite no meio
 
-No meio das duas colunas havia um fio tracejado com uma sombra em gradiente.
-Durante a virada aquilo lia como **uma linha de fechamento da página**, e a
-sombra não se explicava. Saiu, e no lugar entrou a fita de marcador de livro
-antigo, com a ponta recortada em V.
+No meio das duas colunas já houve um fio tracejado com sombra, e depois uma
+fita de marca-página. Os dois caíram pelo mesmo motivo: eram **coisas postas
+no meio da tela**, sem explicação física. A fita ainda por cima tinha cara de
+gerada.
 
-**Ela não gira, não afunila e não encolhe ao passar as páginas.** Isso é
-requisito do dono, e é o que decide onde ela mora — no `.livro`, e em nenhum
-destes três lugares:
+O que ficou é a **divisa de verdade** — a página curvando para dentro da
+lombada mais o fio onde o papel dobra:
 
-- dentro do `.ticket__caderno` ela entraria no mesmo espaço 3D das folhas
-  (`perspective` + `preserve-3d`) e a perspectiva a **afunilaria** a cada
-  virada;
-- dentro de uma `.ticket__folha` ela giraria junto e sumiria com a folha;
-- dentro do `.ticket` o `overflow:hidden` cortaria a ponta em V.
+- ela mora **na face** (`.ticket__face::before`) e por isso **gira junto com
+  a folha**. A página que levanta leva o seu vinco, como papel de verdade;
+- atrás das folhas há a **calha da lombada** (`.ticket__livro::before`), que
+  só aparece quando uma página levanta e descobre o fundo do livro. Ela leva
+  `translateZ(-1px)`: coplanar com as folhas num pai `preserve-3d` ela
+  brigaria por profundidade e piscaria.
 
-Geometria fixa, nenhum `transform` que a virada toque, e
-`pointer-events:none`, senão ela rouba o toque dos itens.
+Medido atravessando a lombada: 244 de luminância na página, caindo suave até
+208 e um fio em 123 no vinco, simétrico dos dois lados. É esse perfil que faz
+ler como dobra em vez de borda.
 
-Ela desce **do alto da página** (`--fita-y`, escrito em JS) e sai pela base,
-como fita presa na cabeça da lombada. No livro aberto nenhum texto chega ao
-vão — as duas faces têm respiro na lombada, e é por ali que ela passa. No
-feitio antigo, de página única, a nota da seção atravessava o meio e a fita
-passava por cima dela; por isso começava mais abaixo.
-
-**Só acima de 720px**, onde o livro abre em duas páginas e ela cai bem na
-lombada, e **só com o livro aberto**: fechado, o miolo tem altura de capa e a
-fita sobraria pendurada no vazio.
+**Só acima de 720px**, onde o livro abre em duas páginas. Na página única não
+existe lombada no meio, e nada vai ali.
 
 ### Três coisas que não dá para mexer sem quebrar
 
