@@ -163,18 +163,74 @@ sendo do Lenis, como em qualquer outro lugar. Os dois botões de seta e o
 fólio ("Página 3 de 6") existem para quem não descobre o gesto e para o
 teclado.
 
+## Abertura: a lua vira a logo
+
+Na chegada, sem precisar rolar, roda uma sequência de ~5,5s:
+
+1. **A câmera sobe** pela foto da fachada — animando o `object-position` da
+   imagem, de `50% 76%` (calçada) para `50% 42%` (céu).
+2. **A lua cheia desce** para dentro do quadro e acende.
+3. **O morph**: o disco da lua apaga enquanto a face da logo acende, no mesmo
+   lugar e no mesmo tamanho. Não é morph nenhum — são duas faces do mesmo
+   elemento `#lua`, e as duas são bolas. É por isso que funciona.
+4. **O voo**: a logo formada vai até a vaga do cabeçalho e cruza com a
+   `.marca__logo` de verdade num cross-fade de 0.6s, no mesmo ponto e tamanho.
+
+**A câmera sobe pelo `object-position`, não deslocando `.hero__media`.** O
+transbordo desse elemento é de 4%; empurrá-lo para baixo abriria fresta preta
+no topo. Mexendo no enquadramento dentro do mesmo retângulo não há fresta
+possível — e também não há briga com o parallax da seção 9, que escreve
+`yPercent` no mesmo elemento.
+
+**A regra que não pode cair: existe uma logo só.** O dono rejeitou
+explicitamente uma cópia caindo ao lado da logo do cabeçalho. `#lua` e
+`.marca__logo` nunca podem estar visíveis ao mesmo tempo em **lugares
+diferentes**. No mesmo ponto, durante o cross-fade, é o projeto.
+
+A lua é enfeite: não recebe ponteiro, não entra na árvore de acessibilidade e
+some inteira sem GSAP ou sob `prefers-reduced-motion`. **Nunca ponha
+informação nela.**
+
+### A abertura tem de ser pulável
+
+São ~4,5s até o wordmark. `wheel`, `touchstart`, `keydown` e `pointerdown`
+levam a linha do tempo direto ao fim (`abertura.progress(1)`). Sem isso a
+chegada vira armadilha, e a sequência ficaria rodando por cima de uma página
+já em curso.
+
+### A logo do cabeçalho é escondida por GSAP, nunca por CSS
+
+A sequência começa com `gsap.set(logoTopo, { autoAlpha: 0 })`. Isso **tem**
+de ser em GSAP: posto no CSS, o cabeçalho carregaria sem logo em toda máquina
+sem JS. Qualquer caminho novo que esconda essa logo precisa de um caminho que
+a reacenda — e o teste das três degradações é o que pega isso.
+
 ## A logo despencando
 
-Uma cópia da logo (`#logoQueda`) cai pela tela enquanto a página desce,
-girando e bambeando. São **três quedas** ao longo da página: ela sai por
-baixo do topo, atravessa, some embaixo e volta a cair. Uma travessia só,
-esticada pelos 9 mil pixels da página, seria lenta demais para ler como
-queda.
+Quem despenca é a **própria `.marca__logo`**, a mesma que nasceu da lua. Não
+existe cópia. São três travessias presas ao scroll: a primeira sai da própria
+vaga do cabeçalho, as outras duas entram por cima. Subir a página devolve a
+logo à vaga.
 
-É enfeite e só: não recebe ponteiro, não entra na árvore de acessibilidade
-e some inteira sem GSAP ou sob `prefers-reduced-motion`. **Nunca ponha
-informação ali.** No celular ela é menor e mais apagada, porque não há
-margem para cair sem passar por cima do texto.
+O `.topo` é `sticky` e não tem `overflow:hidden`, então ela sai da caixa do
+cabeçalho sem ser cortada, e a origem dela acompanha o alto da janela — é
+isso que faz a queda ler como queda.
+
+Enquanto ela está fora, fica uma vaga de 36px antes de "PIZZA MIA" no
+cabeçalho. Lê como recuo, não como buraco. Fechar a vaga exigiria animar
+layout, que treme.
+
+### A armadilha do `immediateRender`
+
+`fromTo` escreve o estado inicial **no instante em que é criado**, não quando
+chega a vez dele na linha do tempo. As três quedas são criadas em sequência,
+então sem `immediateRender: false` da segunda em diante **vale o `from` da
+última** — e a logo nasce em `y:-180`, fora da tela, no topo da página. O
+cabeçalho carrega sem logo nenhuma, e nada no console avisa.
+
+Vale para qualquer `fromTo` repetido na mesma linha do tempo sobre o mesmo
+alvo.
+
 
 ## Sem componentes
 

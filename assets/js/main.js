@@ -220,34 +220,99 @@
   function letrasDe(el) { return divididos[el.dataset.splitId] || []; }
 
   /* =======================================================
-     8. Abertura do hero
+     8. Abertura: a camera sobe, a lua acende e vira a logo
+
+     A camera sobe animando o `object-position` da foto, nao a posicao
+     do elemento: deslocar `.hero__media` para baixo abriria fresta no
+     topo, porque o transbordo dela e so de 4%. Mexendo no enquadramento
+     dentro do mesmo retangulo, nao ha fresta possivel — e tambem nao ha
+     briga com o parallax da secao 9, que escreve `yPercent` no elemento.
+
+     A lua desce para dentro do quadro e troca de pele: dois circulos do
+     mesmo tamanho no mesmo lugar, um apagando enquanto o outro acende.
+     Formada, a logo voa ate a vaga do cabecalho e cruza com a logo de
+     verdade ali. Nunca ha duas na tela: e sempre a mesma bola.
      ======================================================= */
   var linhasTitulo = document.querySelectorAll('.marcaovo [data-split]');
+  var lua = document.getElementById('lua');
+  var logoTopo = document.querySelector('.marca__logo');
+  var temLua = !!(lua && logoTopo);
+
+  function centroDe(el) {
+    var r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width };
+  }
+
+  if (temLua) {
+    // A logo do cabecalho so acende no fim do voo — e isso e feito em
+    // GSAP, nunca em CSS: sem JS ela tem de aparecer normal, como
+    // qualquer outra imagem da pagina.
+    gsap.set(logoTopo, { autoAlpha: 0 });
+    gsap.set(lua, { y: -240, scale: .84 });
+  }
+
   var abertura = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
   abertura
     .fromTo('.hero__media', { scale: 1.14 }, { scale: 1, duration: 3.6, ease: 'expo.out' }, 0)
-    .to('.hero__cortina', { opacity: 0, duration: 1.4, ease: 'expo.inOut' }, 0.2)
-    .fromTo('.hero__rotulo',
-      { opacity: 0, y: 14, filter: 'blur(5px)' },
-      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1 }, 0.65);
+    // a camera subindo: o enquadramento sobe da calcada para o ceu
+    .fromTo('.hero__media img',
+      { objectPosition: '50% 76%' },
+      { objectPosition: '50% 42%', duration: 3.2, ease: 'expo.inOut' }, 0.4)
+    .to('.hero__cortina', { opacity: 0, duration: 1.4, ease: 'expo.inOut' }, 0.2);
 
+  if (temLua) {
+    abertura
+      // a lua entra por cima, como quem estava fora do quadro
+      .to('.lua__disco', { opacity: 1, duration: 1.4, ease: 'expo.out' }, 1.5)
+      .to(lua, { y: 0, scale: 1, duration: 1.8, ease: 'expo.out' }, 1.5)
+      // o morph: as duas bolas trocam sem sair do lugar
+      .to('.lua__disco', { opacity: 0, duration: 1, ease: 'expo.inOut' }, 2.9)
+      .to('.lua__logo', { opacity: 1, duration: 1, ease: 'expo.inOut' }, 2.9)
+      // o voo ate a vaga do cabecalho. Os retangulos sao lidos em funcao,
+      // isto e, no instante do tween: lidos na montagem da linha do tempo
+      // mirariam uma posicao de 4 segundos antes.
+      .to(lua, {
+        x: function () { return gsap.getProperty(lua, 'x') + centroDe(logoTopo).x - centroDe(lua).x; },
+        y: function () { return gsap.getProperty(lua, 'y') + centroDe(logoTopo).y - centroDe(lua).y; },
+        scale: function () { return centroDe(logoTopo).w / (lua.offsetWidth || 1); },
+        rotation: 300,
+        duration: 1.3, ease: 'expo.inOut'
+      }, 3.8)
+      // a cruzada invisivel: mesmo ponto, mesmo tamanho, meio segundo cada
+      .to(lua, { autoAlpha: 0, duration: .6, ease: 'power3.inOut' }, 5.0)
+      .to(logoTopo, { autoAlpha: 1, duration: .6, ease: 'power3.inOut' }, 5.0);
+  }
+
+  abertura.fromTo('.hero__rotulo',
+    { opacity: 0, y: 14, filter: 'blur(5px)' },
+    { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1 }, temLua ? 3.9 : 0.65);
+
+  var tLetras = temLua ? 4.3 : 1.05;
   linhasTitulo.forEach(function (linha, i) {
     abertura.from(letrasDe(linha), {
       yPercent: 115, rotate: 4, opacity: 0,
       duration: 1.1, ease: 'expo.out', stagger: 0.045
-    }, 1.05 + i * 0.2);
+    }, tLetras + i * 0.2);
   });
 
   abertura
-    .to('.hero__texto', { opacity: 1, duration: 1 }, 1.75)
-    .from('.hero__texto', { y: 22, duration: 1 }, 1.75)
-    .set('.hero__acoes', { opacity: 1 }, 1.9)
-    .from('.hero__acoes .botao', { y: 20, opacity: 0, duration: .9, stagger: .12 }, 1.9)
-    .to('.rolar', { opacity: 1, duration: .9 }, 2.4);
+    .set('.hero__acoes', { opacity: 1 }, tLetras + 0.85)
+    .from('.hero__acoes .botao', { y: 20, opacity: 0, duration: .9, stagger: .12 }, tLetras + 0.85)
+    .to('.rolar', { opacity: 1, duration: .9 }, tLetras + 1.35);
 
   gsap.fromTo('.rolar__bola',
     { x: -12 }, { x: 34, duration: 1.9, repeat: -1, ease: 'power3.inOut' });
+
+  // Sao ~4,5s ate o wordmark. Se a pessoa rolar, clicar ou teclar antes do
+  // fim, a abertura termina na hora — senao a chegada vira armadilha, e a
+  // sequencia da lua ficaria rodando por cima de uma pagina ja em curso.
+  function pularAbertura() {
+    if (abertura.progress() < 1) { abertura.progress(1); }
+  }
+  ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(function (evt) {
+    window.addEventListener(evt, pularAbertura, { once: true, passive: true });
+  });
 
   /* =======================================================
      9. Parallax do hero e saída do indicador
@@ -576,30 +641,38 @@
   /* =======================================================
      13. A logo despencando
 
-     Ela cai de verdade pela tela, girando, presa ao scroll: subir a
-     pagina faz a queda voltar. Tween preso ao scroll — por isso
-     ease 'none' (exceção 1 do CLAUDE.md).
+     E a logo do cabecalho em pessoa, a mesma que nasceu da lua: nao
+     existe copia. Cai girando, presa ao scroll, e subir a pagina faz a
+     queda voltar ate a vaga. Tween preso ao scroll — por isso ease
+     'none' (exceção 1 do CLAUDE.md).
      ======================================================= */
-  var queda = document.getElementById('logoQueda');
-  if (queda) {
-    gsap.set(queda, { xPercent: -50, y: -180 });
+  if (temLua) {
+    gsap.set(logoTopo, { transformOrigin: 'center center' });
 
-    // Tres quedas ao longo da pagina: ela sai por baixo do topo, atravessa a
-    // tela, some embaixo e volta a cair. Uma travessia so, esticada pelos
-    // 9 mil pixels da pagina, seria lenta demais para ler como queda.
+    // Tres quedas ao longo da pagina. A primeira parte da propria vaga do
+    // cabecalho (y:0), porque agora quem cai e a logo de la — nao ha copia.
+    // O `.topo` e sticky e nao tem overflow:hidden, entao ela sai da caixa
+    // do cabecalho sem ser cortada, e a origem dela acompanha o alto da
+    // janela, que e o que faz a queda ler como queda.
     var cair = gsap.timeline({
       scrollTrigger: { start: 'top top', end: 'max', scrub: .7, invalidateOnRefresh: true }
     });
+    // immediateRender:false a partir da segunda queda. O `fromTo` do GSAP
+    // escreve o estado inicial na HORA EM QUE E CRIADO, nao quando chega a
+    // vez dele na linha do tempo — entao as tres criadas em seguida deixam
+    // valer o `from` da ultima, e a logo nasce em y:-180, fora da tela, no
+    // topo da pagina. Sem isso o cabecalho carrega sem logo nenhuma.
     for (var q = 0; q < 3; q++) {
-      cair.fromTo(queda,
-        { y: -180 },
+      cair.fromTo(logoTopo,
+        { y: q === 0 ? 0 : -180 },
         { y: function () { return window.innerHeight + 180; },
-          rotation: '+=760', duration: 1, ease: 'none' });
+          rotation: '+=760', duration: 1, ease: 'none',
+          immediateRender: q === 0 });
     }
 
     // o bamboleio lateral: sem ele a queda vira um elevador descendo
     var balanco = Math.min(window.innerWidth * .2, 190);
-    gsap.to(queda, {
+    gsap.to(logoTopo, {
       keyframes: { x: [0, balanco, -balanco * .75, balanco * 1.05, -balanco * .5, balanco * .8, 0] },
       ease: 'none',
       scrollTrigger: { start: 'top top', end: 'max', scrub: .7 }

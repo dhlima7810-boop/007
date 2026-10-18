@@ -142,27 +142,46 @@ ol,ul{margin:0;padding:0;list-style:none}
   background:var(--acento);transform:scaleX(0);transform-origin:left center;
 }
 
-/* ---------------- A logo despencando ----------------
-   Passa por tras do topo e cai pela tela enquanto a pagina desce. E
-   enfeite: nao recebe ponteiro, nao entra na arvore de acessibilidade
-   e some inteira se o GSAP nao subir ou se a pessoa pedir menos
-   movimento. Nenhuma informacao mora aqui.
-   ---------------------------------------------------- */
-.logo-queda{
+/* ---------------- A lua que vira a logo ----------------
+   Abertura: a camera sobe pela fachada, a lua cheia desce para dentro do
+   quadro e troca de pele. O "morph" nao e morph nenhum: sao dois circulos
+   do mesmo tamanho, no mesmo lugar, um apagando enquanto o outro acende.
+   Formada, a logo voa para a vaga do cabecalho e cruza com a logo de
+   verdade ali — por isso nunca ha duas na tela.
+
+   z-index acima do topo: ela tem de pousar POR CIMA do cabecalho, senao
+   termina o voo atras do vidro fosco do `.topo` e chega embacada.
+
+   E enfeite: nao recebe ponteiro, nao entra na arvore de acessibilidade e
+   some inteira sem GSAP ou sob prefers-reduced-motion. Nenhuma informacao
+   mora aqui.
+   ------------------------------------------------------- */
+.lua{
   display:none;
-  position:fixed;top:0;left:50%;z-index:40;
-  width:clamp(44px,5.5vw,70px);height:auto;
-  border-radius:50%;pointer-events:none;
-  opacity:.92;filter:drop-shadow(0 10px 26px rgba(0,0,0,.6));
-  will-change:transform;
+  position:fixed;z-index:60;
+  top:11vh;left:14%;
+  width:clamp(96px,13vw,188px);aspect-ratio:1;
+  pointer-events:none;will-change:transform;
 }
-.js .logo-queda{display:block}
-/* No celular nao ha margem para ela cair: passa por cima do texto. Menor
-   e mais apagada, vira enfeite que atravessa a tela sem roubar a linha. */
-@media (max-width:719px){
-  .logo-queda{width:38px;opacity:.55}
+.js .lua{display:block}
+@media (prefers-reduced-motion:reduce){ .lua{display:none !important} }
+
+.lua__disco,.lua__logo{
+  position:absolute;inset:0;width:100%;height:100%;
+  border-radius:50%;display:block;
 }
-@media (prefers-reduced-motion:reduce){ .logo-queda{display:none !important} }
+/* luz fria, fora do centro, com halo — e uma lua, nao um circulo branco */
+.lua__disco{
+  opacity:0;
+  background:radial-gradient(circle at 38% 33%,
+    #fffdf6 0%, #f4edda 44%, #d9ceb5 76%, #b7aa90 100%);
+  box-shadow:
+    0 0 0 1px rgba(255,253,246,.2),
+    0 0 38px rgba(255,248,224,.5),
+    0 0 115px rgba(255,240,200,.32),
+    0 0 230px rgba(255,236,186,.18);
+}
+.lua__logo{opacity:0;object-fit:cover}
 
 /* ---------------- Topo ---------------- */
 .topo{
@@ -176,7 +195,7 @@ ol,ul{margin:0;padding:0;list-style:none}
 .topo__inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:var(--topo-h)}
 
 .marca{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--txt)}
-.marca img{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.marca img{width:36px;height:36px;border-radius:50%;object-fit:cover;pointer-events:none}
 .marca__nome{
   font-family:var(--display);font-weight:var(--peso-titulo);
   font-size:1.35rem;letter-spacing:.02em;text-transform:uppercase;

@@ -87,8 +87,11 @@ rasgando. Tudo em CSS: é estado de hover, não entrada.
 No celular o cupom vira coluna única e o dedo vira a folha: 33 sabores em
 6 cadernos de 6, com setas e fólio para quem não descobre o gesto. É montado
 em JS — sem JS ou com a janela larga, a lista inteira aparece de uma vez.
-Uma cópia da logo cai pela tela enquanto a página desce, três vezes ao
-longo da leitura; é decorativa e some sob `prefers-reduced-motion`.
+Na chegada a câmera sobe pela fachada, uma lua cheia desce no céu e vira a
+logo, que voa para a vaga do cabeçalho. Dali em diante é **essa mesma logo**
+que despenca pela página, três vezes ao longo da leitura — não há cópia. A
+sequência é pulável (rolar, clicar ou teclar encerra) e some inteira sob
+`prefers-reduced-motion`.
 
 Os subtítulos do cardápio e das três cenas só aparecem quando o ponteiro
 chega no nome. O espaço deles fica reservado desde o início (anima `opacity`
