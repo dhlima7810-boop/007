@@ -126,7 +126,55 @@ prédio amarelo e vermelho da esquina. Os tokens estão no `:root` do
 - **Encostar num sabor rasga a linha**: a linha inclina, desloca e abre
   embaixo uma faixa serrada. É hover de estado, feito em CSS — não gaste
   GSAP com isso.
+- **Preço em `tabular-nums`, não em monoespaçada.** A monoespaçada alinhava
+  as colunas mas era larga demais: `R$ 58,00` comia a linha no celular e o
+  nome do sabor quebrava em duas. `font-variant-numeric: tabular-nums` na
+  fonte do corpo dá o mesmo alinhamento numa largura bem menor.
 - **Raio pequeno** (4–8px) e pílula. Não voltar para raio grande nem sombra.
+
+## O cardápio vira página no celular
+
+Acima de 720px o cupom já lê como livro aberto, com o vinco no meio. Abaixo
+disso vira coluna única, e aí **o dedo vira a folha**: os sabores são
+repartidos em cadernos de 6 e a folha da vez gira pela lombada para
+descobrir a de baixo.
+
+O caderno é montado em JS, dentro de um `gsap.matchMedia()`, e desmontado
+quando a janela alarga. Sem JS, sem GSAP ou com a janela larga, o que fica
+na tela é **a lista inteira de uma vez** — a paginação é conforto, não
+suporte.
+
+Três coisas que não dá para mexer sem quebrar:
+
+1. **Visibilidade da folha é só da classe `e-a-folha`.** Posta inline, ela
+   sobrevive ao `clearProps` e a folha nunca mais some: em três viradas o
+   caderno vira uma pilha de páginas sobrepostas.
+2. **A altura do caderno é medida com as folhas soltas** (classe `medindo`).
+   Enquanto são `position:absolute` com `inset:0` dentro de um pai sem
+   altura, todas medem zero e o cupom fecha.
+3. **`touch-action: pan-y` no caderno.** Entrega a rolagem vertical ao
+   navegador (e ao Lenis) e guarda o arrasto horizontal para a virada. Sem
+   isso o navegador reivindica o gesto lateral como rolagem e dispara
+   `pointercancel` no meio.
+
+O gesto só é lido no soltar, e só se for claramente horizontal. Nada de
+`preventDefault`: rolar a página com o dedo em cima do cardápio continua
+sendo do Lenis, como em qualquer outro lugar. Os dois botões de seta e o
+fólio ("Página 3 de 6") existem para quem não descobre o gesto e para o
+teclado.
+
+## A logo despencando
+
+Uma cópia da logo (`#logoQueda`) cai pela tela enquanto a página desce,
+girando e bambeando. São **três quedas** ao longo da página: ela sai por
+baixo do topo, atravessa, some embaixo e volta a cair. Uma travessia só,
+esticada pelos 9 mil pixels da página, seria lenta demais para ler como
+queda.
+
+É enfeite e só: não recebe ponteiro, não entra na árvore de acessibilidade
+e some inteira sem GSAP ou sob `prefers-reduced-motion`. **Nunca ponha
+informação ali.** No celular ela é menor e mais apagada, porque não há
+margem para cair sem passar por cima do texto.
 
 ## Sem componentes
 

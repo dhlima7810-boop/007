@@ -430,18 +430,179 @@
   }
 
   /* =======================================================
-     13. A logo caindo
+     12b. O cardapio vira pagina no celular
 
-     A logo e redonda e vive no topo preso. A leitura de "caindo"
-     aqui e a de rolar: ela gira no sentido da descida, presa ao
-     scroll, e volta sozinha quando a pessoa sobe. Tween preso ao
-     scroll — por isso ease 'none' (exceção 1 do CLAUDE.md).
+     Acima de 720px o cupom ja le como livro aberto, com o vinco no
+     meio. Abaixo disso vira coluna unica — e ai o dedo vira a folha:
+     os sabores sao repartidos em cadernos de 6 e a folha da vez gira
+     pela lombada para descobrir a de baixo.
+
+     O caderno e montado em JS de proposito. Sem JS, sem GSAP ou com
+     a janela larga, o que fica na tela e a lista inteira de uma vez,
+     que e o conteudo de verdade. A paginacao e conforto, nao suporte.
      ======================================================= */
-  var logoMarca = document.querySelector('.marca__logo');
-  if (logoMarca) {
-    gsap.to(logoMarca, {
-      rotation: 720, duration: 1, ease: 'none',
-      scrollTrigger: { start: 'top top', end: 'max', scrub: .8 }
+  var lista = document.querySelector('.ticket__lista');
+
+  if (lista && gsap.matchMedia) {
+    gsap.matchMedia().add('(max-width: 719px)', function () {
+      var itens = Array.prototype.slice.call(lista.querySelectorAll('.ticket__item'));
+      if (itens.length < 8) { return; }
+
+      // a entrada em grupo prendeu esses <li> num tween com opacity 0;
+      // sem soltar antes de mover, o cardapio some no celular
+      gsap.killTweensOf(itens);
+      gsap.set(itens, { clearProps: 'all' });
+
+      var POR_PAGINA = 6;
+      var caderno = document.createElement('div');
+      caderno.className = 'ticket__caderno';
+      var folhas = [];
+
+      for (var i = 0; i < itens.length; i += POR_PAGINA) {
+        var folha = document.createElement('ol');
+        folha.className = 'ticket__folha';
+        folha.start = i + 1;
+        for (var k = i; k < Math.min(i + POR_PAGINA, itens.length); k++) {
+          folha.appendChild(itens[k]);
+        }
+        caderno.appendChild(folha);
+        folhas.push(folha);
+      }
+
+      var nav = document.createElement('div');
+      nav.className = 'ticket__nav';
+      nav.innerHTML =
+        '<button type="button" class="ticket__virar" data-dir="-1" aria-label="Página anterior do cardápio">' +
+          '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        '</button>' +
+        '<p class="ticket__folio" aria-live="polite">Página <span></span> de ' + folhas.length + '</p>' +
+        '<button type="button" class="ticket__virar" data-dir="1" aria-label="Próxima página do cardápio">' +
+          '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        '</button>';
+
+      lista.parentNode.insertBefore(caderno, lista.nextSibling);
+      caderno.parentNode.insertBefore(nav, caderno.nextSibling);
+      lista.hidden = true;
+
+      // A altura do caderno e a da folha mais alta, senao o pe do cupom
+      // sobe e desce a cada virada. Medir so depois de soltar as folhas
+      // do empilhamento: enquanto sao absolutas com inset:0 dentro de um
+      // pai sem altura, todas medem zero e o cupom fecha.
+      caderno.classList.add('medindo');
+      var alta = 0;
+      folhas.forEach(function (f) { alta = Math.max(alta, f.offsetHeight); });
+      caderno.classList.remove('medindo');
+      caderno.style.height = alta + 'px';
+
+      var atual = 0, virando = false;
+      var folio = nav.querySelector('.ticket__folio span');
+      var botoes = Array.prototype.slice.call(nav.querySelectorAll('.ticket__virar'));
+
+      function pintar() {
+        folhas.forEach(function (f, i) {
+          f.classList.toggle('e-a-folha', i === atual);
+          f.setAttribute('aria-hidden', i === atual ? 'false' : 'true');
+        });
+        folio.textContent = String(atual + 1);
+        botoes[0].disabled = atual === 0;
+        botoes[1].disabled = atual === folhas.length - 1;
+      }
+
+      function virar(destino) {
+        if (virando || destino === atual || destino < 0 || destino >= folhas.length) { return; }
+        virando = true;
+        var sai = folhas[atual], entra = folhas[destino], frente = destino > atual;
+        var pivo = { transformOrigin: 'left center', transformPerspective: 1100 };
+
+        // As duas folhas ficam visiveis durante a virada, e quem apaga a
+        // que saiu e o pintar() no fim. Visibilidade so pela classe: posta
+        // inline, ela sobrevive ao clearProps e a folha nunca mais some —
+        // em tres viradas o caderno vira uma pilha de paginas sobrepostas.
+        entra.classList.add('e-a-folha');
+
+        function fim() {
+          gsap.set([sai, entra], { clearProps: 'transform,opacity,zIndex' });
+          atual = destino; virando = false; pintar();
+        }
+
+        if (frente) {
+          // a folha da vez gira pela lombada e descobre a de baixo
+          gsap.set(entra, { zIndex: 1, rotationY: 0, opacity: 1 });
+          gsap.set(sai, Object.assign({ zIndex: 2 }, pivo));
+          gsap.to(sai, { rotationY: -112, opacity: 0, duration: .9, ease: 'expo.inOut', onComplete: fim });
+        } else {
+          // voltando, a folha anterior desce de volta por cima
+          gsap.set(sai, { zIndex: 1 });
+          gsap.set(entra, Object.assign({ zIndex: 2, rotationY: -112, opacity: 0 }, pivo));
+          gsap.to(entra, { rotationY: 0, opacity: 1, duration: .9, ease: 'expo.inOut', onComplete: fim });
+        }
+      }
+
+      botoes.forEach(function (b) {
+        b.addEventListener('click', function () { virar(atual + (+b.dataset.dir)); });
+      });
+
+      // O gesto so e lido no soltar, e so se for claramente horizontal.
+      // Nada de preventDefault: a rolagem vertical com o dedo em cima do
+      // cardapio continua sendo do Lenis, como em qualquer outro lugar.
+      var px = null, py = null;
+      caderno.addEventListener('pointerdown', function (e) { px = e.clientX; py = e.clientY; });
+      caderno.addEventListener('pointercancel', function () { px = null; });
+      caderno.addEventListener('pointerup', function (e) {
+        if (px === null) { return; }
+        var dx = e.clientX - px, dy = e.clientY - py;
+        px = null;
+        if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+          virar(atual + (dx < 0 ? 1 : -1));
+        }
+      });
+
+      pintar();
+      ScrollTrigger.refresh();
+
+      // desmontagem: a janela alargou, o livro volta a ser lista
+      return function () {
+        gsap.killTweensOf(folhas);
+        folhas.forEach(function (f) {
+          while (f.firstChild) { lista.appendChild(f.firstChild); }
+        });
+        gsap.set(lista.querySelectorAll('.ticket__item'), { clearProps: 'all' });
+        caderno.remove(); nav.remove(); lista.hidden = false;
+        ScrollTrigger.refresh();
+      };
+    });
+  }
+
+  /* =======================================================
+     13. A logo despencando
+
+     Ela cai de verdade pela tela, girando, presa ao scroll: subir a
+     pagina faz a queda voltar. Tween preso ao scroll — por isso
+     ease 'none' (exceção 1 do CLAUDE.md).
+     ======================================================= */
+  var queda = document.getElementById('logoQueda');
+  if (queda) {
+    gsap.set(queda, { xPercent: -50, y: -180 });
+
+    // Tres quedas ao longo da pagina: ela sai por baixo do topo, atravessa a
+    // tela, some embaixo e volta a cair. Uma travessia so, esticada pelos
+    // 9 mil pixels da pagina, seria lenta demais para ler como queda.
+    var cair = gsap.timeline({
+      scrollTrigger: { start: 'top top', end: 'max', scrub: .7, invalidateOnRefresh: true }
+    });
+    for (var q = 0; q < 3; q++) {
+      cair.fromTo(queda,
+        { y: -180 },
+        { y: function () { return window.innerHeight + 180; },
+          rotation: '+=760', duration: 1, ease: 'none' });
+    }
+
+    // o bamboleio lateral: sem ele a queda vira um elevador descendo
+    var balanco = Math.min(window.innerWidth * .2, 190);
+    gsap.to(queda, {
+      keyframes: { x: [0, balanco, -balanco * .75, balanco * 1.05, -balanco * .5, balanco * .8, 0] },
+      ease: 'none',
+      scrollTrigger: { start: 'top top', end: 'max', scrub: .7 }
     });
   }
 

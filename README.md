@@ -84,6 +84,12 @@ vinco de livro entre as duas colunas e a assinatura da casa no pé. Encostar
 num sabor inclina a linha e abre embaixo uma faixa serrada — o comprovante
 rasgando. Tudo em CSS: é estado de hover, não entrada.
 
+No celular o cupom vira coluna única e o dedo vira a folha: 33 sabores em
+6 cadernos de 6, com setas e fólio para quem não descobre o gesto. É montado
+em JS — sem JS ou com a janela larga, a lista inteira aparece de uma vez.
+Uma cópia da logo cai pela tela enquanto a página desce, três vezes ao
+longo da leitura; é decorativa e some sob `prefers-reduced-motion`.
+
 Os subtítulos do cardápio e das três cenas só aparecem quando o ponteiro
 chega no nome. O espaço deles fica reservado desde o início (anima `opacity`
 e `transform`, nunca `max-height`), em tela de toque ficam sempre abertos, e
