@@ -140,9 +140,31 @@ prédio amarelo e vermelho da esquina. Os tokens estão no `:root` do
 São **111 itens** em seis seções. Uma lista corrida com 111 linhas não se lê,
 então o cardápio é um objeto: fechado é uma capa, aberto é um livro.
 
-**A capa** é um `<button>` — tocar em qualquer parte dela gira a capa pela
-lombada (`rotationY`, origem à esquerda) e descobre o miolo. Sendo botão, o
-teclado e o leitor de tela chegam junto, com `aria-expanded`.
+**A capa é a primeira folha do livro.** Ela não sai de cena por fora: vira na
+**mesma lombada** que as páginas, no mesmo gesto, e pousa como página da
+esquerda — é o cardápio na mão. Abrir e fechar não são um efeito à parte, são
+a folha 0 girando; voltar da primeira abertura **fecha o cardápio**.
+
+Sendo um `<button>`, o teclado e o leitor de tela chegam junto, com
+`aria-expanded`. Tocar nela chama `virar(1)`, e o arrasto a conduz como
+conduz qualquer página.
+
+Com o livro **fechado** só a capa existe na tela. Três coisas fazem isso, e
+as três correm junto do giro:
+
+- **as abas, a navegação e o pé saem do fluxo** (CSS, sob `.js`), então a
+  altura do livro cai para a altura da capa; ao abrir, ela cresce até a
+  altura cheia no mesmo tempo do giro;
+- **o papel apaga** (`.livro__papel`). Ele mora no `.livro`, e não no miolo,
+  por dois motivos: o miolo recorta o que sai dele (`overflow:hidden`) e
+  cortaria a sombra projetada, e separado ele pode acender e apagar em GSAP;
+- **a área do livro desliza** um quarto da largura (`xPercent: -25`), que é
+  meia página: é isso que deixa a capa no meio da tela com o livro fechado e
+  a traz para o lugar da página da direita ao abrir. A fita acompanha o
+  deslize — parada no meio da tela ela ficaria por cima do texto.
+
+Nada disso tem tween próprio: tudo é função do ângulo da folha 0, para abrir
+no dedo ficar igual a abrir no toque.
 
 ### A capa tem corpo, e o ouro mora na ponta
 
@@ -159,11 +181,18 @@ O dono recusou duas vezes a capa chapada. O que ficou de pé:
   lombada. A moldura interna continua, mas é acabamento.
 - **A cor do couro não muda.** Foi aprovada; só a espessura e o ouro estavam
   errados.
-- **Fechado, o cardápio tem altura de cardápio.** Sem isso a capa herda a
-  altura do livro aberto e vira um muro de couro com a logo perdida no meio.
-  A altura é posta em JS (o miolo já é `overflow:hidden`) e vai para `auto` ao
-  abrir, no mesmo tempo da capa girando. Aqui animar altura sai barato: o
-  caderno já tem altura fixa em px e nada dentro dele reflui a cada quadro.
+- **A face da capa não recorta** (`overflow:visible`). O corte das páginas e
+  a sombra caem fora da caixa dela e sumiriam.
+
+### Quantos itens por página é a proporção da capa
+
+A capa é uma folha do livro, então ela é **tão alta quanto a página mais
+alta** — e quem decide a altura da página é quantos itens cabem nela. Com 12
+por página a capa saía **1:2,45**: uma tira de couro, não um cardápio.
+
+Hoje são **9 por página espalhado e 8 no estreito**, e o livro vai até
+1080px, o que põe a capa perto de **1:1,5** no desktop. Mexeu num desses
+números, confira a proporção antes de dar por bom.
 
 ### O livro abre em duas páginas
 
@@ -177,16 +206,16 @@ Foi isso que resolveu o "é muito grande": no feitio antigo a folha varria a
 
 A montagem é em duas etapas, e nesta ordem:
 
-1. **as páginas** (`.ticket__pag`) — 12 itens cada quando espalhado, 9 em
+1. **as páginas** (`.ticket__pag`) — 9 itens cada quando espalhado, 8 em
    coluna única no estreito. **Nenhuma mistura seções**: cada uma pertence a
    uma e leva o nome dela no alto, senão a pessoa perde o fio.
 2. **as folhas** (`.ticket__folha`) — espalhado, cada folha tem **duas
    faces**: a frente é sempre a página da direita, o verso sempre a da
    esquerda. É por isso que o respiro da lombada pode ser fixo em cada uma.
 
-A face 0 é **o lado de dentro da capa, em branco**. Ela existe para o livro
-já abrir com as duas páginas cheias (a abertura começa em 1, não em 0) e
-nunca chega a aparecer, porque não se volta aquém da primeira.
+**A face 0 é a capa**, e o estado 0 é o livro fechado. Daí para a frente,
+espalhado a página `p` está na abertura `ceil((p+1)/2)`; solta, ela é a folha
+`p+1`, porque a folha 0 é a capa.
 
 Numa pilha assim **não há folha escondida**: as já viradas ficam à esquerda,
 com a última por cima; as que faltam ficam à direita, com a da vez por cima.
@@ -293,10 +322,11 @@ destes três lugares:
 Geometria fixa, nenhum `transform` que a virada toque, e
 `pointer-events:none`, senão ela rouba o toque dos itens.
 
-Ela começa **onde a lista da página começa** (`--fita-y`, escrito em JS), e
-não no alto da folha: acima disso o nome da seção e a nota ocupam a largura
-inteira e a fita passava por cima do texto. O recuo é o maior de todas as
-páginas — um número só, igual em qualquer abertura.
+Ela desce **do alto da página** (`--fita-y`, escrito em JS) e sai pela base,
+como fita presa na cabeça da lombada. No livro aberto nenhum texto chega ao
+vão — as duas faces têm respiro na lombada, e é por ali que ela passa. No
+feitio antigo, de página única, a nota da seção atravessava o meio e a fita
+passava por cima dela; por isso começava mais abaixo.
 
 **Só acima de 720px**, onde o livro abre em duas páginas e ela cai bem na
 lombada, e **só com o livro aberto**: fechado, o miolo tem altura de capa e a

@@ -550,8 +550,9 @@
   var livro = document.getElementById('livro');
   var miolo = document.getElementById('livroMiolo');
   var capa = document.getElementById('livroCapa');
+  var papel = document.getElementById('livroPapel');
 
-  if (livro && miolo && capa && gsap.matchMedia) {
+  if (livro && miolo && capa && papel && gsap.matchMedia) {
     // Duas condicoes, nao uma sempre verdadeira: e a troca entre elas que
     // remonta o livro quando a janela cruza os 720px. Com uma condicao so,
     // o numero de itens por folha ficaria congelado na largura da chegada.
@@ -561,8 +562,12 @@
     }, function (contexto) {
       // Acima de 720px o livro abre em DUAS paginas, com a dobradica na
       // lombada do meio: 12 itens de cada lado, os mesmos 24 de antes.
+      // Quantos itens cabem numa pagina e o que decide a PROPORCAO da capa:
+      // a capa e uma folha do livro, entao ela e tao alta quanto a pagina
+      // mais alta. Com 12 por pagina ela saia 1:2,45 — uma tira de couro,
+      // nao um cardapio. Nestes numeros a capa fica perto de 1:1,5.
       var espalhado = !!contexto.conditions.largo;
-      var porPagina = espalhado ? 12 : 9;
+      var porPagina = espalhado ? 9 : 8;
 
       var blocos = Array.prototype.slice.call(miolo.querySelectorAll('.secao-card'));
       if (!blocos.length) { return; }
@@ -639,18 +644,30 @@
         return f;
       }
 
+      // A CAPA E A FRENTE DA PRIMEIRA FOLHA. Ela nao sai de cena por fora
+      // do livro: vira na mesma lombada que as paginas e pousa como pagina
+      // da esquerda, como um cardapio na mao. Fechado o livro e so ela.
+      var faceCapa = document.createElement('div');
+      faceCapa.className = 'ticket__face ticket__face--frente ticket__face--capa';
+      faceCapa.appendChild(capa);
+
       if (espalhado) {
         faces = [null].concat(paginas);
         if (faces.length % 2) { faces.push(null); }
         for (var f = 0; f < faces.length; f += 2) {
           var folha = document.createElement('div');
           folha.className = 'ticket__folha';
-          folha.appendChild(montarFace(faces[f], 'frente'));
+          folha.appendChild(f === 0 ? faceCapa : montarFace(faces[f], 'frente'));
           folha.appendChild(montarFace(faces[f + 1], 'verso'));
           areaLivro.appendChild(folha);
           folhas.push(folha);
         }
       } else {
+        var folhaCapa = document.createElement('div');
+        folhaCapa.className = 'ticket__folha';
+        folhaCapa.appendChild(faceCapa);
+        areaLivro.appendChild(folhaCapa);
+        folhas.push(folhaCapa);
         paginas.forEach(function (pag) {
           var folha = document.createElement('div');
           folha.className = 'ticket__folha';
@@ -661,14 +678,15 @@
         });
       }
 
-      // o primeiro e o ultimo estado do livro, e em que estado cada
-      // pagina aparece. Espalhado, a pagina p esta na abertura
-      // ceil((p+1)/2); solta, ela e a propria folha p.
-      var primeiro = espalhado ? 1 : 0;
-      var ultimo = espalhado ? Math.ceil(paginas.length / 2) : paginas.length - 1;
-      function aberturaDa(p) { return espalhado ? Math.ceil((p + 1) / 2) : p; }
+      // O estado 0 e o livro FECHADO, com a capa por cima. Dali para a
+      // frente, espalhado a pagina p esta na abertura ceil((p+1)/2);
+      // solta, ela e a folha p+1, porque a folha 0 e a capa.
+      var primeiro = 0;
+      var ultimo = espalhado ? Math.ceil(paginas.length / 2) : paginas.length;
+      function aberturaDa(p) { return espalhado ? Math.ceil((p + 1) / 2) : p + 1; }
       function visiveis(i) {
-        if (!espalhado) { return [paginas[i]]; }
+        if (i < 1) { return []; }
+        if (!espalhado) { return [paginas[i - 1]]; }
         return [faces[2 * i - 1], faces[2 * i]].filter(Boolean);
       }
 
@@ -696,8 +714,7 @@
       nav.className = 'ticket__nav';
       nav.innerHTML =
         '<button type="button" class="ticket__virar" data-dir="-1" aria-label="Página anterior do cardápio">' + seta(-1) + '</button>' +
-        '<p class="ticket__folio" aria-live="polite">Página <span></span> de ' +
-        (espalhado ? ultimo : paginas.length) + '</p>' +
+        '<p class="ticket__folio" aria-live="polite">Página <span></span> de ' + ultimo + '</p>' +
         '<button type="button" class="ticket__virar" data-dir="1" aria-label="Próxima página do cardápio">' + seta(1) + '</button>';
 
       blocos.forEach(function (b) { b.hidden = true; });
@@ -721,34 +738,45 @@
       // entrar na perspectiva das folhas: assim nenhum destes numeros
       // muda ao virar a pagina — a fita continua fita. A classe so entra
       // com o livro montado, entao sem JS nao ha fita.
-      // Ela comeca onde o vao das duas colunas comeca, e nao no alto da
-      // folha: acima disso o cabecalho da secao e a nota ocupam a largura
-      // inteira e a fita passaria por cima do texto. O recuo e o MAIOR de
-      // todas as folhas (a primeira de cada secao leva nota e e a mais
-      // baixa), entao vale para todas — e e um numero so, igual em
-      // qualquer pagina: a fita nao muda ao virar.
-      var recuo = 0;
-      paginas.forEach(function (p) {
-        var l = p.querySelector('.ticket__lista');
-        if (l) { recuo = Math.max(recuo, l.offsetTop); }
-      });
-      recuo = Math.max(0, recuo - 10);
-      livro.style.setProperty('--fita-y', (miolo.offsetTop + caderno.offsetTop + recuo) + 'px');
-      livro.style.setProperty('--fita-h', (alta - recuo + 54) + 'px');
+      // Ela desce do alto da pagina, como fita presa na cabeca da lombada,
+      // e sai pela base. No livro aberto nada de texto chega ao vao: as
+      // duas faces tem respiro na lombada, e e por ali que ela passa.
+      livro.style.setProperty('--fita-y', (miolo.offsetTop + caderno.offsetTop) + 'px');
+      livro.style.setProperty('--fita-h', (alta + 54) + 'px');
       livro.classList.add('livro--fita');
+      var fita = livro.querySelector('.livro__fita');
 
-      // Fechado, o cardapio tem altura de cardapio. Sem isto a capa herda
-      // a altura do livro aberto e vira um muro de couro de 1300px com a
-      // logo perdida no meio. O miolo ja e overflow:hidden (o recorte que
-      // segura a folha girando), entao basta a altura; ao abrir, ela vai
-      // para auto junto com a capa girando.
-      var fechada = Math.max(540, Math.min(miolo.offsetHeight, window.innerHeight * .86));
-      gsap.set(miolo, { height: fechada });
+      // As duas alturas do livro. Fechado ele e so a capa: as abas, a
+      // navegacao e o pe saem do fluxo (CSS), e a altura cai para a do
+      // caderno. Ao abrir, a altura cresce no mesmo tempo da capa virando.
+      // Animar altura reflui, mas aqui sai barato: o caderno ja tem altura
+      // fixa em px e nada dentro dele reflui a cada quadro.
+      livro.classList.add('aberto');
+      var alturaAberta = miolo.offsetHeight;
+      livro.classList.remove('aberto');
+      var alturaFechada = miolo.offsetHeight;
 
       var atual = primeiro, virando = false;
       var folio = nav.querySelector('.ticket__folio span');
       var botoes = Array.prototype.slice.call(nav.querySelectorAll('.ticket__virar'));
       var listaAbas = Array.prototype.slice.call(abas.querySelectorAll('.livro__aba'));
+
+      // o livro fechado ou aberto, em estado parado. Quem abre e fecha de
+      // verdade e a folha 0 virando; isto so assenta o resultado.
+      // o quanto o livro desliza para a capa ficar no meio da tela com ele
+      // fechado: um quarto da largura, que e metade de uma pagina
+      function deslize() { return (areaLivro.offsetWidth || 0) * .25; }
+
+      function vestir() {
+        var aberto = atual > 0;
+        livro.classList.toggle('aberto', aberto);
+        capa.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+        gsap.set(papel, { autoAlpha: aberto ? 1 : 0 });
+        gsap.set(fita, { autoAlpha: aberto ? 1 : 0, x: 0 });
+        if (espalhado) { gsap.set(areaLivro, { xPercent: aberto ? 0 : -25 }); }
+        if (aberto) { gsap.set(miolo, { clearProps: 'height' }); }
+        else { gsap.set(miolo, { height: alturaFechada }); }
+      }
 
       function pintar() {
         if (espalhado) {
@@ -772,7 +800,7 @@
         paginas.forEach(function (p) {
           p.setAttribute('aria-hidden', aberta.indexOf(p) < 0 ? 'true' : 'false');
         });
-        folio.textContent = String(espalhado ? atual : atual + 1);
+        folio.textContent = String(Math.max(1, atual));
         botoes[0].disabled = faixaAnt.disabled = atual === primeiro;
         botoes[1].disabled = faixaProx.disabled = atual === ultimo;
         var secoes = aberta.map(function (p) { return p.dataset.secao; });
@@ -780,6 +808,7 @@
           a.setAttribute('aria-current',
             secoes.indexOf(a.dataset.secao) >= 0 ? 'true' : 'false');
         });
+        vestir();
       }
 
       // A virada e de folha, nao de cartao. Tres coisas fazem a diferenca:
@@ -804,6 +833,13 @@
       function montar(destino) {
         var frente = destino > atual;
         var movida;
+
+        // Abrir e fechar NAO sao um efeito a parte: sao a folha 0 virando.
+        // O que corre junto do giro e o resto do livro aparecendo — o
+        // papel acende, a altura cresce e, espalhado, o livro desliza do
+        // lugar onde so a capa aparecia para o lugar das duas paginas.
+        var cruza = (atual === 0 || destino === 0);
+        if (cruza) { livro.classList.add('aberto'); }
 
         if (espalhado) {
           // A folha que anima e a ULTIMA a virar, indo, e a PRIMEIRA a
@@ -842,11 +878,24 @@
           desenhar: function (g) {
             gsap.set(movida, { rotationY: g });
             sombra(movida, g);
+            if (!cruza) { return; }
+            var t = Math.abs(g - (frente ? 0 : -180)) / 180;
+            var k = destino > 0 ? t : 1 - t;   // 0 = fechado, 1 = aberto
+            gsap.set(miolo, { height: alturaFechada + (alturaAberta - alturaFechada) * k });
+            gsap.set(papel, { autoAlpha: k });
+            // a fita acompanha o livro deslizando: ela esta DENTRO dele, e
+            // parada no meio da tela ficaria por cima do texto da pagina
+            gsap.set(fita, {
+              autoAlpha: k,
+              x: espalhado ? -deslize() * (1 - k) : 0
+            });
+            if (espalhado) { gsap.set(areaLivro, { xPercent: -25 * (1 - k) }); }
           },
           fim: function (chegou) {
             sombra(movida, 0);
             if (chegou) { atual = destino; }
             virando = false; pintar();
+            if (cruza) { ScrollTrigger.refresh(); }
           }
         };
       }
@@ -973,32 +1022,8 @@
 
       pintar();
 
-      // ---- a capa ----
-      var aberto = false;
-      function abrir() {
-        if (aberto) { return; }
-        aberto = true;
-        livro.classList.add('aberto');
-        capa.setAttribute('aria-expanded', 'true');
-        gsap.to(capa, {
-          rotationY: -118, opacity: 0,
-          transformOrigin: 'left center', transformPerspective: 1400,
-          duration: .9, ease: 'expo.inOut',
-          onComplete: function () { gsap.set(capa, { autoAlpha: 0 }); ScrollTrigger.refresh(); }
-        });
-        gsap.from(miolo, { opacity: .3, duration: .9, ease: 'power3.out' });
-        // o livro cresce para a altura cheia no mesmo tempo da capa. Animar
-        // altura reflui, mas aqui sai barato: o caderno ja tem altura fixa
-        // em px e nada dentro dele reflui a cada quadro.
-        gsap.to(miolo, {
-          height: 'auto', duration: .9, ease: 'expo.inOut',
-          onComplete: function () {
-            gsap.set(miolo, { clearProps: 'height' });
-            ScrollTrigger.refresh();
-          }
-        });
-      }
-      capa.addEventListener('click', abrir);
+      // tocar na capa vira a primeira folha — e isso e abrir o cardapio
+      capa.addEventListener('click', function () { virar(1); });
 
       ScrollTrigger.refresh();
 
@@ -1013,7 +1038,9 @@
         blocos.forEach(function (b) { b.hidden = false; });
         gsap.set(miolo.querySelectorAll('.ticket__item'), { clearProps: 'all' });
         gsap.set(miolo, { clearProps: 'height,opacity' });
-        gsap.set(capa, { clearProps: 'all' });
+        gsap.set([capa, papel], { clearProps: 'all' });
+        // a capa volta para o lugar dela no HTML, antes do miolo
+        livro.insertBefore(capa, miolo);
         livro.classList.remove('aberto');
         livro.classList.remove('livro--fita');
         livro.style.removeProperty('--fita-y');

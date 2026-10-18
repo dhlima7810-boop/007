@@ -1478,6 +1478,12 @@
          da secao certa. O JSON-LD do <head> e gerado lendo daqui.
          ========================================================= -->
     <div class="livro" id="livro">
+      <!-- o papel do cardápio. Fica fora do miolo porque o miolo recorta
+           (overflow:hidden) e a sombra projetada seria cortada; e fica
+           separado da folha porque some com o livro fechado, quando só a
+           capa aparece. -->
+      <div class="livro__papel" id="livroPapel" aria-hidden="true"></div>
+
       <button class="livro__capa" id="livroCapa" type="button"
               aria-expanded="false" aria-controls="livroMiolo">
         <span class="livro__lombada" aria-hidden="true"></span>

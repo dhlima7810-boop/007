@@ -561,7 +561,7 @@ ol,ul{margin:0;padding:0;list-style:none}
    lista inteira dos 111 itens aparece de uma vez. A capa e conforto,
    nunca suporte.
    ----------------------------------------------------------- */
-.livro{position:relative;margin-top:clamp(3rem,6vw,4.5rem);max-width:860px}
+.livro{position:relative;margin-top:clamp(3rem,6vw,4.5rem);max-width:1080px}
 
 .livro__capa{
   display:none;
@@ -589,9 +589,13 @@ ol,ul{margin:0;padding:0;list-style:none}
     8px 9px 0 0 #dccfb3,
     8px 12px 0 0 #c9b995,
     inset 20px 0 24px -16px rgba(0,0,0,.95),
-    0 34px 72px rgba(0,0,0,.7);
+    0 18px 40px rgba(0,0,0,.66);
   -webkit-tap-highlight-color:transparent;
 }
+/* a capa e a frente da PRIMEIRA FOLHA do livro: ela vira na mesma lombada
+   que as paginas e pousa como pagina da esquerda. A face dela nao recorta,
+   senao o corte das paginas e a sombra — que caem fora da caixa — sumiam. */
+.ticket__face--capa{overflow:visible;background:transparent;padding:0}
 .js .livro__capa{display:grid}
 @media (prefers-reduced-motion:reduce){ .livro__capa{display:none !important} }
 .livro.aberto .livro__capa{pointer-events:none}
@@ -702,25 +706,41 @@ ol,ul{margin:0;padding:0;list-style:none}
 }
 .livro__capa:hover .livro__dica{color:var(--ouro)}
 
-/* ---- o miolo: folha de papel ---- */
-.ticket{
-  --faixa:clamp(26px,5%,54px);
-  position:relative;
-  background:var(--papel);color:var(--txt-escuro);
-  padding:clamp(1.4rem,2.6vw,2rem) clamp(1.1rem,2vw,1.6rem);
+/* ---- o papel do cardapio ----
+   Mora no .livro, nao no miolo: o miolo recorta o que sai dele
+   (overflow:hidden, o recorte que segura a folha girando) e cortaria a
+   sombra projetada. E fica separado porque ele SOME com o livro fechado,
+   quando a unica coisa na tela e a capa — a transicao e do GSAP. */
+.livro__papel{
+  position:absolute;inset:0;pointer-events:none;
+  background:var(--papel);
   border-radius:3px 7px 7px 3px;
   /* folhas empilhadas na borda direita */
   box-shadow:
     0 20px 44px rgba(0,0,0,.5),
     3px 0 0 -1px rgba(25,20,19,.14),
     7px 0 0 -2px rgba(25,20,19,.1);
-  overflow:hidden;
 }
 /* o fio vermelho da casa, no alto da folha */
-.ticket::before{
+.livro__papel::before{
   content:'';position:absolute;left:0;right:0;top:0;height:4px;
   background:var(--acao);
 }
+
+/* ---- o miolo ---- */
+.ticket{
+  --faixa:clamp(26px,5%,54px);
+  position:relative;
+  color:var(--txt-escuro);
+  padding:clamp(1.4rem,2.6vw,2rem) clamp(1.1rem,2vw,1.6rem);
+  overflow:hidden;
+}
+/* Fechado, o cardapio e so a capa: as abas, a navegacao e o pe saem do
+   fluxo para a altura do livro ser a altura da capa, e o papel apaga. */
+.js .livro:not(.aberto) .livro__abas,
+.js .livro:not(.aberto) .ticket__nav,
+.js .livro:not(.aberto) .ticket__pe,
+.js .livro:not(.aberto) .folha-virar{display:none}
 
 /* ---- cabeçalho de cada seção ---- */
 .secao-card__nome{
@@ -867,10 +887,12 @@ ol,ul{margin:0;padding:0;list-style:none}
 
 /* a area do livro: o recuo lateral e o que deixa as faixas de virar fora
    do alcance dos itens — entre elas fica so o texto do cardapio */
+/* Sem fundo de proposito: quem traz o papel sao as faces. Fechado, a
+   metade esquerda tem de ficar VAZIA — se a area tivesse fundo, a capa
+   apareceria sobre um retangulo de papel do tamanho do livro aberto. */
 .ticket__livro{
   position:absolute;inset:0 var(--faixa);
   transform-style:preserve-3d;
-  background:var(--papel);
 }
 
 .ticket__folha{
