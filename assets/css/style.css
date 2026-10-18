@@ -990,18 +990,41 @@ ol,ul{margin:0;padding:0;list-style:none}
 /* ---------------- Responsivo ---------------- */
 @media (max-width:860px){
   .menu-btn{display:flex}
-  /* sem JS o botao nao faz nada e a nav ja aparece inteira: botao morto some */
-  html:not(.js) .menu-btn{display:none}
   .nav{
     position:absolute;top:100%;left:0;right:0;
     flex-direction:column;align-items:stretch;gap:0;
     background:rgba(18,16,16,.98);backdrop-filter:blur(14px);
     border-bottom:1px solid var(--fio);
-    padding:0 var(--gutter);
-    max-height:0;overflow:hidden;
-    transition:max-height .7s var(--dupla), padding .7s var(--dupla);
+    padding:.5rem var(--gutter) 1.5rem;
   }
-  .nav.aberto{max-height:26rem;padding:.5rem var(--gutter) 1.5rem}
+
+  /* O estado FECHADO mora sob `.js`, e so sob `.js`. Sem JavaScript nao ha
+     quem abra o menu: a nav precisa chegar aberta, senao os seis links
+     ficam recortados por `max-height:0` e inalcancaveis — medido com
+     elementFromPoint, nenhum deles recebia o ponteiro. Sem JS ela sai do
+     dropdown e empilha no proprio cabecalho, em vez de cobrir o hero. */
+  html:not(.js) .topo__inner{flex-wrap:wrap}
+  html:not(.js) .nav{
+    position:static;width:100%;
+    background:none;backdrop-filter:none;border-bottom:0;
+    padding:0 0 .75rem;
+  }
+  html:not(.js) .menu-btn{display:none}
+
+  /* visibility tira os links da ordem de tabulacao. Recortados so por
+     max-height eles continuavam focaveis: o Tab entrava nos seis e o foco
+     sumia da tela, sem anel visivel em lugar nenhum (WCAG 2.4.7). O atraso
+     de 0.7s segura a visibilidade ate a animacao de fechar terminar. */
+  .js .nav{
+    max-height:0;overflow:hidden;padding-block:0;visibility:hidden;
+    transition:max-height .7s var(--dupla), padding .7s var(--dupla),
+               visibility 0s linear .7s;
+  }
+  .js .nav.aberto{
+    max-height:26rem;padding-block:.5rem 1.5rem;visibility:visible;
+    transition:max-height .7s var(--dupla), padding .7s var(--dupla),
+               visibility 0s linear 0s;
+  }
   .nav a{padding:.95rem 0;border-bottom:1px solid var(--fio);font-size:1rem}
   .nav__cta{margin-top:1rem;text-align:center;border-bottom:1px solid var(--fio-forte)}
 

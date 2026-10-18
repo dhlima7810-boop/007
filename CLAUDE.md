@@ -278,6 +278,28 @@ A página precisa continuar legível e utilizável nas três situações:
 
 Nunca deixe conteúdo visível só por efeito de animação.
 
+### Medir alcance é `elementFromPoint`, não `getBoundingClientRect`
+
+Um elemento recortado por `overflow:hidden` de um ancestral **continua com
+retângulo não-zero**. Testar `getBoundingClientRect().width > 1` dá "visível"
+para conteúdo que ninguém alcança — foi assim que o menu quebrado passou por
+um teste meu.
+
+O teste que vale: `document.elementFromPoint` no centro do elemento devolve
+ele mesmo (ou um filho dele)? Se devolver outra coisa, está inalcançável.
+
+### O menu fechado mora sob `.js`
+
+O estado fechado do menu do celular (`max-height:0`) é `.js .nav`, e só. Sem
+JavaScript não há quem abra: a nav tem de **chegar aberta**, empilhada no
+próprio cabeçalho (`position:static`), em vez de ficar como dropdown
+recortado. Medido antes: nenhum dos seis links recebia o ponteiro.
+
+O fechado também leva `visibility:hidden`, com atraso de 0.7s na transição
+para a animação de fechar terminar antes. Recortados só por `max-height`, os
+links continuavam **focáveis**: o Tab entrava nos seis e o foco sumia da tela,
+sem anel visível em lugar nenhum (WCAG 2.4.7).
+
 ### A logo do cabeçalho nasce apagada sob `.js`
 
 `.js .marca__logo{opacity:0}` existe para ela não piscar entre o script do
