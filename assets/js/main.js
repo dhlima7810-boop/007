@@ -679,11 +679,23 @@
         });
       }
 
+      // A virada e de folha, nao de cartao. Tres coisas fazem a diferenca:
+      //
+      // 1. NADA de opacidade. Papel nao desbota ao virar. A folha gira ate
+      //    -180 e, com backface-visibility:hidden, some sozinha ao passar
+      //    da vertical — que e exatamente o que uma folha faz.
+      // 2. A perspectiva mora no conteiner (CSS), entao a folha afunila
+      //    para a lombada em vez de inclinar como imagem plana.
+      // 3. A sombra do ::after corre junto do giro: cresce ate a vertical
+      //    e e o que da volume ao papel.
+      //
+      // power3.inOut e nao expo.inOut: a expo tem um talo quase reto no
+      // meio e a folha parece saltar. A power3 sai, acelera e assenta —
+      // o jeito de quem passa o dedo.
       function virar(destino) {
         if (virando || destino === atual || destino < 0 || destino >= folhas.length) { return; }
         virando = true;
         var sai = folhas[atual], entra = folhas[destino], frente = destino > atual;
-        var pivo = { transformOrigin: 'left center', transformPerspective: 1100 };
 
         // As duas folhas ficam visiveis durante a virada, e quem apaga a
         // que saiu e o pintar() no fim. Visibilidade so pela classe: posta
@@ -692,18 +704,28 @@
 
         function fim() {
           gsap.set([sai, entra], { clearProps: 'transform,opacity,zIndex' });
+          sombra(sai, 0); sombra(entra, 0);
           atual = destino; virando = false; pintar();
         }
+        function sombra(el, v) { el.style.setProperty('--sombra-folha', v); }
 
-        if (frente) {
-          gsap.set(entra, { zIndex: 1, rotationY: 0, opacity: 1 });
-          gsap.set(sai, Object.assign({ zIndex: 2 }, pivo));
-          gsap.to(sai, { rotationY: -112, opacity: 0, duration: .9, ease: 'expo.inOut', onComplete: fim });
-        } else {
-          gsap.set(sai, { zIndex: 1 });
-          gsap.set(entra, Object.assign({ zIndex: 2, rotationY: -112, opacity: 0 }, pivo));
-          gsap.to(entra, { rotationY: 0, opacity: 1, duration: .9, ease: 'expo.inOut', onComplete: fim });
-        }
+        var movida = frente ? sai : entra;
+        var parada = frente ? entra : sai;
+        gsap.set(parada, { zIndex: 1, rotationY: 0 });
+        gsap.set(movida, { zIndex: 2, rotationY: frente ? 0 : -180 });
+
+        var g = { r: frente ? 0 : -180 };
+        gsap.to(g, {
+          r: frente ? -180 : 0,
+          duration: 1.1, ease: 'power3.inOut',
+          onUpdate: function () {
+            gsap.set(movida, { rotationY: g.r });
+            // a sombra e maxima na vertical e volta a zero nas pontas
+            movida.style.setProperty('--sombra-folha',
+              (Math.sin(Math.abs(g.r) * Math.PI / 180) * 0.9).toFixed(3));
+          },
+          onComplete: fim
+        });
       }
 
       botoes.forEach(function (b) {
@@ -811,12 +833,27 @@
       var berco = centroNatural();
       if (!wm) { return { x: 0, y: window.innerHeight + 180, escala: 1 }; }
       var maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      var r = wm.getBoundingClientRect();
-      var topoNoFim = r.top + window.scrollY - maxScroll;
-      var tamanho = r.height * .78;                       // proporcional ao wordmark
+
+      // O retangulo do <p> e a largura do CONTEINER, nao a do texto — por
+      // ele a logo pousava la na margem, longe do nome. Um Range sobre o
+      // conteudo devolve a caixa do texto de verdade, e e ao lado DELE que
+      // ela tem de parar.
+      var faixa = document.createRange();
+      faixa.selectNodeContents(wm);
+      var texto = faixa.getBoundingClientRect();
+      var bloco = wm.getBoundingClientRect();
+      if (!texto.width) { texto = bloco; }
+
+      var tamanho = texto.height * .72;                   // proporcional ao nome
+      var centroX = texto.right + tamanho * .66;          // logo depois do "MIA"
+      // se nao couber ao lado, encosta na borda do conteudo em vez de sair
+      var limite = bloco.right - tamanho / 2;
+      if (centroX > limite) { centroX = limite; }
+
+      var topoNoFim = texto.top + window.scrollY - maxScroll;
       return {
-        x: (r.right - tamanho * .72) - berco.x,
-        y: (topoNoFim + r.height / 2) - berco.y,
+        x: centroX - berco.x,
+        y: (topoNoFim + texto.height / 2) - berco.y,
         escala: tamanho / (logoTopo.offsetWidth || 36)
       };
     }

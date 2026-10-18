@@ -168,6 +168,24 @@ O gesto de arrasto continua valendo nos dois sentidos, e só é lido no soltar,
 e só se for claramente horizontal — um toque parado tem `dx` pequeno e não
 vira nada.
 
+### A virada é de folha, não de cartão
+
+Três coisas fazem a diferença, e as três são fáceis de desfazer sem perceber:
+
+1. **Nada de opacidade.** Papel não desbota ao virar. A folha gira até
+   `-180` e, com `backface-visibility:hidden`, some sozinha ao passar da
+   vertical — que é exatamente o que uma folha faz.
+2. **A perspectiva mora no contêiner**, no CSS do `.ticket__caderno`, nunca
+   em `transformPerspective` por tween. Por tween, cada folha ganha o seu
+   próprio ponto de fuga e a virada lê como carta girando no vazio.
+3. **A sombra corre junto do giro** (`--sombra-folha`, no `::after`), com
+   pico na vertical. Sem ela, uma folha girando lê como imagem plana
+   inclinando.
+
+`power3.inOut`, não `expo.inOut`: a expo tem um talo quase reto no meio e a
+folha parece saltar. Medida, a power3 dá 3° nos primeiros 227ms, passa a
+vertical aos 585ms e assenta em 180° — puxada, aceleração e pouso.
+
 ### Três coisas que não dá para mexer sem quebrar
 
 1. **Visibilidade da folha é só da classe `e-a-folha`.** Posta inline, ela
@@ -246,6 +264,11 @@ dá 2160 — seis voltas exatas. Mexeu nos graus de uma queda, acerte o pouso.
 **Queda, bamboleio e pouso moram numa linha do tempo só.** Em duas, o
 bamboleio e o pouso disputariam o `x` do mesmo elemento e a logo nunca
 chegaria no alvo.
+
+**Onde ela para é ao lado do texto**, encostada no "MIA". O retângulo do
+`<p class="wordmark">` é a largura do **contêiner**, não a do texto — por ele
+a logo pousava lá na margem, longe do nome. Um `Range` sobre o conteúdo
+devolve a caixa do texto de verdade.
 
 O alvo do pouso é calculado para o **scroll máximo**, não para onde o rodapé
 está no instante do tween. E o centro natural da logo sai do retângulo menos

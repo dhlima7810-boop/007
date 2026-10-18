@@ -764,6 +764,13 @@ ol,ul{margin:0;padding:0;list-style:none}
    visivel; a virada e do GSAP, girando pela lombada da esquerda. */
 .ticket__caderno{
   position:relative;margin-top:.2rem;
+  /* A perspectiva mora no CONTEINER, nao em cada tween. Posta por tween,
+     cada folha ganha o seu proprio ponto de fuga e a virada le como carta
+     girando no vazio; posta aqui, as folhas dividem o mesmo ponto e a
+     folha afunila para a lombada como papel de verdade. */
+  perspective:1700px;
+  perspective-origin:left center;
+  transform-style:preserve-3d;
   /* pan-y entrega a rolagem vertical ao navegador (e ao Lenis) e guarda o
      arrasto horizontal para a virada. Sem isso o navegador reivindica o
      gesto lateral como rolagem e dispara pointercancel no meio. */
@@ -775,6 +782,17 @@ ol,ul{margin:0;padding:0;list-style:none}
   position:absolute;inset:0 var(--faixa);margin:0;padding:0;list-style:none;
   visibility:hidden;backface-visibility:hidden;
   background:var(--papel);
+  transform-origin:left center;
+  will-change:transform;
+}
+/* A sombra que corre pela folha enquanto ela levanta. E ela que da volume:
+   sem sombra, uma folha girando le como imagem plana inclinando. A opacidade
+   e conduzida pelo GSAP, junto do giro. */
+.ticket__folha::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  opacity:var(--sombra-folha,0);
+  background:linear-gradient(90deg,
+    rgba(25,20,19,.42) 0%, rgba(25,20,19,.16) 26%, rgba(25,20,19,0) 62%);
 }
 .ticket__folha__cabeca{
   font-family:var(--display);font-weight:var(--peso-titulo);
