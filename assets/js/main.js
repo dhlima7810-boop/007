@@ -302,17 +302,35 @@
     });
   });
 
+  // clearProps no fim e obrigatorio: o GSAP escreve transform inline, e
+  // style inline ganha da folha. Sem limpar, todo hover que move (o carimbo
+  // que levanta, a linha do cupom que rasga) ficaria preso no transform da
+  // entrada e nao aconteceria nunca.
   function entrarEmGrupo(pai, filho, desloca, passo) {
     document.querySelectorAll(pai).forEach(function (p) {
       gsap.from(p.querySelectorAll(filho), {
         y: desloca, opacity: 0, duration: 1, ease: 'power3.out',
         stagger: passo === undefined ? .07 : passo,
+        clearProps: 'transform',
         scrollTrigger: { trigger: p, start: 'top 84%' }
       });
     });
   }
   entrarEmGrupo('.acoes', '.acao', 34);
-  entrarEmGrupo('.semana', '.carimbo', 26);
+  // Os dias nao sobem como uma lista: eles descem e assentam, e a pilula
+  // chega girando até o tombo que o CSS deixou. E um carimbo batendo.
+  document.querySelectorAll('.semana').forEach(function (lista) {
+    gsap.from(lista.querySelectorAll('.carimbo'), {
+      opacity: 0, y: -30, scale: .94, duration: 1.1, ease: 'power3.out', stagger: .08,
+      clearProps: 'transform',
+      scrollTrigger: { trigger: lista, start: 'top 84%' }
+    });
+    gsap.from(lista.querySelectorAll('.carimbo__dia'), {
+      rotation: 9, scale: .8, duration: 1.1, ease: 'expo.out', stagger: .08,
+      clearProps: 'transform',
+      scrollTrigger: { trigger: lista, start: 'top 84%' }
+    });
+  });
   entrarEmGrupo('.itens', '.item', 24);
   entrarEmGrupo('.ticket__lista', '.ticket__item', 18, .022);
   entrarEmGrupo('.local__info', '.dado', 22);
@@ -342,6 +360,10 @@
 
   if (secaoNoite && cenas.length) {
     secaoNoite.classList.add('pin-ativo');
+
+    // a cena 01 ja chega sendo a de cima: sem isso ela fica sem ponteiro
+    // ate o primeiro onUpdate, e o hover do titulo nao responde na chegada.
+    cenas[0].classList.add('cena-ativa');
 
     var linha = gsap.timeline();
     var marcos = [];   // em que ponto da linha do tempo cada cena entra
@@ -381,7 +403,7 @@
       }
     });
 
-    linha.to({}, { duration: 1 });    // respiro no fim, antes de soltar o pin
+    linha.to({}, { duration: 1, ease: 'none' });  // respiro no fim, antes de soltar o pin
 
     ScrollTrigger.create({
       animation: linha,
@@ -398,6 +420,9 @@
         for (var k = 0; k < marcos.length; k++) {
           if (t >= marcos[k] - 0.25) { i = k; }
         }
+        for (var c = 0; c < cenas.length; c++) {
+          cenas[c].classList.toggle('cena-ativa', c === i);
+        }
         if (contador) { contador.textContent = String(i + 1).padStart(2, '0'); }
         if (barra) { barra.style.transform = 'scaleX(' + self.progress.toFixed(3) + ')'; }
       }
@@ -405,7 +430,23 @@
   }
 
   /* =======================================================
-     13. Barra de progresso da leitura
+     13. A logo caindo
+
+     A logo e redonda e vive no topo preso. A leitura de "caindo"
+     aqui e a de rolar: ela gira no sentido da descida, presa ao
+     scroll, e volta sozinha quando a pessoa sobe. Tween preso ao
+     scroll — por isso ease 'none' (exceção 1 do CLAUDE.md).
+     ======================================================= */
+  var logoMarca = document.querySelector('.marca__logo');
+  if (logoMarca) {
+    gsap.to(logoMarca, {
+      rotation: 720, duration: 1, ease: 'none',
+      scrollTrigger: { start: 'top top', end: 'max', scrub: .8 }
+    });
+  }
+
+  /* =======================================================
+     14. Barra de progresso da leitura
      ======================================================= */
   gsap.to('#progresso', {
     scaleX: 1, duration: 1, ease: 'none',

@@ -51,8 +51,8 @@ A composição veio do site de referência que o dono mandou:
 
 | Peça | O que é |
 |---|---|
-| Wordmark gigante | o nome ocupa a tela toda, em caixa baixa, sobre a fachada |
-| As quatro ações | rodízio · para viagem · disk pizza · onde fica, com faixa de cor no hover |
+| Wordmark gigante | o nome ocupa a tela toda, em caixa alta, sobre a fachada |
+| As quatro ações | Rodízio · Para viagem · Disk pizza · Onde fica, com faixa de cor no hover |
 | Letreiro | faixa amarela em movimento contínuo |
 | Bandas alternadas | seções escuras alternando `tinta` e `tinta-2` |
 | Wordmark no rodapé | fecha o livro |
@@ -74,9 +74,20 @@ e vermelho da esquina. O que ele trouxe de novo:
 |---|---|
 | **Antonio** no lugar da Anton | toda a tipografia de display |
 | **Carimbo do dia** | seção "A semana inteira" |
-| **Ticket de balcão** | seção "Cardápio" |
+| **Cupom serrado** | seção "Cardápio" |
 | **Botão chunky** amarelo | "Ver a semana" no topo |
-| **Wordmark minúsculo** | rodapé |
+| **Wordmark de fecho** | rodapé |
+
+O cupom do cardápio ganhou borda serrada em cima e embaixo (dois
+`conic-gradient` numa `mask`, um triângulo por dente), fio vermelho no topo,
+vinco de livro entre as duas colunas e a assinatura da casa no pé. Encostar
+num sabor inclina a linha e abre embaixo uma faixa serrada — o comprovante
+rasgando. Tudo em CSS: é estado de hover, não entrada.
+
+Os subtítulos do cardápio e das três cenas só aparecem quando o ponteiro
+chega no nome. O espaço deles fica reservado desde o início (anima `opacity`
+e `transform`, nunca `max-height`), em tela de toque ficam sempre abertos, e
+o teclado chega por `tabindex` + `:focus-visible`.
 
 Duas coisas do sistema **não** foram adotadas como estavam:
 
@@ -114,7 +125,7 @@ no `CLAUDE.md`.
 preta, foto assentando de 14% maior, rótulo desfocado que entra, e só então as
 letras do título subindo de dentro de uma janela.
 
-**"Uma noite aqui":** seção presa na tela. O scroll deixa de rolar a página e
+**"Uma noite especial conosco":** seção presa na tela. O scroll deixa de rolar a página e
 passa a mover a câmera, uma cena de cada vez, da calçada até a mesa. O `scrub`
 é o que dá essa sensação: cada pixel rolado move um pedaço da linha do tempo.
 Dentro de cada cena os elementos entram com `stagger: 0.2` e `ease: power3.out`.
@@ -165,7 +176,7 @@ Cada foto aparece **uma única vez**:
 |---|---|
 | `fachada-noite.jpg` | fundo do topo |
 | `fachada.jpg` | cena 01 — "A casa na esquina" |
-| `salao.jpg` | cena 02 — "O salão vai enchendo" |
+| `salao.jpg` | cena 02 — "Um bom ambiente" |
 | `pizza-viagem.jpg` | cena 03 — "E também sai para viagem" |
 | `logo.jpg` | cabeçalho e rodapé |
 
@@ -182,10 +193,10 @@ dados o que a página diz em texto: endereço, telefone, horário e os 33 sabore
 com preço. É o que faz buscador e assistente de IA responderem "que horas
 abre" e "quanto custa a portuguesa" sem adivinhar.
 
-O bloco é **gerado a partir do próprio HTML**, lendo os `<li class="sabor">`.
-Se mexer nos sabores, regere para não divergir do que está na tela. O script
-que gerou está no histórico desta conversa; em resumo: ler os `sabor__nome`,
-`sabor__preco` e `sabor__ing`, montar os `MenuItem` com `offers`, e substituir
+O bloco é **gerado a partir do próprio HTML**, lendo os
+`<li class="ticket__item">`. Se mexer nos sabores, regere para não divergir do
+que está na tela. Em resumo: ler os `ticket__nome`, `ticket__preco` e
+`ticket__ing`, montar os `MenuItem` com `offers`, e substituir
 o bloco inteiro.
 
 ## Antes de publicar

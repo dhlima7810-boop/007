@@ -26,6 +26,16 @@ Sem exceção:
 abrir e fechar menu. O que a regra proíbe é animar entrada, saída e
 movimento ligado ao scroll fora do GSAP.
 
+### A armadilha do `clearProps`
+
+O GSAP escreve `transform` **inline** no elemento, e style inline ganha da
+folha de estilo. Então toda entrada em GSAP que mexa em `x`, `y`, `scale` ou
+`rotation` de um elemento que **também tem hover que move** precisa terminar
+com `clearProps: 'transform'`. Sem isso o hover simplesmente não acontece:
+o carimbo não levanta, a linha do cupom não rasga, e nada no console avisa.
+Vale hoje para `.carimbo`, `.carimbo__dia` e tudo que passa por
+`entrarEmGrupo`.
+
 ### Tempo e curva
 
 Sites cinematográficos são lentos com intenção.
@@ -57,18 +67,33 @@ arquivo não ter número curto que confunda na próxima leitura.
 A estrutura veio da referência que o dono mandou (o site da Tripletta),
 recomposta com conteúdo e cores da Pizza Mia:
 
-1. **Wordmark gigante** no topo, em caixa baixa, ocupando a largura toda da
-   tela, sobre a foto da fachada à noite. O nome é o hero.
-2. **As quatro ações** logo abaixo: rodízio, para viagem, disk pizza, onde
-   fica. Palavra enorme em caixa baixa + seta, com faixa de cor sangrando de
-   ponta a ponta no hover. É por aqui que a pessoa escolhe o que quer, antes
-   de qualquer outra coisa — não mexa na ordem sem motivo.
+1. **Wordmark gigante** no topo, ocupando a largura toda da tela, sobre a
+   foto da fachada à noite. O nome é o hero, e é a coisa mais visível da
+   página — não encolha. Abaixo dele vêm os dois botões e mais nada: o
+   parágrafo que existia ali foi retirado de propósito.
+2. **As quatro ações** logo abaixo: Rodízio, Para viagem, Disk pizza, Onde
+   fica. Palavra enorme + seta, com faixa de cor sangrando de ponta a ponta
+   no hover. É por aqui que a pessoa escolhe o que quer, antes de qualquer
+   outra coisa — não mexa na ordem sem motivo.
 3. **Letreiro** amarelo em movimento.
 4. Seções de conteúdo em **bandas alternadas** (`.secao--banda` = `tinta-2`).
 5. **Wordmark de novo** no rodapé, fechando o livro.
 
-Caixa baixa é só do wordmark e das quatro ações — esse é o registro da
-"voz grande" do site. O resto do nome da marca é maiúsculo.
+### Caixa alta em tudo
+
+**Todo título, nome, rótulo e botão do site é maiúsculo.** Wordmark do hero,
+as quatro ações, títulos de seção, nomes do cardápio, sabores do cupom,
+carimbo "HOJE", wordmark do rodapé, links do menu. Não existe mais exceção
+em caixa baixa — a regra anterior, que reservava minúsculo ao wordmark,
+caiu a pedido do dono.
+
+A caixa vem sempre de `text-transform` no CSS, **nunca** de texto escrito em
+maiúsculo no HTML. O JSON-LD é gerado lendo o próprio HTML: se o texto for
+gravado em caixa alta, os dados estruturados saem gritando.
+
+Parágrafos de corpo continuam em caixa de frase. "Tudo em maiúsculo" vale
+para a tipografia de display e os rótulos; um parágrafo inteiro em caixa
+alta não se lê.
 
 Quando chegarem mais fotos, as quatro ações podem receber uma foto cada,
 que cresce no hover no lugar da faixa de cor. Hoje não dá: cada foto já
@@ -90,11 +115,17 @@ prédio amarelo e vermelho da esquina. Os tokens estão no `:root` do
   gira entre amarelo, vermelho e papel. A cor marca o dia, não hierarquia.
   Não espalhe essa rotação em qualquer lista — ela vale ali e nas cenas de
   "Uma noite aqui", e só.
-- **Minúsculo e itálico é exceção**: o carimbo "hoje" e o wordmark do rodapé.
-  O nome da marca é maiúsculo em todo o resto.
-- **Ticket**: o cardápio é uma ficha de balcão — papel claro sobre fundo
-  escuro, canto cortado por `clip-path`, pontilhado entre nome e preço. O
-  papel é o objeto, não a seção.
+- **Itálico é exceção**: só o carimbo "HOJE", que fica torto e itálico sobre
+  o dia de hoje. A caixa, mesmo ali, é alta.
+- **Cupom**: o cardápio é um comprovante de balcão — papel claro sobre fundo
+  escuro, **borda serrada em cima e embaixo** (dois `conic-gradient` em
+  `mask`, um triângulo por dente), fio vermelho no topo, pontilhado entre
+  nome e preço e o nome da casa assinando no pé. Em duas colunas o cupom lê
+  como **livro aberto**, com o vinco pontilhado no meio. O papel é o objeto,
+  não a seção.
+- **Encostar num sabor rasga a linha**: a linha inclina, desloca e abre
+  embaixo uma faixa serrada. É hover de estado, feito em CSS — não gaste
+  GSAP com isso.
 - **Raio pequeno** (4–8px) e pílula. Não voltar para raio grande nem sombra.
 
 ## Sem componentes
@@ -131,6 +162,23 @@ A página precisa continuar legível e utilizável nas três situações:
    a ser o do navegador e nenhuma linha do tempo roda.
 
 Nunca deixe conteúdo visível só por efeito de animação.
+
+### Subtítulo que aparece no hover
+
+Os subtítulos do cardápio (`.item__revela`) e das três cenas
+(`.noite__revela`) ficam invisíveis até o ponteiro chegar no nome. Três
+regras seguram isso de pé:
+
+1. O espaço fica **reservado desde o início** — anima-se `opacity` e
+   `transform`, nunca `max-height`. Crescer no hover empurraria a seção
+   inteira e a página pularia debaixo do mouse.
+2. Em tela sem ponteiro, `@media (hover:none)` deixa tudo aberto. Num
+   celular o gesto não existe, e o conteúdo não pode depender dele.
+3. Teclado chega junto: os blocos têm `tabindex="0"` e as regras respondem a
+   `:focus-visible` e `:focus-within` além de `:hover`.
+
+Leitor de tela lê os dois de qualquer jeito — `opacity:0` não esconde de
+tecnologia assistiva.
 
 ## Estrutura
 

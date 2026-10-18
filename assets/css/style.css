@@ -118,7 +118,7 @@ ol,ul{margin:0;padding:0;list-style:none}
 .botao{
   display:inline-flex;align-items:center;justify-content:center;
   padding:.95rem 1.7rem;border-radius:var(--r-pill);
-  font-weight:700;font-size:.95rem;letter-spacing:.01em;
+  font-weight:700;font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;
   text-decoration:none;border:1px solid transparent;
   transition:background .25s var(--saida), border-color .25s var(--saida), color .25s var(--saida);
 }
@@ -131,7 +131,7 @@ ol,ul{margin:0;padding:0;list-style:none}
    solido fica reservado para pedir — telefone e disk pizza. */
 .botao--chunky{
   font-family:var(--display);font-weight:var(--peso-titulo);
-  text-transform:uppercase;letter-spacing:.04em;font-size:1.02rem;
+  text-transform:uppercase;letter-spacing:.08em;font-size:.88rem;
   border:2px solid var(--acento);color:var(--acento);background:transparent;
 }
 .botao--chunky:hover{background:var(--acento);color:var(--txt-escuro)}
@@ -163,7 +163,8 @@ ol,ul{margin:0;padding:0;list-style:none}
 
 .nav{display:flex;align-items:center;gap:2rem}
 .nav a{
-  color:var(--txt-2);text-decoration:none;font-weight:500;font-size:.9rem;
+  color:var(--txt-2);text-decoration:none;font-weight:700;font-size:.76rem;
+  text-transform:uppercase;letter-spacing:.1em;
   transition:color .25s var(--saida);
 }
 .nav a:hover{color:var(--txt)}
@@ -194,8 +195,8 @@ ol,ul{margin:0;padding:0;list-style:none}
 .hero__veu{
   position:absolute;inset:0;z-index:-2;
   background:
-    linear-gradient(to top, rgba(18,16,16,.96) 2%, rgba(18,16,16,.62) 38%, rgba(18,16,16,.3) 70%),
-    linear-gradient(100deg, rgba(18,16,16,.78) 0%, rgba(18,16,16,.3) 55%, rgba(18,16,16,.1) 100%);
+    linear-gradient(to top, rgba(18,16,16,.97) 4%, rgba(18,16,16,.78) 34%, rgba(18,16,16,.4) 72%),
+    linear-gradient(100deg, rgba(18,16,16,.86) 0%, rgba(18,16,16,.42) 55%, rgba(18,16,16,.14) 100%);
 }
 .hero__cortina{position:absolute;inset:0;z-index:-1;background:var(--tinta);opacity:0;pointer-events:none}
 .js .hero__cortina{opacity:1}
@@ -205,10 +206,11 @@ ol,ul{margin:0;padding:0;list-style:none}
 
 .marcaovo{
   font-family:var(--display);font-weight:var(--peso-titulo);
-  font-size:clamp(4.5rem,25vw,19rem);
-  text-transform:lowercase;letter-spacing:-.01em;
-  line-height:.82;
-  text-shadow:0 2px 50px rgba(0,0,0,.5);
+  font-size:clamp(3.7rem,23vw,21rem);
+  text-transform:uppercase;letter-spacing:-.005em;
+  line-height:.84;
+  color:var(--papel);
+  text-shadow:0 2px 70px rgba(0,0,0,.72);
   margin-block:clamp(.5rem,2vh,1.5rem);
 }
 @media (min-width:860px){
@@ -217,14 +219,11 @@ ol,ul{margin:0;padding:0;list-style:none}
 }
 
 .hero__base{
-  display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;
+  display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:flex-start;
   gap:2rem clamp(2rem,6vw,5rem);
   margin-top:clamp(2rem,5vh,3.25rem);
   padding-top:clamp(1.5rem,3vh,2.25rem);
   border-top:1px solid var(--fio);
-}
-.hero__texto{
-  max-width:36ch;color:var(--txt-2);font-size:1rem;line-height:1.65;
 }
 .hero__acoes{display:flex;flex-wrap:wrap;gap:.75rem}
 
@@ -240,9 +239,9 @@ ol,ul{margin:0;padding:0;list-style:none}
 .rolar__bola{position:absolute;inset:0;width:12px;background:var(--acento)}
 
 /* ---------------- As quatro ações ----------------
-   Quatro palavras enormes em caixa baixa, cada uma com sua faixa de
-   cor entrando por tras no hover. A caixa baixa aqui e proposital: e
-   o mesmo registro do wordmark do topo e do rodape, e so dele.
+   Quatro palavras enormes, cada uma com sua faixa de cor entrando por
+   tras no hover. Caixa alta como o resto do site; o que distingue este
+   bloco e o tamanho, nao a caixa.
    ------------------------------------------------- */
 .acoes{border-top:1px solid var(--fio)}
 .acao{
@@ -276,8 +275,8 @@ ol,ul{margin:0;padding:0;list-style:none}
 }
 .acao__palavra{
   font-family:var(--display);font-weight:var(--peso-titulo);
-  text-transform:lowercase;letter-spacing:-.005em;line-height:.9;
-  font-size:clamp(2.6rem,9vw,7rem);
+  text-transform:uppercase;letter-spacing:-.005em;line-height:.9;
+  font-size:clamp(2.1rem,7.6vw,6.1rem);
   padding-bottom:.08em;
   transition:transform .7s var(--saida);
 }
@@ -360,9 +359,20 @@ ol,ul{margin:0;padding:0;list-style:none}
   border-radius:var(--r-md);
   padding:clamp(1.1rem,2vw,1.4rem);
   display:flex;flex-direction:column;align-items:flex-start;
-  transition:border-color .25s var(--saida), background .25s var(--saida);
+  position:relative;isolation:isolate;overflow:hidden;
+  --cor-dia:var(--acento);
+  transition:border-color .25s var(--saida), transform .7s var(--saida);
 }
-.carimbo:hover{border-color:var(--acento)}
+/* a lavagem da cor do dia sobe por tras, como a faixa das quatro acoes */
+.carimbo::before{
+  content:'';position:absolute;z-index:-1;inset:0;
+  background:var(--cor-dia);opacity:0;transform:translateY(101%);
+  transition:transform .8s var(--saida), opacity .8s var(--saida);
+}
+.carimbo:hover,.carimbo:focus-within{
+  border-color:var(--cor-dia);transform:translateY(-8px) rotate(-.5deg);
+}
+.carimbo:hover::before,.carimbo:focus-within::before{transform:none;opacity:.12}
 
 .carimbo__dia{
   display:inline-block;
@@ -370,11 +380,18 @@ ol,ul{margin:0;padding:0;list-style:none}
   text-transform:uppercase;font-size:.74rem;letter-spacing:.09em;
   padding:.32rem .75rem;border-radius:var(--r-pill);
   margin-bottom:.9rem;transform:rotate(-3deg);
+  background:var(--cor-dia);
+  transition:transform .7s var(--saida);
 }
+/* o carimbo endireita quando o dia e o alvo */
+.carimbo:hover .carimbo__dia,.carimbo:focus-within .carimbo__dia{transform:rotate(0deg) scale(1.07)}
 /* a rotacao de cor: amarelo, vermelho, papel */
-.carimbo:nth-child(3n+1) .carimbo__dia{background:var(--acento);color:var(--txt-escuro)}
-.carimbo:nth-child(3n+2) .carimbo__dia{background:var(--acao);color:#fff}
-.carimbo:nth-child(3n+3) .carimbo__dia{background:var(--papel);color:var(--txt-escuro)}
+.carimbo:nth-child(3n+1){--cor-dia:var(--acento)}
+.carimbo:nth-child(3n+2){--cor-dia:var(--acao)}
+.carimbo:nth-child(3n+3){--cor-dia:var(--papel)}
+.carimbo:nth-child(3n+1) .carimbo__dia{color:var(--txt-escuro)}
+.carimbo:nth-child(3n+2) .carimbo__dia{color:#fff}
+.carimbo:nth-child(3n+3) .carimbo__dia{color:var(--txt-escuro)}
 
 .carimbo__titulo{
   font-family:var(--display);font-weight:var(--peso-titulo);
@@ -395,7 +412,10 @@ ol,ul{margin:0;padding:0;list-style:none}
   border-bottom:1px solid var(--fio-forte);padding-bottom:3px;
   transition:color .25s var(--saida), border-color .25s var(--saida);
 }
-.carimbo__link:hover{color:var(--acento);border-color:var(--acento)}
+.carimbo__link:hover,.carimbo:hover .carimbo__link{color:var(--cor-dia);border-color:var(--cor-dia)}
+/* o titulo do dia desloca junto, so o suficiente para notar */
+.carimbo__titulo{transition:transform .7s var(--saida)}
+.carimbo:hover .carimbo__titulo{transform:translateX(.3rem)}
 
 /* hoje: borda inteira em vez de tracejada, e o carimbo "hoje" torto.
    No desktop ocupa duas colunas — alem de destacar o dia mais util,
@@ -407,8 +427,8 @@ ol,ul{margin:0;padding:0;list-style:none}
 .carimbo--hoje::after{
   content:'hoje';
   position:absolute;top:.9rem;right:1rem;
-  font-family:var(--corpo);font-weight:700;font-style:italic;text-transform:lowercase;
-  font-size:.78rem;color:var(--acento);
+  font-family:var(--corpo);font-weight:700;font-style:italic;text-transform:uppercase;
+  font-size:.7rem;letter-spacing:.08em;color:var(--acento);
   border:1.5px dashed var(--acento);border-radius:var(--r-pill);
   padding:.15rem .6rem;transform:rotate(-4deg);
 }
@@ -429,48 +449,118 @@ ol,ul{margin:0;padding:0;list-style:none}
 /* são quatro blocos fixos: 4 ou 2 por linha, nunca 3 e um órfão */
 @media (min-width:560px){ .itens{grid-template-columns:repeat(2,1fr)} }
 @media (min-width:1100px){ .itens{grid-template-columns:repeat(4,1fr)} }
-.item{max-width:34ch}
+/* A caixa do nome e o alvo: muda de cor no hover e puxa o subtitulo
+   para fora. Em tela sem hover (dedo) o subtitulo fica sempre aberto,
+   senao o conteudo depende de um gesto que nao existe ali. */
+.item{max-width:34ch;cursor:default}
+.item:focus{outline:none}
+.item:focus-visible{outline:2px solid var(--acento);outline-offset:6px;border-radius:var(--r)}
 .item__num{
   display:block;font-family:var(--display);font-weight:var(--peso-rotulo);
   font-size:.9rem;color:var(--acao);margin-bottom:.9rem;letter-spacing:.1em;
 }
 .item__nome{
-  font-size:clamp(1.15rem,2vw,1.35rem);font-weight:700;font-family:var(--corpo);
-  margin-bottom:.55rem;line-height:1.25;
+  font-family:var(--display);font-weight:var(--peso-titulo);
+  font-size:clamp(1.3rem,2.2vw,1.6rem);text-transform:uppercase;letter-spacing:.015em;
+  margin-bottom:0;line-height:1.1;
 }
-.item__desc{color:var(--txt-2);font-size:.95rem;line-height:1.6}
+.item__caixa{
+  display:inline-block;
+  padding:.26em .5em .3em;
+  border:1.5px solid var(--fio-forte);border-radius:var(--r);
+  transition:background .25s var(--saida), border-color .25s var(--saida), color .25s var(--saida);
+}
+/* a rotacao de cor do sistema: amarelo, vermelho, papel, amarelo */
+.item:hover .item__caixa,.item:focus-visible .item__caixa{
+  background:var(--acento);border-color:var(--acento);color:var(--txt-escuro);
+}
+.item:nth-child(2):hover .item__caixa,.item:nth-child(2):focus-visible .item__caixa{
+  background:var(--acao);border-color:var(--acao);color:#fff;
+}
+.item:nth-child(3):hover .item__caixa,.item:nth-child(3):focus-visible .item__caixa{
+  background:var(--papel);border-color:var(--papel);color:var(--txt-escuro);
+}
+
+.item__revela{
+  display:block;
+  opacity:0;transform:translateY(-.55rem);
+  transition:opacity .7s var(--saida), transform .7s var(--saida);
+}
+.item:hover .item__revela,.item:focus-visible .item__revela,.item:focus-within .item__revela{
+  opacity:1;transform:none;
+}
+.item__desc{display:block;padding-top:.7rem;color:var(--txt-2);font-size:.95rem;line-height:1.6}
+@media (hover:none){
+  .item__revela{opacity:1;transform:none}
+}
 
 /* ---------------- Ficha do cardápio (ticket) ----------------
-   Do sistema: nem cartao nem lista simples — um ticket de balcao,
-   com canto cortado e linha pontilhada entre nome e preco. O papel
-   deixou de ser a secao inteira e virou o objeto; e ele que respira
-   dentro do escuro.
+   Do sistema: nem cartao nem lista simples — um cupom de balcao. A
+   borda serrada em cima e embaixo e o que diz "comprovante" antes de
+   qualquer palavra: dois conic-gradient em mascara, um tri&acirc;ngulo por
+   dente. Em duas colunas o cupom le como um livro aberto, com o vinco
+   no meio. Encostar num sabor rasga a linha.
    ------------------------------------------------------------- */
 .ticket{
+  --dente:11px;
+  position:relative;
   background:var(--papel);color:var(--txt-escuro);
-  border-radius:var(--r-md) var(--r-md) 0 var(--r-md);
   max-width:760px;
   margin-top:clamp(3rem,6vw,4.5rem);
-  padding:clamp(1.5rem,3vw,2.25rem);
-  clip-path:polygon(0 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%);
+  padding:calc(var(--dente) + clamp(1.4rem,2.6vw,2rem)) clamp(1.5rem,3vw,2.25rem);
+  filter:drop-shadow(0 20px 44px rgba(0,0,0,.5));
+  /* corpo + um dente por tile, apontando para cima em cima e para baixo embaixo */
+  -webkit-mask:
+    linear-gradient(#000 0 0) 0 50%/100% calc(100% - var(--dente) * 2) no-repeat,
+    conic-gradient(from 135deg at 50% 0,#000 0 90deg,#0000 0) 0 0/var(--dente) var(--dente) repeat-x,
+    conic-gradient(from -45deg at 50% 100%,#000 0 90deg,#0000 0) 0 100%/var(--dente) var(--dente) repeat-x;
+  mask:
+    linear-gradient(#000 0 0) 0 50%/100% calc(100% - var(--dente) * 2) no-repeat,
+    conic-gradient(from 135deg at 50% 0,#000 0 90deg,#0000 0) 0 0/var(--dente) var(--dente) repeat-x,
+    conic-gradient(from -45deg at 50% 100%,#000 0 90deg,#0000 0) 0 100%/var(--dente) var(--dente) repeat-x;
 }
 .ticket__topo{
+  display:flex;align-items:baseline;justify-content:space-between;gap:1rem;
   padding-bottom:.9rem;margin-bottom:.6rem;
-  border-bottom:2px dashed rgba(25,20,19,.25);
+  border-bottom:2px dashed rgba(25,20,19,.3);
+}
+.ticket__topo::before{
+  content:'';position:absolute;left:0;right:0;top:var(--dente);height:4px;
+  background:var(--acao);
+}
+.ticket__selo{
+  font-family:var(--display);font-weight:var(--peso-rotulo);
+  font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--txt-escuro-2);flex:none;
 }
 .ticket__titulo{
   font-family:var(--display);font-weight:var(--peso-titulo);
   text-transform:uppercase;letter-spacing:.02em;
   font-size:clamp(1.25rem,2.4vw,1.6rem);
 }
-.ticket__lista{display:grid}
+.ticket__lista{display:grid;position:relative}
 .ticket__item{
-  display:grid;
+  display:grid;position:relative;
   grid-template-columns:auto 1fr auto;
   align-items:baseline;gap:0 .55rem;
-  padding:.65rem 0;
+  padding:.65rem .4rem;
+  transition:transform .7s var(--saida), background .25s var(--saida);
 }
-.ticket__nome{font-weight:700;font-size:.98rem;line-height:1.25}
+/* o rasgo: uma faixa escura mascarada em dentes, abrindo da esquerda */
+.ticket__item::after{
+  content:'';position:absolute;z-index:1;pointer-events:none;
+  left:0;right:0;bottom:-2px;height:8px;
+  background:rgba(25,20,19,.45);
+  transform:scaleX(0);transform-origin:left center;
+  transition:transform .7s var(--saida);
+  -webkit-mask:conic-gradient(from -45deg at 50% 100%,#000 0 90deg,#0000 0) 0 100%/8px 8px repeat-x;
+  mask:conic-gradient(from -45deg at 50% 100%,#000 0 90deg,#0000 0) 0 100%/8px 8px repeat-x;
+}
+.ticket__item:hover{transform:translateX(.45rem) rotate(-.35deg);background:rgba(224,18,48,.07)}
+.ticket__item:hover::after{transform:scaleX(1)}
+.ticket__item:hover .ticket__nome,.ticket__item:hover .ticket__preco{color:var(--acao)}
+.ticket__nome,.ticket__preco{transition:color .25s var(--saida)}
+.ticket__nome{font-weight:700;font-size:.95rem;line-height:1.25;text-transform:uppercase;letter-spacing:.02em}
 .ticket__pontos{
   border-bottom:1px dotted rgba(25,20,19,.45);
   transform:translateY(-.28em);
@@ -486,17 +576,40 @@ ol,ul{margin:0;padding:0;list-style:none}
   margin-top:.15rem;
 }
 .ticket__pe{
-  margin-top:1.1rem;padding-top:1rem;
-  border-top:2px dashed rgba(25,20,19,.25);
-  font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;
-  color:var(--txt-escuro-2);
+  margin-top:1.5rem;padding-top:1.2rem;
+  border-top:2px dashed rgba(25,20,19,.3);
+  text-align:center;
 }
+.ticket__nota{
+  font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--txt-escuro-2);line-height:1.65;
+}
+.ticket__nota--fim{font-size:.63rem;letter-spacing:.07em}
+/* o nome da casa fecha o cupom, como a assinatura de um comprovante */
+.ticket__assina{
+  font-family:var(--display);font-weight:var(--peso-titulo);
+  text-transform:uppercase;letter-spacing:.03em;
+  font-size:clamp(1.9rem,5.5vw,2.9rem);line-height:1;
+  margin:.75rem 0 .6rem;color:var(--txt-escuro);
+}
+.ticket__assina em{color:var(--acao);font-style:normal}
 
 @media (min-width:720px){
   /* duas colunas dentro do ticket, lendo de cima para baixo */
   .ticket{max-width:860px}
-  .ticket__lista{grid-template-columns:1fr 1fr;column-gap:clamp(2rem,4vw,3rem)}
+  .ticket__lista{grid-template-columns:1fr 1fr;column-gap:clamp(2.5rem,5vw,3.75rem)}
   .ticket__item{grid-column:auto}
+  /* o vinco do livro: fio pontilhado no meio e a sombra dos dois lados */
+  .ticket__lista::before{
+    content:'';position:absolute;top:-.4rem;bottom:-.4rem;left:50%;
+    border-left:1.5px dashed rgba(25,20,19,.32);transform:translateX(-50%);
+  }
+  .ticket__lista::after{
+    content:'';position:absolute;top:-.4rem;bottom:-.4rem;left:50%;width:52px;
+    transform:translateX(-50%);pointer-events:none;
+    background:linear-gradient(90deg,rgba(25,20,19,0),rgba(25,20,19,.08) 42%,
+                               rgba(25,20,19,.08) 58%,rgba(25,20,19,0));
+  }
 }
 
 /* ---------------- Uma noite aqui (pin scroll) ---------------- */
@@ -514,7 +627,7 @@ ol,ul{margin:0;padding:0;list-style:none}
   border:1px solid var(--fio);
 }
 .noite__foto img{width:100%;display:block;transition:transform .8s var(--saida)}
-.noite__foto--retrato{max-width:420px;margin-inline:auto}
+.noite__quadro--retrato{max-width:420px;margin-inline:auto}
 .noite__foto:hover img{transform:scale(1.03)}
 
 .noite__texto{display:grid;gap:.75rem;align-content:center}
@@ -531,7 +644,67 @@ ol,ul{margin:0;padding:0;list-style:none}
   text-transform:uppercase;letter-spacing:.01em;
   font-size:clamp(1.7rem,3.6vw,2.7rem);
 }
-.noite__desc{color:var(--txt-2);font-size:1rem;line-height:1.65;max-width:44ch}
+.noite__titulo{cursor:default}
+.noite__texto:focus{outline:none}
+.noite__texto:focus-visible{outline:2px solid var(--acento);outline-offset:8px;border-radius:var(--r)}
+/* o titulo ganha o mesmo fio do cardapio: acende quando o texto e alvo */
+.noite__titulo{
+  /* justify-self: item de grade com inline-block e "blockificado" e
+     estica a coluna toda — o fio tem de medir a palavra, nao a coluna */
+  display:inline-block;justify-self:start;
+  border-bottom:2px solid transparent;padding-bottom:.08em;
+  transition:border-color .25s var(--saida), color .25s var(--saida);
+}
+.noite__texto:hover .noite__titulo,.noite__texto:focus-visible .noite__titulo{
+  border-bottom-color:var(--acento);
+}
+.noite__cena:nth-child(3n+2) .noite__texto:hover .noite__titulo{border-bottom-color:var(--papel)}
+.noite__cena:nth-child(3n+3) .noite__texto:hover .noite__titulo{border-bottom-color:var(--acao-2)}
+
+.noite__revela{
+  display:block;
+  opacity:0;transform:translateY(-.55rem);
+  transition:opacity .7s var(--saida), transform .7s var(--saida);
+}
+.noite__texto:hover .noite__revela,.noite__texto:focus-visible .noite__revela,
+.noite__texto:focus-within .noite__revela{
+  opacity:1;transform:none;
+}
+.noite__desc{display:block;padding-top:.6rem;color:var(--txt-2);font-size:1rem;line-height:1.65;max-width:44ch}
+@media (hover:none){
+  .noite__revela{opacity:1;transform:none}
+}
+
+/* ---- quadros: cada foto montada de um jeito ----
+   Uma moldura deslocada por tras, na cor da cena, e uma inclinacao
+   minima. E o que tira as tres fotos do mesmo retangulo chapado. */
+.noite__cena{--moldura:var(--acento)}
+.noite__cena:nth-child(3n+2){--moldura:var(--papel)}
+.noite__cena:nth-child(3n+3){--moldura:var(--acao-2)}
+.noite__quadro{position:relative;display:block}
+.noite__quadro::before{
+  content:'';position:absolute;z-index:0;
+  inset:0;border:2px solid var(--moldura);border-radius:var(--r);
+  pointer-events:none;
+}
+.noite__cena:nth-child(3n+1) .noite__quadro::before{transform:translate(-14px,14px)}
+.noite__cena:nth-child(3n+2) .noite__quadro::before{transform:translate(16px,-12px)}
+.noite__cena:nth-child(3n+3) .noite__quadro::before{transform:translate(13px,13px) rotate(-1.6deg)}
+.noite__quadro{transition:transform .7s var(--saida)}
+.noite__cena:nth-child(3n+1) .noite__quadro{transform:rotate(-.7deg)}
+.noite__cena:nth-child(3n+2) .noite__quadro{transform:rotate(.8deg)}
+.noite__cena:nth-child(3n+3) .noite__quadro{transform:rotate(-1.4deg)}
+.noite__quadro:hover{transform:rotate(0deg)}
+.noite__foto{position:relative;z-index:1}
+@media (max-width:560px){
+  /* em tela estreita a moldura deslocada vira recorte: encosta */
+  .noite__quadro,.noite__quadro::before{transform:none !important}
+}
+
+/* no modo pin as cenas se empilham: so a de cima recebe o ponteiro,
+   senao o hover da cena 03 responde por cima da cena 01 */
+.noite.pin-ativo .noite__cena{pointer-events:none}
+.noite.pin-ativo .noite__cena.cena-ativa{pointer-events:auto}
 
 .noite__rodape{
   display:flex;align-items:center;gap:1.25rem;
@@ -572,18 +745,19 @@ ol,ul{margin:0;padding:0;list-style:none}
     gap:clamp(2.5rem,4.5vw,4rem);
   }
 }
-.noite.pin-ativo .noite__foto{aspect-ratio:4/3;max-height:min(46vh,440px)}
-.noite.pin-ativo .noite__foto--retrato{
+.noite.pin-ativo .noite__quadro{aspect-ratio:4/3;max-height:min(46vh,440px)}
+.noite.pin-ativo .noite__quadro--retrato{
   aspect-ratio:3/4;width:auto;height:min(54vh,500px);max-height:none;
   justify-self:center;
 }
+.noite.pin-ativo .noite__foto{width:100%;height:100%}
 .noite.pin-ativo .noite__foto img{width:100%;height:100%;object-fit:cover;max-height:none}
 .noite.pin-ativo .noite__rodape{flex:none;margin:0 auto clamp(1rem,3vh,2rem)}
 
 /* no celular as cenas são mais baixas, para caber foto e texto */
 @media (max-width:859px){
-  .noite.pin-ativo .noite__foto{aspect-ratio:3/2;max-height:32svh}
-  .noite.pin-ativo .noite__foto--retrato{aspect-ratio:3/4;height:min(42svh,350px);max-height:none}
+  .noite.pin-ativo .noite__quadro{aspect-ratio:3/2;max-height:32svh}
+  .noite.pin-ativo .noite__quadro--retrato{aspect-ratio:3/4;height:min(42svh,350px);max-height:none}
   .noite.pin-ativo .noite__num{font-size:1.8rem}
   .noite.pin-ativo .noite__titulo{font-size:1.45rem}
   .noite.pin-ativo .noite__desc{font-size:.92rem;line-height:1.5}
@@ -655,13 +829,12 @@ ol,ul{margin:0;padding:0;list-style:none}
 /* ---------------- Rodapé ---------------- */
 .rodape{border-top:1px solid var(--fio);padding:clamp(2.5rem,5vw,3.5rem) 0}
 
-/* Do sistema: wordmark gigante em caixa baixa. E a unica vez que
-   "pizza mia" aparece minusculo no site inteiro — por isso fecha,
-   em vez de repetir o logo do topo. */
+/* Do sistema: wordmark gigante fechando o livro. Mesma caixa alta do
+   resto do site; o que fecha e o tamanho, nao a caixa. */
 .wordmark{
   font-family:var(--display);font-weight:var(--peso-titulo);
-  text-transform:lowercase;letter-spacing:.005em;
-  font-size:clamp(3rem,11vw,6.5rem);line-height:.88;
+  text-transform:uppercase;letter-spacing:.005em;
+  font-size:clamp(2.6rem,10vw,6rem);line-height:.88;
   margin-bottom:clamp(1.75rem,4vw,2.5rem);
   color:var(--txt);
 }
