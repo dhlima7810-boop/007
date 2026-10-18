@@ -702,7 +702,7 @@
           var pai = getComputedStyle(logoTopo.parentElement);
           return -(r.width + (parseFloat(pai.columnGap || pai.gap) || 0));
         },
-        ease: 'none',
+        duration: 1, ease: 'none',
         scrollTrigger: { start: 'top top', end: '+=420', scrub: .7, invalidateOnRefresh: true }
       });
     }
@@ -711,7 +711,7 @@
     var balanco = Math.min(window.innerWidth * .2, 190);
     gsap.to(logoTopo, {
       keyframes: { x: [0, balanco, -balanco * .75, balanco * 1.05, -balanco * .5, balanco * .8, 0] },
-      ease: 'none',
+      duration: 1, ease: 'none',
       scrollTrigger: { start: 'top top', end: 'max', scrub: .7 }
     });
   }

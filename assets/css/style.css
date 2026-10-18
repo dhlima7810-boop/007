@@ -196,6 +196,12 @@ ol,ul{margin:0;padding:0;list-style:none}
 
 .marca{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--txt)}
 .marca img{width:36px;height:36px;border-radius:50%;object-fit:cover;pointer-events:none}
+/* A logo do cabecalho nasce apagada sob .js e so acende no fim do voo da
+   lua. Sem isto ela pisca visivel entre o script do <head> e o main.js
+   (medido: ainda visivel aos 365ms) e so volta 5s depois. Mesmo contrato
+   do [data-entra]: sem .js — sem JS, libs caidas, movimento reduzido ou
+   rede de seguranca — ela aparece normal. */
+.js .marca__logo{opacity:0}
 .marca__nome{
   font-family:var(--display);font-weight:var(--peso-titulo);
   font-size:1.35rem;letter-spacing:.02em;text-transform:uppercase;
@@ -550,6 +556,10 @@ ol,ul{margin:0;padding:0;list-style:none}
   margin-top:clamp(3rem,6vw,4.5rem);
   padding:calc(var(--dente) + clamp(1.4rem,2.6vw,2rem)) clamp(1.5rem,3vw,2.25rem);
   filter:drop-shadow(0 20px 44px rgba(0,0,0,.5));
+  /* a folha girando em rotationY sai da caixa e empurra o documento: entre
+     600 e 719px isso abria 36px de rolagem horizontal de verdade. O recorte
+     fica no cupom, que e a borda natural do livro. */
+  overflow:hidden;
   /* corpo + um dente por tile, apontando para cima em cima e para baixo embaixo */
   -webkit-mask:
     linear-gradient(#000 0 0) 0 50%/100% calc(100% - var(--dente) * 2) no-repeat,
@@ -677,7 +687,8 @@ ol,ul{margin:0;padding:0;list-style:none}
   width:2.5rem;height:2.5rem;padding:0;cursor:pointer;
   background:transparent;color:var(--txt-escuro);
   border:1.5px solid rgba(25,20,19,.35);border-radius:50%;
-  transition:background .25s var(--saida), border-color .25s var(--saida), color .25s var(--saida), opacity .25s var(--saida);
+  transition:background .25s var(--saida), border-color .25s var(--saida),
+             color .25s var(--saida), opacity .6s var(--saida);
 }
 .ticket__virar svg{width:60%;height:60%}
 .ticket__virar:hover:not(:disabled){background:var(--acao);border-color:var(--acao);color:#fff}
@@ -979,6 +990,8 @@ ol,ul{margin:0;padding:0;list-style:none}
 /* ---------------- Responsivo ---------------- */
 @media (max-width:860px){
   .menu-btn{display:flex}
+  /* sem JS o botao nao faz nada e a nav ja aparece inteira: botao morto some */
+  html:not(.js) .menu-btn{display:none}
   .nav{
     position:absolute;top:100%;left:0;right:0;
     flex-direction:column;align-items:stretch;gap:0;

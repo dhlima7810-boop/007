@@ -130,6 +130,10 @@ prédio amarelo e vermelho da esquina. Os tokens estão no `:root` do
   as colunas mas era larga demais: `R$ 58,00` comia a linha no celular e o
   nome do sabor quebrava em duas. `font-variant-numeric: tabular-nums` na
   fonte do corpo dá o mesmo alinhamento numa largura bem menor.
+- **O cupom recorta o que sai dele** (`overflow:hidden`). A folha girando em
+  `rotationY` transborda a caixa e empurra o documento: sem o recorte isso
+  abria **36px de rolagem horizontal de verdade** entre 600 e 719px — faixa
+  que uma varredura de larguras "redondas" não pega. Varra de 20 em 20px.
 - **Raio pequeno** (4–8px) e pílula. Não voltar para raio grande nem sombra.
 
 ## O cardápio vira página no celular
@@ -273,6 +277,13 @@ A página precisa continuar legível e utilizável nas três situações:
    a ser o do navegador e nenhuma linha do tempo roda.
 
 Nunca deixe conteúdo visível só por efeito de animação.
+
+### A logo do cabeçalho nasce apagada sob `.js`
+
+`.js .marca__logo{opacity:0}` existe para ela não piscar entre o script do
+`<head>` e o `main.js` (medido antes: ainda visível aos 365ms, e só de volta
+5s depois). É o mesmo contrato do `[data-entra]` — sem `.js`, ela aparece
+normal — e é compatível com a rede de segurança abaixo, que tira a classe.
 
 ### A rede de segurança do `.js`
 
