@@ -659,6 +659,35 @@
       caderno.classList.remove('medindo');
       caderno.style.height = alta + 'px';
 
+      // A fita de marca-pagina desce pelo vao das duas colunas e sai pela
+      // base. Ela mora no .livro, fora do caderno, justamente para nao
+      // entrar na perspectiva das folhas: assim nenhum destes numeros
+      // muda ao virar a pagina — a fita continua fita. A classe so entra
+      // com o livro montado, entao sem JS nao ha fita.
+      // Ela comeca onde o vao das duas colunas comeca, e nao no alto da
+      // folha: acima disso o cabecalho da secao e a nota ocupam a largura
+      // inteira e a fita passaria por cima do texto. O recuo e o MAIOR de
+      // todas as folhas (a primeira de cada secao leva nota e e a mais
+      // baixa), entao vale para todas — e e um numero so, igual em
+      // qualquer pagina: a fita nao muda ao virar.
+      var recuo = 0;
+      folhas.forEach(function (f) {
+        var l = f.querySelector('.ticket__lista');
+        if (l) { recuo = Math.max(recuo, l.offsetTop); }
+      });
+      recuo = Math.max(0, recuo - 10);
+      livro.style.setProperty('--fita-y', (miolo.offsetTop + caderno.offsetTop + recuo) + 'px');
+      livro.style.setProperty('--fita-h', (alta - recuo + 54) + 'px');
+      livro.classList.add('livro--fita');
+
+      // Fechado, o cardapio tem altura de cardapio. Sem isto a capa herda
+      // a altura do livro aberto e vira um muro de couro de 1300px com a
+      // logo perdida no meio. O miolo ja e overflow:hidden (o recorte que
+      // segura a folha girando), entao basta a altura; ao abrir, ela vai
+      // para auto junto com a capa girando.
+      var fechada = Math.max(540, Math.min(miolo.offsetHeight, window.innerHeight * .86));
+      gsap.set(miolo, { height: fechada });
+
       var atual = 0, virando = false;
       var folio = nav.querySelector('.ticket__folio span');
       var botoes = Array.prototype.slice.call(nav.querySelectorAll('.ticket__virar'));
@@ -689,12 +718,16 @@
       // 3. A sombra do ::after corre junto do giro: cresce ate a vertical
       //    e e o que da volume ao papel.
       //
-      // power3.inOut e nao expo.inOut: a expo tem um talo quase reto no
-      // meio e a folha parece saltar. A power3 sai, acelera e assenta —
-      // o jeito de quem passa o dedo.
-      function virar(destino) {
-        if (virando || destino === atual || destino < 0 || destino >= folhas.length) { return; }
-        virando = true;
+      // Quem conduz o angulo muda: pelas faixas, setas e abas conduz o
+      // relogio; pelo arrasto conduz o dedo. O montar() abaixo so sabe
+      // desenhar a folha num angulo, e serve aos dois.
+      function sombra(el, g) {
+        // maxima na vertical, zero nas duas pontas
+        el.style.setProperty('--sombra-folha',
+          (Math.sin(Math.abs(g) * Math.PI / 180) * 0.9).toFixed(3));
+      }
+
+      function montar(destino) {
         var sai = folhas[atual], entra = folhas[destino], frente = destino > atual;
 
         // As duas folhas ficam visiveis durante a virada, e quem apaga a
@@ -702,29 +735,41 @@
         // inline, ela sobrevive ao clearProps e a folha nunca mais some.
         entra.classList.add('e-a-folha');
 
-        function fim() {
-          gsap.set([sai, entra], { clearProps: 'transform,opacity,zIndex' });
-          sombra(sai, 0); sombra(entra, 0);
-          atual = destino; virando = false; pintar();
-        }
-        function sombra(el, v) { el.style.setProperty('--sombra-folha', v); }
-
         var movida = frente ? sai : entra;
         var parada = frente ? entra : sai;
         gsap.set(parada, { zIndex: 1, rotationY: 0 });
         gsap.set(movida, { zIndex: 2, rotationY: frente ? 0 : -180 });
 
-        var g = { r: frente ? 0 : -180 };
-        gsap.to(g, {
-          r: frente ? -180 : 0,
-          duration: 1.1, ease: 'power3.inOut',
-          onUpdate: function () {
-            gsap.set(movida, { rotationY: g.r });
-            // a sombra e maxima na vertical e volta a zero nas pontas
-            movida.style.setProperty('--sombra-folha',
-              (Math.sin(Math.abs(g.r) * Math.PI / 180) * 0.9).toFixed(3));
+        return {
+          frente: frente,
+          de: frente ? 0 : -180,
+          ate: frente ? -180 : 0,
+          desenhar: function (g) {
+            gsap.set(movida, { rotationY: g });
+            sombra(movida, g);
           },
-          onComplete: fim
+          fim: function (chegou) {
+            gsap.set([sai, entra], { clearProps: 'transform,opacity,zIndex' });
+            sombra(sai, 0); sombra(entra, 0);
+            if (chegou) { atual = destino; }
+            virando = false; pintar();
+          }
+        };
+      }
+
+      // power3.inOut e nao expo.inOut: a expo tem um talo quase reto no
+      // meio e a folha parece saltar. A power3 sai, acelera e assenta —
+      // o jeito de quem passa o dedo.
+      function virar(destino) {
+        if (virando || destino === atual || destino < 0 || destino >= folhas.length) { return; }
+        virando = true;
+        var v = montar(destino);
+        var g = { r: v.de };
+        gsap.to(g, {
+          r: v.ate,
+          duration: .8, ease: 'power3.inOut',
+          onUpdate: function () { v.desenhar(g.r); },
+          onComplete: function () { v.fim(true); }
         });
       }
 
@@ -737,20 +782,94 @@
         a.addEventListener('click', function () { virar(+a.dataset.alvo); });
       });
 
-      // O gesto so e lido no soltar, e so se for claramente horizontal.
-      // Um toque parado tem dx pequeno e nao vira nada — e por isso que
-      // encostar num sabor para ler nao tira a folha do lugar.
-      var px = null, py = null;
-      caderno.addEventListener('pointerdown', function (e) { px = e.clientX; py = e.clientY; });
-      caderno.addEventListener('pointercancel', function () { px = null; });
-      caderno.addEventListener('pointerup', function (e) {
-        if (px === null) { return; }
-        var dx = e.clientX - px, dy = e.clientY - py;
-        px = null;
-        if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-          virar(atual + (dx < 0 ? 1 : -1));
-        }
+      // ---- o arrasto: a folha SEGUE O DEDO ----
+      //
+      // O gesto nao e lido so no soltar. A cada pointermove a folha e
+      // redesenhada no angulo que o deslocamento pede, quadro a quadro: e
+      // isso, e nao a curva, que faz a virada parecer conduzida pela mao.
+      // Uma animacao que comeca depois do gesto nunca vai parecer que foi
+      // o gesto que a conduziu.
+      //
+      // Posicao vinda do dedo nao e tween — como no scroll, nao ha curva
+      // nem duracao aqui. A curva so aparece no assentamento, quando o
+      // dedo larga a folha no meio do caminho.
+      //
+      // A conducao so comeca quando o gesto se mostra horizontal. Um toque
+      // parado tem dx pequeno e nao vira nada: e por isso que encostar num
+      // sabor para ler nao tira a folha do lugar.
+      var toque = null;
+
+      function largura() { return caderno.offsetWidth || window.innerWidth || 1; }
+      function agora() { return window.performance ? performance.now() : Date.now(); }
+
+      caderno.addEventListener('pointerdown', function (e) {
+        if (virando || e.button) { return; }
+        toque = {
+          id: e.pointerId, x: e.clientX, y: e.clientY,
+          ux: e.clientX, ut: agora(), v: 0, p: 0, virada: null, frente: false
+        };
       });
+
+      caderno.addEventListener('pointermove', function (e) {
+        if (!toque) { return; }
+        var dx = e.clientX - toque.x, dy = e.clientY - toque.y;
+
+        if (!toque.virada) {
+          // ainda nao e um arrasto horizontal: pode ser toque parado ou
+          // rolagem vertical, e nenhum dos dois vira pagina
+          if (Math.abs(dx) < 12 || Math.abs(dx) <= Math.abs(dy)) { return; }
+          var destino = atual + (dx < 0 ? 1 : -1);
+          if (destino < 0 || destino >= folhas.length) { toque = null; return; }
+          virando = true;
+          toque.frente = dx < 0;
+          toque.virada = montar(destino);
+          caderno.classList.add('arrastando');
+          // o arrasto nao se perde se o dedo sair da folha no meio
+          if (caderno.setPointerCapture) {
+            try { caderno.setPointerCapture(toque.id); } catch (erro) {}
+          }
+        }
+
+        var t = agora(), dt = t - toque.ut;
+        if (dt > 0) { toque.v = (e.clientX - toque.ux) / dt; }
+        toque.ux = e.clientX; toque.ut = t;
+
+        // o sinal tem de bater com o sentido em que a folha comecou:
+        // arrastar de volta desfaz a virada, nao vira para o outro lado
+        var p = (toque.frente ? -dx : dx) / largura();
+        toque.p = Math.max(0, Math.min(1, p));
+        toque.virada.desenhar(toque.virada.de +
+          (toque.virada.ate - toque.virada.de) * toque.p);
+      });
+
+      // No soltar, a folha assenta a partir de onde o dedo a deixou — nao
+      // do zero. Passou de um terco do caminho, ou veio rapido o bastante,
+      // completa; senao volta.
+      function soltar() {
+        if (!toque) { return; }
+        var t = toque;
+        toque = null;
+        if (!t.virada) { return; }
+        caderno.classList.remove('arrastando');
+
+        var rapido = (t.frente ? -t.v : t.v) > .5;
+        var chegou = t.p > .35 || rapido;
+        var de = t.virada.de + (t.virada.ate - t.virada.de) * t.p;
+        var ate = chegou ? t.virada.ate : t.virada.de;
+        var g = { r: de };
+        gsap.to(g, {
+          r: ate,
+          // o assentamento nao desce de 0.6s (regra do projeto); com
+          // power3.out quase todo o movimento sai no primeiro terco, de
+          // modo que um resto curto ainda larga rapido
+          duration: .6 + .3 * Math.abs(ate - de) / 180,
+          ease: 'power3.out',
+          onUpdate: function () { t.virada.desenhar(g.r); },
+          onComplete: function () { t.virada.fim(chegou); }
+        });
+      }
+      caderno.addEventListener('pointerup', soltar);
+      caderno.addEventListener('pointercancel', soltar);
 
       pintar();
 
@@ -768,6 +887,16 @@
           onComplete: function () { gsap.set(capa, { autoAlpha: 0 }); ScrollTrigger.refresh(); }
         });
         gsap.from(miolo, { opacity: .3, duration: .9, ease: 'power3.out' });
+        // o livro cresce para a altura cheia no mesmo tempo da capa. Animar
+        // altura reflui, mas aqui sai barato: o caderno ja tem altura fixa
+        // em px e nada dentro dele reflui a cada quadro.
+        gsap.to(miolo, {
+          height: 'auto', duration: .9, ease: 'expo.inOut',
+          onComplete: function () {
+            gsap.set(miolo, { clearProps: 'height' });
+            ScrollTrigger.refresh();
+          }
+        });
       }
       capa.addEventListener('click', abrir);
 
@@ -783,8 +912,12 @@
         });
         blocos.forEach(function (b) { b.hidden = false; });
         gsap.set(miolo.querySelectorAll('.ticket__item'), { clearProps: 'all' });
+        gsap.set(miolo, { clearProps: 'height,opacity' });
         gsap.set(capa, { clearProps: 'all' });
         livro.classList.remove('aberto');
+        livro.classList.remove('livro--fita');
+        livro.style.removeProperty('--fita-y');
+        livro.style.removeProperty('--fita-h');
         capa.setAttribute('aria-expanded', 'false');
         abas.remove(); caderno.remove(); nav.remove();
         ScrollTrigger.refresh();

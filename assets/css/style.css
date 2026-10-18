@@ -547,13 +547,15 @@ ol,ul{margin:0;padding:0;list-style:none}
 }
 
 /* ---------------- O cardápio: capa e folhas ----------------
-   Fechado e um cardapio de couro marrom com fio e cantoneiras
-   douradas e a logo no centro. Tocar em qualquer parte abre: a capa
-   gira pela lombada e descobre o miolo.
+   Fechado e um cardapio de couro marrom, espesso, com o ouro na ponta
+   — fio de borda, cantoneiras e os aneis da lombada — e a logo no
+   centro. Tocar em qualquer parte abre: a capa gira pela lombada e
+   descobre o miolo.
 
    O miolo e livro, nao mais nota: a borda serrada do comprovante
    saiu, porque folha de cardapio nao e cupom rasgado. Ficou o papel,
-   o vinco do meio nas duas colunas e a assinatura da casa no fim.
+   a fita de marca-pagina no vao das duas colunas e a assinatura da
+   casa no fim.
 
    Sem JS, sem GSAP ou sob movimento reduzido a capa nao existe e a
    lista inteira dos 111 itens aparece de uma vez. A capa e conforto,
@@ -564,66 +566,136 @@ ol,ul{margin:0;padding:0;list-style:none}
 .livro__capa{
   display:none;
   position:absolute;inset:0;z-index:3;
-  place-content:center;justify-items:center;gap:clamp(.9rem,2vw,1.4rem);
+  place-content:center;justify-items:center;gap:clamp(.8rem,1.8vw,1.3rem);
   padding:clamp(2rem,6vw,3.5rem);
   border:0;cursor:pointer;
   border-radius:3px 8px 8px 3px;
+  /* o couro: a cor que o dono aprovou, com um grao fino por cima para a
+     capa nao ler como retangulo chapado */
   background:
+    repeating-linear-gradient(26deg, rgba(255,255,255,.03) 0 1px, rgba(0,0,0,.032) 1px 3px),
+    repeating-linear-gradient(-64deg, rgba(255,255,255,.022) 0 1px, rgba(0,0,0,.022) 1px 4px),
     linear-gradient(118deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 38%),
     linear-gradient(150deg, var(--couro-claro) 0%, var(--couro) 46%, #26150a 100%);
-  /* a lombada a esquerda e a sombra funda dao a espessura */
+  /* A ESPESSURA mora aqui: o corte das paginas, visto de lado, em laminas
+     creme empilhadas a direita e embaixo. E isso que da corpo — sombra
+     sozinha so escurece o fundo. O deslocamento lateral para em 8px: a
+     pilha fica fora da caixa do .livro e acima disso abre rolagem
+     horizontal nas telas estreitas. */
   box-shadow:
-    inset 16px 0 20px -14px rgba(0,0,0,.95),
-    inset -2px 0 0 rgba(0,0,0,.4),
-    0 28px 64px rgba(0,0,0,.66);
+    2px 3px 0 0 #efe4cc,
+    4px 5px 0 0 #dccfb3,
+    6px 7px 0 0 #efe4cc,
+    8px 9px 0 0 #dccfb3,
+    8px 12px 0 0 #c9b995,
+    inset 20px 0 24px -16px rgba(0,0,0,.95),
+    0 34px 72px rgba(0,0,0,.7);
   -webkit-tap-highlight-color:transparent;
 }
 .js .livro__capa{display:grid}
 @media (prefers-reduced-motion:reduce){ .livro__capa{display:none !important} }
 .livro.aberto .livro__capa{pointer-events:none}
 
-/* moldura dourada e as quatro cantoneiras */
-.livro__ouro{
-  position:absolute;inset:clamp(13px,3%,24px);
-  border:2px solid var(--ouro);border-radius:2px;
-  pointer-events:none;
+/* ---- o ouro vai na BORDA FISICA, nao numa moldura desenhada ----
+   O dono foi claro: "a borda mesmo, a ponta do cardapio... como se fossem
+   aneis que se conectam nas bordas". Entao o ouro e feito de tres pecas de
+   borda — o fio que contorna a capa inteira, as quatro cantoneiras macicas
+   nos cantos e os aneis da lombada. A moldura interna continua, um pouco
+   mais grossa, mas ela e acabamento: o ouro que ele pediu e o da ponta. */
+.livro__fio{
+  position:absolute;inset:0;pointer-events:none;
+  border-radius:3px 8px 8px 3px;
+  /* o fio vai por inset box-shadow, nao por border: border empurraria a
+     caixa de posicionamento das cantoneiras 3px para dentro e elas
+     desencontrariam o canto */
+  box-shadow:
+    inset 0 0 0 4px var(--ouro),
+    inset 0 0 0 6px rgba(32,18,6,.55),
+    inset 0 0 0 7px rgba(201,164,74,.5),
+    inset 0 0 22px rgba(201,164,74,.2);
 }
-.livro__ouro::before,.livro__ouro::after,
+/* as cantoneiras: quatro chapas de metal fechando os cantos, cada uma
+   ligando as duas bordas que ali se encontram */
+.livro__fio::before,.livro__fio::after,
 .livro__capa::before,.livro__capa::after{
-  content:'';position:absolute;width:26px;height:26px;
-  border:2px solid var(--ouro);pointer-events:none;
+  content:'';position:absolute;pointer-events:none;
+  width:clamp(30px,6.5%,52px);aspect-ratio:1;
 }
-.livro__ouro::before{top:-9px;left:-9px;border-right:0;border-bottom:0}
-.livro__ouro::after{bottom:-9px;right:-9px;border-left:0;border-top:0}
 .livro__capa::before{
-  top:calc(clamp(13px,3%,24px) - 9px);right:calc(clamp(13px,3%,24px) - 9px);
-  border-left:0;border-bottom:0;
+  top:0;left:0;border-radius:3px 0 0 0;
+  background:
+    linear-gradient(135deg, transparent 0 48.8%, rgba(32,18,6,.55) 48.8% 51.4%, transparent 51.4%),
+    linear-gradient(135deg, #f7e5aa 0%, #d8b55c 26%, var(--ouro) 42%, #8f6d26 51%, transparent 51.2%);
 }
 .livro__capa::after{
-  bottom:calc(clamp(13px,3%,24px) - 9px);left:calc(clamp(13px,3%,24px) - 9px);
-  border-right:0;border-top:0;
+  top:0;right:0;border-radius:0 8px 0 0;
+  background:
+    linear-gradient(225deg, transparent 0 48.8%, rgba(32,18,6,.55) 48.8% 51.4%, transparent 51.4%),
+    linear-gradient(225deg, #f7e5aa 0%, #d8b55c 26%, var(--ouro) 42%, #8f6d26 51%, transparent 51.2%);
+}
+.livro__fio::after{
+  bottom:0;right:0;border-radius:0 0 8px 0;
+  background:
+    linear-gradient(315deg, transparent 0 48.8%, rgba(32,18,6,.55) 48.8% 51.4%, transparent 51.4%),
+    linear-gradient(315deg, #f7e5aa 0%, #d8b55c 26%, var(--ouro) 42%, #8f6d26 51%, transparent 51.2%);
+}
+.livro__fio::before{
+  bottom:0;left:0;border-radius:0 0 0 3px;
+  background:
+    linear-gradient(45deg, transparent 0 48.8%, rgba(32,18,6,.55) 48.8% 51.4%, transparent 51.4%),
+    linear-gradient(45deg, #f7e5aa 0%, #d8b55c 26%, var(--ouro) 42%, #8f6d26 51%, transparent 51.2%);
+}
+
+/* a lombada: largura de verdade, com brilho e os dois aneis de ouro do
+   livro antigo. Antes era so uma sombra interna fingindo volume. */
+.livro__lombada{
+  position:absolute;top:0;bottom:0;left:0;pointer-events:none;
+  width:clamp(17px,3.4%,28px);border-radius:3px 0 0 3px;
+  background:linear-gradient(90deg,
+    #1b0e05 0%, #3d230f 30%, var(--couro-claro) 54%,
+    rgba(0,0,0,.42) 88%, rgba(0,0,0,.66) 100%);
+  box-shadow:inset -1px 0 0 rgba(0,0,0,.6), inset 1px 0 0 rgba(201,164,74,.3);
+}
+.livro__lombada::before,.livro__lombada::after{
+  content:'';position:absolute;left:0;right:0;height:3px;
+  background:var(--ouro);opacity:.5;
+}
+.livro__lombada::before{top:15%}
+.livro__lombada::after{bottom:15%}
+
+/* a moldura interna — acabamento, com a linha um pouco mais grossa */
+.livro__ouro{
+  position:absolute;inset:clamp(17px,3.6%,28px);
+  border:3px solid var(--ouro);border-radius:2px;
+  pointer-events:none;opacity:.85;
 }
 
 .livro__logo{
-  width:clamp(118px,19vw,196px);height:auto;border-radius:50%;
-  border:3px solid var(--ouro);
-  box-shadow:0 14px 38px rgba(0,0,0,.66), 0 0 0 9px rgba(201,164,74,.12);
+  width:clamp(140px,24vw,250px);height:auto;border-radius:50%;
+  border:4px solid var(--ouro);
+  box-shadow:0 16px 42px rgba(0,0,0,.7), 0 0 0 11px rgba(201,164,74,.13);
 }
 /* os dois fios de ouro ancoram o bloco no meio de uma capa alta */
 .livro__titulo{
   position:relative;
   font-family:var(--display);font-weight:var(--peso-titulo);
   text-transform:uppercase;letter-spacing:.16em;
-  font-size:clamp(1.9rem,5.4vw,3.2rem);line-height:1;
+  font-size:clamp(2.1rem,6.2vw,3.9rem);line-height:1;
   color:var(--ouro);
-  padding:.5rem 0;
+  padding:.6rem 0;
 }
 .livro__titulo::before,.livro__titulo::after{
   content:'';position:absolute;left:50%;transform:translateX(-50%);
-  width:clamp(120px,22vw,230px);height:1px;background:var(--ouro);opacity:.55;
+  width:clamp(120px,22vw,230px);height:2px;background:var(--ouro);opacity:.6;
 }
 .livro__titulo::before{top:0}
 .livro__titulo::after{bottom:0}
+/* a casa no pe da capa: a capa alta ficava vazia com so logo e titulo */
+.livro__casa{
+  font-size:.64rem;text-transform:uppercase;letter-spacing:.22em;
+  line-height:1.9;text-align:center;
+  color:rgba(201,164,74,.66);
+}
 .livro__dica{
   font-size:.66rem;text-transform:uppercase;letter-spacing:.2em;
   color:rgba(201,164,74,.72);
@@ -776,6 +848,10 @@ ol,ul{margin:0;padding:0;list-style:none}
      gesto lateral como rolagem e dispara pointercancel no meio. */
   touch-action:pan-y;
 }
+/* so enquanto o dedo (ou o mouse) conduz a folha: sem isso o arrasto no
+   desktop sai selecionando os nomes e os precos pelo caminho */
+.ticket__caderno.arrastando{user-select:none;-webkit-user-select:none}
+
 .ticket__folha{
   /* o recuo lateral e o que deixa as faixas de virar fora do alcance
      dos itens: entre elas fica so o texto do cardapio */
@@ -844,18 +920,49 @@ ol,ul{margin:0;padding:0;list-style:none}
   /* duas colunas, lendo de cima para baixo */
   .ticket__lista{grid-template-columns:1fr 1fr;column-gap:clamp(2.5rem,5vw,3.75rem)}
   .ticket__item{grid-column:auto}
-  /* o vinco do livro: fio pontilhado no meio e a sombra dos dois lados.
-     Mora na propria lista, seja ela a lista solta (sem JS) ou a de
-     dentro de uma folha. */
-  .ticket__lista::before{
-    content:'';position:absolute;top:-.4rem;bottom:-.4rem;left:50%;
-    border-left:1.5px dashed rgba(25,20,19,.32);transform:translateX(-50%);
-  }
-  .ticket__lista::after{
-    content:'';position:absolute;top:-.4rem;bottom:-.4rem;left:50%;width:52px;
-    transform:translateX(-50%);pointer-events:none;
-    background:linear-gradient(90deg,rgba(25,20,19,0),rgba(25,20,19,.08) 42%,
-                               rgba(25,20,19,.08) 58%,rgba(25,20,19,0));
+}
+
+/* ---------------- o marca-pagina de fita ----------------
+   Esta fita entrou no lugar do vinco tracejado com sombra que ficava no
+   meio das duas colunas: durante a virada aquele fio lia como uma linha
+   de fechamento da pagina, e a sombra nao se explicava.
+
+   A FITA CONTINUA FITA: ela nao gira, nao afunila e nao encolhe ao
+   passar as paginas. Isso e requisito, e e o que decide onde ela mora —
+   no .livro, e em nenhum dos tres lugares abaixo:
+
+   - dentro do .ticket__caderno ela entraria no mesmo espaco 3D das
+     folhas (perspective + preserve-3d) e a perspectiva a afunilaria a
+     cada virada;
+   - dentro de uma .ticket__folha ela giraria junto e sumiria com a folha;
+   - dentro do .ticket o overflow:hidden (o recorte que segura a folha
+     girando) cortaria a ponta em V.
+
+   Geometria fixa: largura e comprimento em px, posicao no vao, nenhum
+   transform que a virada toque. Mais pointer-events:none, senao ela
+   rouba o toque dos itens, e z-index entre o papel e a capa (que e 3),
+   para a fita ficar SOBRE a folha, como fita de verdade sobre a pagina.
+
+   O --fita-y e o --fita-h sao escritos pelo JS a partir do caderno, e
+   a classe .livro--fita so entra quando o livro e montado: sem JS, sem
+   GSAP ou sob movimento reduzido nao ha caderno nem fita.
+
+   So acima de 720px: abaixo ha uma coluna so e nao existe vao, e a fita
+   passaria por cima do texto.
+   ------------------------------------------------------- */
+.livro__fita{display:none}
+@media (min-width:720px){
+  /* so com o livro aberto: fechado, o miolo tem altura de capa e a fita
+     sobraria para fora dela, pendurada no vazio */
+  .js .livro--fita.aberto .livro__fita{
+    display:block;position:absolute;z-index:2;pointer-events:none;
+    left:50%;width:17px;margin-left:-8.5px;
+    top:var(--fita-y,0);height:var(--fita-h,0);
+    background:linear-gradient(90deg,
+      #5d0813 0%, #96101f 30%, #ab1526 52%, #7c0c18 78%, #4e070f 100%);
+    /* a ponta recortada em V, como as de livro antigo */
+    clip-path:polygon(0 0, 100% 0, 100% calc(100% - 17px), 50% 100%, 0 calc(100% - 17px));
+    box-shadow:3px 0 10px rgba(25,20,19,.26);
   }
 }
 

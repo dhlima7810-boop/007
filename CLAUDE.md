@@ -118,9 +118,10 @@ prédio amarelo e vermelho da esquina. Os tokens estão no `:root` do
 - **Itálico é exceção**: só o carimbo "HOJE", que fica torto e itálico sobre
   o dia de hoje. A caixa, mesmo ali, é alta.
 - **Cardápio**: é um cardápio de verdade, não uma nota. Fechado, uma capa de
-  **couro marrom com fio e cantoneiras douradas** e a logo no centro; aberto,
-  folhas de papel com o vinco no meio e a assinatura da casa no pé. A borda
-  serrada de comprovante **saiu**: folha de cardápio não é cupom rasgado.
+  **couro marrom espessa, com o ouro na ponta** e a logo no centro; aberto,
+  folhas de papel com a **fita de marca-página** no vão das colunas e a
+  assinatura da casa no pé. A borda serrada de comprovante **saiu**: folha de
+  cardápio não é cupom rasgado.
 - **Encostar num sabor rasga a linha**: a linha inclina, desloca e abre
   embaixo uma faixa serrada. Vale para **todos os 111 itens**, não só para as
   pizzas. É hover de estado, feito em CSS — não gaste GSAP com isso.
@@ -143,6 +144,27 @@ então o cardápio é um objeto: fechado é uma capa, aberto é um livro.
 lombada (`rotationY`, origem à esquerda) e descobre o miolo. Sendo botão, o
 teclado e o leitor de tela chegam junto, com `aria-expanded`.
 
+### A capa tem corpo, e o ouro mora na ponta
+
+O dono recusou duas vezes a capa chapada. O que ficou de pé:
+
+- **A espessura vem do corte das páginas**, não da sombra: a pilha de lâminas
+  creme nos `box-shadow` da `.livro__capa`, deslocadas para a direita e para
+  baixo. O deslocamento lateral **para em 8px** — acima disso a pilha abre
+  rolagem horizontal nas telas estreitas.
+- **O ouro é de borda, não de moldura desenhada.** São o fio que contorna a
+  capa inteira (`.livro__fio`, por `inset box-shadow` e não por `border`:
+  `border` empurraria 3px a caixa das cantoneiras e elas desencontrariam o
+  canto), as quatro cantoneiras de metal fechando os cantos e os dois anéis da
+  lombada. A moldura interna continua, mas é acabamento.
+- **A cor do couro não muda.** Foi aprovada; só a espessura e o ouro estavam
+  errados.
+- **Fechado, o cardápio tem altura de cardápio.** Sem isso a capa herda a
+  altura do livro aberto e vira um muro de couro com a logo perdida no meio.
+  A altura é posta em JS (o miolo já é `overflow:hidden`) e vai para `auto` ao
+  abrir, no mesmo tempo da capa girando. Aqui animar altura sai barato: o
+  caderno já tem altura fixa em px e nada dentro dele reflui a cada quadro.
+
 **O miolo** reparte os itens em folhas: ~24 por folha em duas colunas acima de
 720px, ~9 em coluna única abaixo. **Nenhuma folha mistura seções** — cada uma
 pertence a uma e leva o nome dela no alto, senão a pessoa perde o fio em
@@ -164,9 +186,34 @@ O que garante isso é o **recuo lateral da folha** (`inset: 0 var(--faixa)`):
 as faixas ficam fora do alcance de qualquer `.ticket__item`. Se esse recuo
 sumir, as faixas passam por baixo dos itens e o toque volta a virar página.
 
-O gesto de arrasto continua valendo nos dois sentidos, e só é lido no soltar,
-e só se for claramente horizontal — um toque parado tem `dx` pequeno e não
-vira nada.
+### A folha segue o dedo
+
+**O arrasto não é lido só no soltar.** Essa foi a reclamação que voltou duas
+vezes — "não vi diferença" — e as duas vezes eu mexi na animação, que era a
+coisa errada. Com o gesto lido só no `pointerup`, a folha fica **parada**
+enquanto o dedo anda e só depois roda um tween: nenhuma curva faz uma
+animação que começa depois do gesto parecer conduzida por ele.
+
+Agora é `pointerdown` → `pointermove` → `pointerup`:
+
+- no `pointermove`, assim que o gesto se mostra horizontal (|dx| > 12px e
+  |dx| > |dy|), a folha passa a ser desenhada quadro a quadro em
+  `rotationY = dx / largura × -180`, com a sombra acompanhando;
+- no `pointerup`, passou de 35% do caminho **ou** veio rápido (acima de
+  0,5px/ms) completa; senão volta. Os dois assentam **de onde o dedo
+  largou**, não do zero.
+
+Posição vinda do dedo **não é tween** — como no scroll, ali não há curva nem
+duração. A curva só aparece no assentamento, e ele não desce de 0.6s (regra
+do projeto); com `power3.out` quase todo o movimento sai no primeiro terço,
+então um resto curto ainda larga rápido.
+
+`setPointerCapture` no começo da condução, senão o arrasto se perde se o dedo
+sair da folha. E `touch-action: pan-y` no caderno é o que permite tudo isso
+sem brigar com a rolagem.
+
+Um toque parado continua com `dx` pequeno e não vira nada — é por isso que
+encostar num sabor para ler não tira a folha do lugar.
 
 ### A virada é de folha, não de cartão
 
@@ -183,8 +230,38 @@ Três coisas fazem a diferença, e as três são fáceis de desfazer sem percebe
    inclinando.
 
 `power3.inOut`, não `expo.inOut`: a expo tem um talo quase reto no meio e a
-folha parece saltar. Medida, a power3 dá 3° nos primeiros 227ms, passa a
-vertical aos 585ms e assenta em 180° — puxada, aceleração e pouso.
+folha parece saltar. A power3 sai, acelera e assenta — o jeito de quem passa
+o dedo. A virada por faixa, seta ou aba leva **0.8s**; a do arrasto não tem
+duração nenhuma, porque quem manda é o dedo.
+
+### A fita de marca-página continua fita
+
+No meio das duas colunas havia um fio tracejado com uma sombra em gradiente.
+Durante a virada aquilo lia como **uma linha de fechamento da página**, e a
+sombra não se explicava. Saiu, e no lugar entrou a fita de marcador de livro
+antigo, com a ponta recortada em V.
+
+**Ela não gira, não afunila e não encolhe ao passar as páginas.** Isso é
+requisito do dono, e é o que decide onde ela mora — no `.livro`, e em nenhum
+destes três lugares:
+
+- dentro do `.ticket__caderno` ela entraria no mesmo espaço 3D das folhas
+  (`perspective` + `preserve-3d`) e a perspectiva a **afunilaria** a cada
+  virada;
+- dentro de uma `.ticket__folha` ela giraria junto e sumiria com a folha;
+- dentro do `.ticket` o `overflow:hidden` cortaria a ponta em V.
+
+Geometria fixa, nenhum `transform` que a virada toque, e
+`pointer-events:none`, senão ela rouba o toque dos itens.
+
+Ela começa **onde o vão das colunas começa** (`--fita-y`, escrito em JS), e
+não no alto da folha: acima disso o nome da seção e a nota ocupam a largura
+inteira e a fita passava por cima do texto. O recuo é o maior de todas as
+folhas — um número só, igual em qualquer página.
+
+**Só acima de 720px**, onde existem duas colunas, e **só com o livro
+aberto**: fechado, o miolo tem altura de capa e a fita sobraria pendurada no
+vazio.
 
 ### Três coisas que não dá para mexer sem quebrar
 
