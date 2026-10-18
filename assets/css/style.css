@@ -491,8 +491,12 @@ ol,ul{margin:0;padding:0;list-style:none}
 
 /* o rodapé das páginas legais e do site compartilham o mesmo bloco */
 .rodape__endereco strong{color:var(--txt)}
-.rodape__legal{display:flex;flex-wrap:wrap;gap:.4rem .9rem;align-items:center}
-.rodape__social{display:flex;flex-wrap:wrap;gap:.9rem;align-items:center}
+.rodape__legal{display:flex;flex-direction:column;gap:.7rem;align-items:flex-start}
+.rodape__social{display:flex;flex-wrap:wrap;gap:1.1rem;align-items:center}
+.rodape__social .elo{font-weight:700}
+@media (min-width:860px){
+  .rodape__legal{align-items:flex-end;text-align:right}
+}
 
 /* ---------------- Rodapé ---------------- */
 .rodape{border-top:1px solid var(--fio);padding:clamp(2.5rem,5vw,3.5rem) 0}

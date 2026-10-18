@@ -117,10 +117,7 @@ Marcado com `TODO` / comentário no código:
    a domingo, das 18h às 00h, mas não batem entre si.
 4. **Segunda unidade** — existe uma Pizza Mia na Av. São Paulo, 474, Cidade
    Brasil, (11) 2425-5960. Ainda não está no site.
-5. **Instagram** — a busca achou dois perfis candidatos (`@pizzamiagv` e
-   `@pizzamia_1`) e não deu para confirmar qual é o oficial. O link está
-   comentado no rodapé do `index.html`, pronto para receber o certo.
-6. **CNPJ** — 54.968.854/0001-95 veio de consulta pública. Vale o dono
+5. **CNPJ** — 54.968.854/0001-95 veio de consulta pública. Vale o dono
    confirmar antes de publicar, porque é identificador legal.
 
 ## As fotos

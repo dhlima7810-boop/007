@@ -108,10 +108,14 @@ assets/vendor/        libs
   "Consultar preço" que liga.
 - Fotos: use só as que a pizzaria forneceu. Imagens de Tripadvisor, Google ou
   Restaurant Guru são de terceiros e não entram.
-- **Telefone: um só, (11) 2452-6575.** É o que aparece primeiro na placa da
-  fachada, primeiro no rodapé do cardápio impresso e como linha principal nos
-  guias da cidade. O 2452-8022 existe, mas sai do site para não dividir a
-  ligação. Se trocar, troque em todas as ocorrências e no JSON-LD.
+- **Telefone: um só, (11) 2452-8022.** Confirmado pelo dono em 17/10/2026.
+  Não troque pelo 2452-6575 com base em fonte externa: a placa da fachada, o
+  rodapé do cardápio impresso e os guias da cidade dão o 6575 em primeiro
+  lugar, e foi exatamente por isso que o site saiu errado uma vez. A linha que
+  atende é a 8022. Se um dia mudar, troque em `index.html`, `privacidade.html`,
+  `termos.html` e no `telephone` do JSON-LD.
+- **Instagram oficial: `@pizzamia_1`.** Confirmado pelo dono. Existe um
+  `@pizzamiagv` parecido que **não** é desta casa.
 - **Horário: todos os dias, 18h à meia-noite.** Os dias vêm do próprio cartaz
   da casa, que anuncia promoção para os sete dias da semana.
 - **Razão social e CNPJ:** La Casa Della Pizza Mia Ltda, 54.968.854/0001-95.
