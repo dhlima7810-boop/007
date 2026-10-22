@@ -8,7 +8,13 @@
 <meta name="theme-color" content="#121010">
 <link rel="icon" href="assets/favicon.png" type="image/png">
 
+<!-- O endereço que o site declara ser o seu. Netlify e Cloudflare servem
+     /termos e /termos.html como páginas diferentes; sem canonical, a
+     citação pode cair na variante errada. Apex, sem www. -->
+<link rel="canonical" href="https://pizzamia.com.br/">
+
 <meta property="og:type" content="restaurant">
+<meta property="og:url" content="https://pizzamia.com.br/">
 <meta property="og:title" content="Pizza Mia — Pizzaria e Rodízio em Guarulhos">
 <meta property="og:description" content="Rodízio, esfihas e pizzas para viagem. Promoção todo dia em Vila Galvão.">
 <meta property="og:image" content="assets/img/fachada-noite.jpg">
@@ -24,10 +30,19 @@
      Dados estruturados (JSON-LD). Diz em dados o que a pagina
      ja diz em texto: endereco, telefone, horario e cardapio.
 
-     ATENCAO ANTES DE PUBLICAR: trocar SITE_URL pelo dominio
-     real em todas as ocorrencias deste bloco, no sitemap.xml
-     e no robots.txt. Enquanto for SITE_URL, os buscadores
-     ignoram as URLs.
+     O dominio e pizzamia.com.br, no apex (sem www). Ele aparece
+     aqui, no canonical e no og:url do <head>, no sitemap.xml e
+     no robots.txt. Se um dia mudar, mude nos quatro — uma URL
+     que nao resolve vale o mesmo que URL nenhuma.
+
+     O horario daqui tem de bater com o selo de aberto/fechado
+     da secao "Onde estamos": os dois saem da mesma regra,
+     18h as 00h, todos os dias.
+
+     O closes e "23:59", nao "00:00", e isso nao e engano: pela
+     doc do Google para local business, opens e closes ambos em
+     00:00 querem dizer FECHADO O DIA INTEIRO. Meia-noite como
+     fim de expediente se escreve 23:59.
 
      O bloco foi gerado a partir do proprio HTML da pagina. Se
      mexer nos sabores, regere para nao divergir — a receita
@@ -37,14 +52,14 @@
   {
     "@context": "https://schema.org",
     "@type": "Restaurant",
-    "@id": "https://SITE_URL/#restaurante",
+    "@id": "https://pizzamia.com.br/#restaurante",
     "name": "Pizza Mia",
     "legalName": "La Casa Della Pizza Mia Ltda",
     "taxID": "54.968.854/0001-95",
     "description": "Pizzaria e rodízio em Vila Galvão, Guarulhos. Rodízio de pizzas salgadas e doces, esfihas e pizzas para viagem.",
-    "image": "https://SITE_URL/assets/img/fachada-noite.jpg",
-    "logo": "https://SITE_URL/assets/img/logo.jpg",
-    "url": "https://SITE_URL/",
+    "image": "https://pizzamia.com.br/assets/img/fachada-noite.jpg",
+    "logo": "https://pizzamia.com.br/assets/img/logo.jpg",
+    "url": "https://pizzamia.com.br/",
     "sameAs": [
       "https://www.instagram.com/pizzamia_1/"
     ],
@@ -58,7 +73,7 @@
     "currenciesAccepted": "BRL",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Av. Emilio Ribas, 3175",
+      "streetAddress": "Av. Emilio Ribas, 3175 — Vila Galvão",
       "addressLocality": "Guarulhos",
       "addressRegion": "SP",
       "postalCode": "07051-001",
@@ -81,13 +96,13 @@
           "Sunday"
         ],
         "opens": "18:00",
-        "closes": "00:00"
+        "closes": "23:59"
       }
     ],
     "acceptsReservations": "False",
     "hasMenu": {
       "@type": "Menu",
-      "@id": "https://SITE_URL/#cardapio",
+      "@id": "https://pizzamia.com.br/#cardapio",
       "name": "Cardápio Pizza Mia",
       "inLanguage": "pt-BR",
       "hasMenuSection": [
@@ -2279,6 +2294,15 @@
             <p class="dado__valor">
               Todos os dias<br>
               <strong>das 18h à meia-noite</strong>
+            </p>
+            <!-- O selo de aberto/fechado. Nasce `hidden` e quem o acende é o
+                 main.js, depois de preencher: sem JS ele não aparece e o
+                 horário acima continua dizendo tudo. Não fica sob a classe
+                 .js de propósito — ele não é animação e precisa funcionar
+                 mesmo quando GSAP e Lenis não carregam. -->
+            <p class="dado__selo" id="seloHorario" aria-live="polite" hidden>
+              <span class="dado__selo-ponto" aria-hidden="true"></span>
+              <span class="dado__selo-texto"></span>
             </p>
           </div>
         </div>

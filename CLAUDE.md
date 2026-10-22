@@ -627,6 +627,48 @@ assets/vendor/        libs
 - **Razão social e CNPJ:** La Casa Della Pizza Mia Ltda, 54.968.854/0001-95.
   Aparece no rodapé e nas páginas legais.
 
+## Relógio: a hora é a da pizzaria, não a do visitante
+
+**Tudo que depende de relógio lê `America/Sao_Paulo`.** Nunca `new Date()`
+sozinho — isso dá a hora do aparelho de quem acessa. O ajudante
+`agoraNaPizzaria()` (§3 do `main.js`) usa `Intl.DateTimeFormat`, é nativo e
+devolve `{dia, minutos}` ou `null` quando o navegador não tem `Intl` ou recusa
+o fuso.
+
+Dois lugares usam: o **carimbo "HOJE"** da semana e o **selo de
+aberto/fechado**. O carimbo errava em silêncio antes disso — quem abrisse o
+site de outro fuso via o destaque no dia errado.
+
+Os dois tratam o `null` de forma diferente, de propósito: o carimbo cai no
+relógio do aparelho (errar o destaque de um dia é barato, e é melhor que a
+semana ficar sem marca nenhuma); o selo **não aparece**, porque dizer "aberto"
+com a casa fechada é pior que não dizer nada.
+
+### O selo de aberto ou fechado
+
+Fica no bloco do Horário da seção `#local`. Diz "Aberto agora · até
+meia-noite" ou "Fechado · abre hoje às 18h".
+
+- **A regra do horário mora em três lugares e os três têm de concordar:** o
+  texto da seção, o `openingHoursSpecification` do JSON-LD e o selo. Mexeu em
+  um, confira os outros dois.
+- **`closes` é `23:59`, não `00:00`.** Pela documentação do Google para *local
+  business*, `opens` e `closes` ambos em `00:00` significam **fechado o dia
+  inteiro**. Meia-noite como fim de expediente se escreve `23:59`. Não
+  "corrija" isso de volta.
+- **O selo nasce `hidden` no HTML e quem o acende é o JS.** Sem JavaScript ele
+  não aparece e o horário fixo continua dizendo tudo — o selo é conforto, o
+  horário é conteúdo.
+- **Ele não fica sob a classe `.js`.** Essa classe é removida quando GSAP ou
+  Lenis falham, e o selo não é animação: tem de aparecer mesmo assim. Por isso
+  vive na §3, antes do portão do `anima`.
+- **Nenhuma animação, e isso é a regra e a degradação apontando para o mesmo
+  lugar.** O projeto manda todo movimento para o GSAP, e o selo precisa
+  funcionar sem GSAP. Então ele não se move: sem `transition`, sem
+  `@keyframes`, sem pulsar. O ponto muda de cor, e só.
+- **Reconfere a cada 60s**, reescrevendo só quando o texto muda de fato, senão
+  o `aria-live` repete a mesma frase para o leitor de tela.
+
 ## Dados estruturados e publicação
 
 O `index.html` tem um bloco JSON-LD (`Restaurant` + `Menu`) no `<head>`. Ele é
@@ -634,9 +676,20 @@ O `index.html` tem um bloco JSON-LD (`Restaurant` + `Menu`) no `<head>`. Ele é
 para nunca divergir do que está na tela. Mexeu nos sabores, regere — a receita
 está no README.
 
-Antes de publicar, trocar `SITE_URL` pelo domínio real em três lugares:
-`index.html` (JSON-LD), `sitemap.xml` e `robots.txt`. Enquanto for `SITE_URL`,
-os buscadores ignoram essas URLs.
+O domínio é **`pizzamia.com.br`**, no apex, sem `www`. Ele aparece em quatro
+lugares que têm de concordar: o JSON-LD, o `canonical` e o `og:url` do
+`index.html`, o `sitemap.xml` e o `robots.txt`. Mudou o domínio, mude nos
+quatro — URL que não resolve vale o mesmo que URL nenhuma. As páginas legais
+têm `canonical` próprio, apontando para elas mesmas.
 
-O `robots.txt` libera explicitamente GPTBot, ClaudeBot, PerplexityBot e
-Google-Extended, entre outros. Não feche esses agentes sem o dono pedir.
+### O site tem de responder na RAIZ do domínio
+
+`robots.txt` só é lido na raiz do host (RFC 9309). Servido num subcaminho — o
+que acontece no GitHub Pages **sem** domínio próprio,
+`usuario.github.io/007-s-repository/` — **o arquivo nunca é buscado**, e as 13
+linhas que liberam GPTBot, ClaudeBot, PerplexityBot e Google-Extended deixam de
+existir para quem interessa. Nada avisa: nenhum erro, nenhuma página quebrada.
+O `_headers` também é ignorado.
+
+O `README` traz as opções em ordem. Não feche esses agentes sem o dono pedir, e
+não publique em subcaminho achando que tanto faz.

@@ -1202,6 +1202,29 @@ ol,ul{margin:0;padding:0;list-style:none}
 }
 .dado__valor{font-size:1.05rem;line-height:1.6}
 .dado__nota{color:var(--txt-3);font-size:.9rem}
+
+/* ---- o selo de aberto ou fechado ----
+   Preenchido e aceso pelo JS (secao 3b do main.js), que o entrega com o
+   atributo hidden removido. Nao tem transition nem keyframes de proposito:
+   ele precisa funcionar sem GSAP, e a regra de animacao do projeto manda o
+   movimento todo para o GSAP — entao a saida e nao se mover.
+   O ponto muda de cor; o texto, de peso. Nada pisca. */
+.dado__selo{
+  display:inline-flex;align-items:center;gap:.5rem;
+  justify-self:start;
+  font-family:var(--corpo);font-size:.82rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--txt-3);
+  border:1.5px solid var(--fio-forte);border-radius:var(--r-pill);
+  padding:.3rem .75rem;
+}
+.dado__selo[hidden]{display:none}
+.dado__selo-ponto{
+  width:.5rem;height:.5rem;border-radius:50%;
+  background:var(--txt-3);flex:none;
+}
+.dado__selo--aberto{color:var(--acento);border-color:var(--acento)}
+.dado__selo--aberto .dado__selo-ponto{background:var(--acento)}
 .elo{
   color:var(--txt);text-decoration:none;
   border-bottom:1px solid var(--fio-forte);padding-bottom:1px;

@@ -58,11 +58,94 @@
   }
 
   /* =======================================================
-     3. Destaque do dia de hoje
+     3. Que horas sao NA PIZZARIA
+
+     Tudo que depende de relogio neste site — o carimbo "HOJE" da
+     semana e o selo de aberto/fechado — tem de ler a hora de
+     Sao Paulo, nao a do visitante. `new Date()` sozinho da a hora
+     do aparelho: quem abrisse o site de outro fuso via o carimbo
+     no dia errado, e veria "aberto" com a casa fechada.
+
+     Intl.DateTimeFormat e nativo e resolve sem biblioteca. Se o
+     navegador nao tiver Intl, ou recusar o fuso, devolve null —
+     e quem chama decide. Para o selo, a decisao e nao aparecer:
+     dizer "aberto" errado e pior que nao dizer nada.
      ======================================================= */
-  var hoje = String(new Date().getDay()); // 0 = domingo
+  var DIAS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+  function agoraNaPizzaria() {
+    try {
+      var f = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Sao_Paulo',
+        weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+      });
+      var p = {};
+      f.formatToParts(new Date()).forEach(function (parte) { p[parte.type] = parte.value; });
+      var dia = DIAS.indexOf(String(p.weekday).slice(0, 3).toLowerCase());
+      var hora = parseInt(p.hour, 10);
+      var minuto = parseInt(p.minute, 10);
+      if (dia < 0 || isNaN(hora) || isNaN(minuto)) { return null; }
+      return { dia: dia, minutos: hora * 60 + minuto };
+    } catch (erro) {
+      return null;
+    }
+  }
+
+  /* ---- o carimbo "HOJE" da semana ---- */
+  var relogio = agoraNaPizzaria();
+  // sem Intl o carimbo cai no relogio do aparelho: errar o destaque de um
+  // dia e barato, e e melhor que a semana inteira ficar sem marca nenhuma
+  var hoje = String(relogio ? relogio.dia : new Date().getDay()); // 0 = domingo
   var diaHoje = document.querySelector('.carimbo[data-dia="' + hoje + '"]');
   if (diaHoje) { diaHoje.classList.add('carimbo--hoje'); }
+
+  /* =======================================================
+     3b. O selo de aberto ou fechado
+
+     A casa abre todos os dias das 18h a meia-noite. Aberto e,
+     portanto, das 18:00 as 23:59 — a mesma regra que esta no
+     openingHoursSpecification do JSON-LD, e os dois nao podem
+     divergir.
+
+     Sem animacao nenhuma, e isso e por regra: o CLAUDE.md
+     proibe keyframes e transition de entrada, e o selo tem de
+     funcionar sem GSAP. As duas coisas apontam para o mesmo
+     lugar — ele aparece pronto e fica parado.
+
+     Reconfere a cada minuto, senao quem abriu a aba as 17h59
+     leria "fechado" a noite toda. So reescreve quando o texto
+     muda de fato, para o aria-live nao repetir a mesma frase.
+     ======================================================= */
+  var ABRE = 18 * 60;        // 18:00
+  var FECHA = 24 * 60;       // meia-noite
+
+  var selo = document.getElementById('seloHorario');
+  if (selo) {
+    var seloTexto = selo.querySelector('.dado__selo-texto');
+    var ultimoTexto = null;
+
+    function pintarSelo() {
+      var agora = agoraNaPizzaria();
+      // sem hora confiavel o selo nao entra: o horario fixo logo acima
+      // continua dizendo o que importa
+      if (!agora) { return; }
+
+      var aberto = agora.minutos >= ABRE && agora.minutos < FECHA;
+      var texto = aberto
+        ? 'Aberto agora · até meia-noite'
+        : 'Fechado · abre hoje às 18h';
+
+      if (texto !== ultimoTexto) {
+        seloTexto.textContent = texto;
+        selo.classList.toggle('dado__selo--aberto', aberto);
+        ultimoTexto = texto;
+      }
+      selo.hidden = false;
+    }
+
+    pintarSelo();
+    setInterval(pintarSelo, 60000);
+  }
 
   /* =======================================================
      4. Lightbox das fotos

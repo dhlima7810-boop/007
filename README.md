@@ -153,22 +153,24 @@ e ajusta a altura do pin e o contador.
 
 **Degradação:** sem JavaScript, com as libs fora do ar ou com "reduzir
 movimento" ligado, o `main.js` tira a classe `js` e sai antes de animar. A
-página aparece inteira e parada, com as quatro cenas uma embaixo da outra.
+página aparece inteira e parada, com as três cenas uma embaixo da outra.
 
 ## O que ainda falta preencher
 
 Marcado com `TODO` / comentário no código:
 
-1. **Cardápio incompleto** — a foto do cardápio pegou só a coluna do meio
-   (111 itens em seis seções). O cardápio está completo; o que falta é a
-   coluna da direita e as pizzas doces. Precisa de uma foto do resto.
-   Os ingredientes do **Hamburguer** estavam cobertos por uma fita na foto.
+1. **Ingredientes do Hamburguer** — o cardápio está completo, 111 itens em
+   seis seções, as duas faces do impresso transcritas. Só falta uma linha:
+   os ingredientes do **Hamburguer** estavam cobertos por uma fita na foto.
 2. **Preços das promoções da semana** — esses continuam fora do site: os do
    cartaz antigo não valem mais. Cada dia tem um link "Consultar preço" que
    liga. Dentro do bloco de segunda-feira em `index.html` há uma linha
    comentada mostrando como pôr o preço de volta.
-3. **Horário de funcionamento** — seção `#local`. Guias da cidade indicam terça
-   a domingo, das 18h às 00h, mas não batem entre si.
+3. ~~**Horário de funcionamento**~~ — **resolvido.** Vale o que o dono
+   confirmou em 18/10/2026: todos os dias, das 18h à meia-noite. Os guias da
+   cidade divergem entre si e do real; não sirva de fonte. O horário está em
+   três lugares que têm de concordar: o texto da seção `#local`, o
+   `openingHoursSpecification` do JSON-LD e o selo de aberto/fechado.
 4. **Segunda unidade** — existe uma Pizza Mia na Av. São Paulo, 474, Cidade
    Brasil, (11) 2425-5960. Ainda não está no site.
 5. **CNPJ** — 54.968.854/0001-95 veio de consulta pública. Vale o dono
@@ -207,16 +209,23 @@ o bloco inteiro.
 
 ## Antes de publicar
 
-1. **Trocar `SITE_URL` pelo domínio real** em três arquivos: `index.html`
-   (JSON-LD), `sitemap.xml` e `robots.txt`. Enquanto for `SITE_URL`, os
-   buscadores ignoram essas URLs.
+O domínio é **`pizzamia.com.br`**, no apex (sem `www`), e já está escrito em
+`index.html` (JSON-LD, `canonical` e `og:url`), `sitemap.xml` e `robots.txt`.
+Se um dia mudar, mude nos quatro.
+
+1. **Servir o site na raiz do domínio.** Não num subcaminho — a razão está na
+   seção de hospedagem abaixo, e é a diferença entre o `robots.txt` existir ou
+   não para quem interessa.
 2. **Atualizar as datas** do `sitemap.xml`.
-3. **Conferir o `robots.txt` no ar**, em `SEU-DOMINIO/robots.txt`. Alguns
-   hosts servem um `robots.txt` próprio e ignoram o do repositório — nesse
-   caso o arquivo daqui não vale de nada e é preciso configurar no painel do
-   host.
+3. **Conferir o `robots.txt` no ar**, em `pizzamia.com.br/robots.txt`. Tem de
+   responder o arquivo deste repositório, com as 13 linhas de liberação dos
+   rastreadores de IA. Alguns hosts servem um `robots.txt` próprio por cima —
+   nesse caso o arquivo daqui não vale de nada e é preciso configurar no painel
+   do host.
 4. **Cache:** o `_headers` vale para Netlify e Cloudflare Pages. O GitHub
    Pages ignora e fixa o cache em 10 minutos, sem como mudar.
+5. **Conferir o selo de aberto/fechado** depois no ar, em horário de casa
+   aberta e fechada. Ele lê o fuso de São Paulo, não o do visitante.
 
 ## Páginas legais
 
@@ -228,8 +237,27 @@ visitante a esses serviços.
 **São minutas.** Valem como ponto de partida honesto, não como peça jurídica
 revisada. Vale uma lida de alguém da área antes de publicar.
 
-## Publicar de graça (GitHub Pages)
+## Hospedar
 
-1. No GitHub, vá em **Settings → Pages**.
-2. Em *Source*, escolha a branch do site e a pasta `/ (root)`.
-3. Salve. Em alguns minutos o site fica no ar.
+### A regra que decide tudo: o site tem de responder na RAIZ do domínio
+
+`robots.txt` só é lido na raiz do host — é o que diz a RFC 9309, e é como todo
+rastreador se comporta. Num subcaminho, como
+`usuario.github.io/007-s-repository/robots.txt`, **o arquivo nunca é buscado**.
+
+Para este site isso não é detalhe. As 13 linhas do `robots.txt` que liberam
+GPTBot, ClaudeBot, PerplexityBot, Google-Extended e companhia são o que permite
+a pizzaria ser citada por IA. Num subcaminho elas deixam de existir, e **nada
+avisa**: nenhum erro, nenhuma página quebrada. O `_headers` também é ignorado.
+
+### As opções, em ordem
+
+1. **Netlify ou Cloudflare Pages com `pizzamia.com.br`.** É o recomendado.
+   Servem na raiz, respeitam o `_headers` e publicam direto do repositório.
+2. **GitHub Pages com `pizzamia.com.br` ligado** (*Settings → Pages → Custom
+   domain*). Funciona: com domínio próprio o site passa a responder na raiz e
+   o `robots.txt` volta a ser lido. O `_headers` continua ignorado e o cache
+   fica fixo em 10 minutos.
+3. **GitHub Pages sem domínio próprio** — ou seja, `usuario.github.io/
+   007-s-repository/`. **Não serve para este projeto**, pelo motivo acima.
+   Se um dia alguém for por aqui achando que tanto faz: é esta a armadilha.

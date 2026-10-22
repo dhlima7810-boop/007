@@ -57,5 +57,7 @@ Allow: /
 User-agent: meta-externalagent
 Allow: /
 
-# ANTES DE PUBLICAR: trocar SITE_URL pelo dominio real.
-Sitemap: https://SITE_URL/sitemap.xml
+# O Sitemap tem de ser URL absoluta, e no mesmo host que serve este
+# arquivo. Confira no ar: pizzamia.com.br/robots.txt tem de responder
+# ESTE arquivo — alguns hosts servem um proprio por cima.
+Sitemap: https://pizzamia.com.br/sitemap.xml
