@@ -1443,7 +1443,71 @@ input[type="range"]::-moz-range-thumb {
     
     
     
-  </head>
+  <style>
+/* melhorias: legibilidade, navegação e microinterações */
+:root { --muted: #adb5a7; }
+html { scroll-behavior: auto; }
+.masthead {
+  position: sticky; top: 0; z-index: 30;
+  background: rgba(11, 16, 13, 0.82);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  transition: height 0.4s var(--saida), background 0.4s;
+}
+.masthead.is-compact { height: 68px; background: rgba(11, 16, 13, 0.94); }
+.scroll-progress {
+  position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 40;
+  background: var(--gold); transform: scaleX(0); transform-origin: 0 50%;
+  pointer-events: none;
+}
+.masthead nav a { position: relative; transition: color 0.25s; }
+.masthead nav a::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 6px; height: 1px;
+  background: var(--gold); transform: scaleX(0); transform-origin: 0 50%;
+  transition: transform 0.45s var(--saida);
+}
+.masthead nav a:hover::after, .masthead nav a.is-active::after { transform: scaleX(1); }
+.masthead nav a.is-active { color: var(--gold); }
+.brand-caption { font-size: 11px; }
+.brand-caption > span, .edition, .hero-topline, .eyebrow,
+.masthead nav, .button-time, .mission-button { font-size: 11px; }
+.hero-intro { font-size: 16px; line-height: 1.75; color: #cdd2c7; }
+.dossier-body p, .spec-heading p { font-size: 16px; line-height: 1.85; color: #c3c9bd; }
+.section-index, .film-facts span, .spec-grid dt, .field-label span,
+.scene-coordinate, .scene-readout, .timeline-ticks, .playback-caption,
+.film-badge, .film-badge span, .text-link { font-size: 11px; }
+.spec-grid dd p { font-size: 13px; color: #b4bcae; }
+.film-credit span:last-child { font-size: 13px; }
+.mission-button { transition: background 0.25s, border-color 0.25s, transform 0.4s var(--saida); }
+.mission-button:hover:not(:disabled) { transform: translateY(-2px); }
+.mission-button:not(.is-seen):not(:disabled) { animation: missionPulse 2.6s ease-out 3.2s infinite; }
+@keyframes missionPulse {
+  0% { box-shadow: 0 0 0 0 rgba(194, 181, 140, 0.55); }
+  70%, 100% { box-shadow: 0 0 0 16px rgba(194, 181, 140, 0); }
+}
+.spec-grid > div { transition: transform 0.5s var(--saida), border-color 0.3s; }
+.spec-grid > div:hover { transform: translateY(-6px); border-color: var(--gold); }
+.text-link { transition: letter-spacing 0.4s var(--saida), color 0.25s; }
+.text-link:hover { letter-spacing: 2.2px; color: var(--gold); }
+.coordinate-bottom { left: auto; right: 5%; bottom: 3%; }
+.key-hint {
+  position: absolute; left: 5%; bottom: 14px; z-index: 4;
+  font-family: monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--muted); opacity: 0.8; pointer-events: none;
+}
+.key-hint kbd {
+  font: inherit; border: 1px solid var(--line); padding: 2px 6px; margin: 0 3px; color: var(--paper);
+}
+@media (hover: none), (max-width: 760px) { .key-hint { display: none; } }
+@media (max-width: 760px) {
+  .masthead.is-compact { height: 60px; }
+  .hero-intro, .dossier-body p, .spec-heading p { font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mission-button { animation: none !important; }
+  .masthead, .masthead nav a::after, .spec-grid > div, .text-link { transition: none; }
+}
+</style>
+</head>
   <body>
     <a class="skip-link" href="#experiencia">Pular para a experiência</a>
     <header class="masthead">
@@ -2175,5 +2239,75 @@ function t(t,e,i){return Math.max(t,Math.min(e,i))}var e=class{isRunning=!1;valu
 })();
 
 </script>
-  </body>
+  <script>
+/* melhorias: progresso de rolagem, navegação ativa, parallax e atalhos */
+(function () {
+  "use strict";
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var bar = document.createElement("div");
+  bar.className = "scroll-progress";
+  bar.setAttribute("aria-hidden", "true");
+  document.body.appendChild(bar);
+  var header = document.querySelector(".masthead");
+
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var y = window.scrollY || 0;
+    bar.style.transform = "scaleX(" + (max > 0 ? Math.min(1, y / max) : 0) + ")";
+    header.classList.toggle("is-compact", y > 60);
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  // navegação: adiciona a Ficha de campo e destaca a seção visível
+  var nav = document.querySelector(".masthead nav");
+  var spec = document.createElement("a");
+  spec.href = "#automovel";
+  spec.textContent = "Ficha de campo";
+  nav.appendChild(spec);
+  var links = Array.prototype.slice.call(nav.querySelectorAll("a"));
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var id = "#" + entry.target.id;
+        links.forEach(function (a) {
+          a.classList.toggle("is-active", a.getAttribute("href") === id);
+        });
+      });
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    ["experiencia", "conexao", "automovel"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) io.observe(el);
+    });
+  }
+
+  var start = document.getElementById("missionStart");
+  start.addEventListener("click", function () { start.classList.add("is-seen"); });
+
+  // dica de atalhos
+  var hint = document.createElement("div");
+  hint.className = "key-hint";
+  hint.innerHTML = "<kbd>Espaço</kbd> missão <kbd>L</kbd> faróis <kbd>R</kbd> reiniciar";
+  document.getElementById("experiencia").appendChild(hint);
+  window.addEventListener("keydown", function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var t = e.target;
+    if (t && /^(INPUT|BUTTON|A|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    var k = e.key.toLowerCase();
+    var map = { " ": "playToggle", l: "headlightToggle", r: "replay" };
+    var el = map[k] && document.getElementById(map[k]);
+    if (el && !el.disabled) { e.preventDefault(); el.click(); }
+  });
+
+  // parallax suave do título e do cilindro ao rolar o hero
+  if (!reduced && window.gsap && window.ScrollTrigger) {
+    var trig = { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.6 };
+    gsap.to(".hero-heading", { y: -70, opacity: 0.25, ease: "none", scrollTrigger: trig });
+    gsap.to(".barrel", { y: 80, rotation: 8, ease: "none", scrollTrigger: trig });
+    gsap.to(".hero-grain", { backgroundPositionY: 120, ease: "none", scrollTrigger: trig });
+  }
+})();
+</script>
+</body>
 </html>

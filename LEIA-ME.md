@@ -15,6 +15,12 @@ Também incluímos **dbs-007.zip**, um pacote menor com o mesmo HTML e um arquiv
 
 Com a preferência de movimento reduzido ativada no aparelho, a experiência fica estática e os faróis continuam disponíveis.
 
+## Atalhos de teclado
+
+- **Espaço**: iniciar/pausar a missão
+- **L**: acender/apagar os faróis
+- **R**: reiniciar a animação
+
 ## Conteúdo
 
 - `dbs-007-portatil.html`: animação completa em um único arquivo.
