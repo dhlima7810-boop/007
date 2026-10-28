@@ -1,0 +1,303 @@
+import * as THREE from './three.module.min.js';
+
+// ---------- configuração ----------
+const N = 17;                                   // tabuleiro N × N
+const mundo = c => c - (N - 1) / 2;             // célula → coordenada 3D
+const passo = () => Math.max(0.075, 0.22 - pontos * 0.004);   // segundos por casa
+
+// ---------- cena ----------
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.prepend(renderer.domElement);
+
+const cena = new THREE.Scene();
+cena.background = new THREE.Color(0x0b1020);
+cena.fog = new THREE.Fog(0x0b1020, 22, 48);
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+const base = new THREE.Vector3(0, 17, 13);
+
+cena.add(new THREE.HemisphereLight(0xbfe6ff, 0x1a1030, 1.1));
+const sol = new THREE.DirectionalLight(0xffffff, 2.2);
+sol.position.set(6, 14, 8);
+sol.castShadow = true;
+sol.shadow.mapSize.set(1024, 1024);
+Object.assign(sol.shadow.camera, { left: -11, right: 11, top: 11, bottom: -11 });
+cena.add(sol);
+
+// chão xadrez
+const cv = document.createElement('canvas');
+cv.width = cv.height = 128;
+const g = cv.getContext('2d');
+[['#16213a', '#1b2947'], ['#1b2947', '#16213a']].forEach((linha, y) =>
+  linha.forEach((cor, x) => { g.fillStyle = cor; g.fillRect(x * 64, y * 64, 64, 64); }));
+const tex = new THREE.CanvasTexture(cv);
+tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+tex.repeat.set(N / 2, N / 2);
+tex.colorSpace = THREE.SRGBColorSpace;
+tex.anisotropy = 8;
+const chao = new THREE.Mesh(new THREE.PlaneGeometry(N, N), new THREE.MeshStandardMaterial({ map: tex, roughness: .9 }));
+chao.rotation.x = -Math.PI / 2;
+chao.receiveShadow = true;
+cena.add(chao);
+
+// muros de neon
+const neon = new THREE.MeshStandardMaterial({ color: 0x0891b2, emissive: 0x22d3ee, emissiveIntensity: 1.4 });
+[[N + .6, .3, 0, N / 2 + .15], [N + .6, .3, 0, -N / 2 - .15], [.3, N, N / 2 + .15, 0], [.3, N, -N / 2 - .15, 0]]
+  .forEach(([w, d, x, z]) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, .5, d), neon);
+    m.position.set(x, .25, z);
+    cena.add(m);
+  });
+
+// ---------- cobra ----------
+const geoCorpo = new THREE.SphereGeometry(.53, 24, 16);
+const segs = [];
+const cabeca = new THREE.Group();
+{
+  const crânio = new THREE.Mesh(geoCorpo, new THREE.MeshStandardMaterial({ roughness: .35 }));
+  crânio.scale.setScalar(1.15);
+  crânio.castShadow = true;
+  cabeca.add(crânio);
+  for (const lado of [-1, 1]) {
+    const olho = new THREE.Mesh(new THREE.SphereGeometry(.17, 12, 10), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+    olho.position.set(lado * .3, .26, .4);
+    const pupila = new THREE.Mesh(new THREE.SphereGeometry(.09, 10, 8), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+    pupila.position.set(0, 0, .11);
+    olho.add(pupila);
+    cabeca.add(olho);
+  }
+  cena.add(cabeca);
+  segs.push(cabeca);
+}
+const corpo = i => {
+  while (segs.length <= i) {
+    const m = new THREE.Mesh(geoCorpo, new THREE.MeshStandardMaterial({ roughness: .4 }));
+    m.castShadow = true;
+    cena.add(m);
+    segs.push(m);
+  }
+  return segs[i];
+};
+const material = m => (m.isGroup ? m.children[0] : m).material;
+
+// ---------- maçã e partículas ----------
+const maca = new THREE.Group();
+maca.add(new THREE.Mesh(new THREE.SphereGeometry(.42, 24, 16), new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xdc2626, emissiveIntensity: .7, roughness: .3 })));
+const folha = new THREE.Mesh(new THREE.BoxGeometry(.06, .22, .06), new THREE.MeshStandardMaterial({ color: 0x84cc16 }));
+folha.position.y = .45;
+maca.add(folha);
+const luzMaca = new THREE.PointLight(0xff4d4d, 8, 5);
+luzMaca.position.y = .8;
+maca.add(luzMaca);
+maca.children.forEach(c => (c.castShadow = true));
+cena.add(maca);
+
+const faiscas = [];
+const geoFaisca = new THREE.BoxGeometry(.16, .16, .16);
+function explodir(x, z, cor) {
+  for (let i = 0; i < 16; i++) {
+    const m = new THREE.Mesh(geoFaisca, new THREE.MeshBasicMaterial({ color: cor }));
+    m.position.set(x, .5, z);
+    m.userData = { v: new THREE.Vector3((Math.random() - .5) * 6, Math.random() * 5 + 2, (Math.random() - .5) * 6), vida: 1 };
+    cena.add(m);
+    faiscas.push(m);
+  }
+}
+
+// ---------- estado ----------
+let cobra, anterior, dir, fila, comida, pontos, recorde, estado = 'pronto', acc = 0, ultimoT = 0, tremor = 0, angulo = 0, surgir = 1;
+try { recorde = +localStorage.getItem('cobrinha-recorde') || 0; } catch { recorde = 0; }
+
+const $ = id => document.getElementById(id);
+const hud = () => { $('pts').textContent = pontos; $('rec').textContent = recorde; };
+
+function sorteiaComida() {
+  const livres = [];
+  for (let x = 0; x < N; x++) for (let y = 0; y < N; y++)
+    if (!cobra.some(s => s.x === x && s.y === y)) livres.push({ x, y });
+  if (!livres.length) return null;
+  surgir = 0;
+  return livres[Math.floor(Math.random() * livres.length)];
+}
+
+function reiniciar() {
+  cobra = [{ x: 4, y: 8 }, { x: 3, y: 8 }, { x: 2, y: 8 }];
+  anterior = cobra.map(s => ({ ...s }));
+  dir = { x: 1, y: 0 };
+  fila = [];
+  pontos = 0;
+  acc = 0;
+  angulo = Math.PI / 2;
+  comida = sorteiaComida();
+  hud();
+}
+
+function tique() {
+  if (fila.length) dir = fila.shift();
+  anterior = cobra.map(s => ({ ...s }));
+  const h = { x: cobra[0].x + dir.x, y: cobra[0].y + dir.y };
+  const come = comida && h.x === comida.x && h.y === comida.y;
+  const ocupado = (come ? cobra : cobra.slice(0, -1)).some(s => s.x === h.x && s.y === h.y);
+  if (h.x < 0 || h.y < 0 || h.x >= N || h.y >= N || ocupado) return morrer();
+  cobra.unshift(h);
+  if (!come) return cobra.pop();
+  anterior.push({ ...anterior.at(-1) });
+  pontos++;
+  explodir(mundo(h.x), mundo(h.y), 0xfacc15);
+  som(520 + pontos * 12, .12);
+  comida = sorteiaComida();
+  if (!comida) return morrer(true);
+  hud();
+}
+
+function morrer(venceu) {
+  estado = 'fim';
+  tremor = venceu ? 0 : .6;
+  som(venceu ? 880 : 110, .5, 'sawtooth');
+  if (pontos > recorde) {
+    recorde = pontos;
+    try { localStorage.setItem('cobrinha-recorde', recorde); } catch {}
+  }
+  hud();
+  $('titulo').textContent = venceu ? 'Você venceu!' : 'Fim de jogo';
+  $('sub').textContent = `${pontos} ponto${pontos === 1 ? '' : 's'} · recorde ${recorde}`;
+  $('jogar').textContent = 'Jogar de novo';
+  setTimeout(() => estado === 'fim' && ($('painel').hidden = false), 700);
+}
+
+function comecar() {
+  if (estado === 'jogando') return;
+  if (estado === 'pausado') { estado = 'jogando'; $('painel').hidden = true; return; }
+  reiniciar();
+  estado = 'jogando';
+  $('painel').hidden = true;
+}
+
+function pausar() {
+  if (estado === 'jogando') {
+    estado = 'pausado';
+    $('titulo').textContent = 'Pausado';
+    $('sub').textContent = 'Espaço ou P para continuar';
+    $('jogar').textContent = 'Continuar';
+    $('painel').hidden = false;
+  } else if (estado === 'pausado') comecar();
+}
+
+// ---------- entrada ----------
+function virar(x, y) {
+  if (estado !== 'jogando') return;
+  const ultima = fila.at(-1) || dir;
+  if ((x === -ultima.x && y === -ultima.y) || (x === ultima.x && y === ultima.y) || fila.length > 2) return;
+  fila.push({ x, y });
+}
+const teclas = {
+  ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1],
+  ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0],
+};
+addEventListener('keydown', e => {
+  if (teclas[e.code]) { e.preventDefault(); virar(...teclas[e.code]); }
+  else if (e.code === 'KeyP' || (e.code === 'Escape' && estado === 'jogando')) pausar();
+  else if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); estado === 'pausado' ? pausar() : comecar(); }
+});
+let toque;
+addEventListener('touchstart', e => (toque = e.touches[0]), { passive: true });
+addEventListener('touchend', e => {
+  const t = e.changedTouches[0], dx = t.clientX - toque.clientX, dy = t.clientY - toque.clientY;
+  if (Math.hypot(dx, dy) < 24) return;
+  Math.abs(dx) > Math.abs(dy) ? virar(Math.sign(dx), 0) : virar(0, Math.sign(dy));
+});
+$('jogar').addEventListener('click', () => (estado === 'pausado' ? pausar() : comecar()));
+
+// ---------- som (um bipe de WebAudio, sem arquivos) ----------
+let audio;
+function som(freq, dur, tipo = 'triangle') {
+  try {
+    audio ||= new AudioContext();
+    const o = audio.createOscillator(), v = audio.createGain();
+    o.type = tipo; o.frequency.value = freq;
+    v.gain.setValueAtTime(.12, audio.currentTime);
+    v.gain.exponentialRampToValueAtTime(.001, audio.currentTime + dur);
+    o.connect(v).connect(audio.destination);
+    o.start(); o.stop(audio.currentTime + dur);
+  } catch {}
+}
+
+// ---------- quadro a quadro ----------
+function ajustar() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  const dist = Math.max(1, 1.15 / camera.aspect) * 21.4;   // em tela estreita a câmera recua
+  base.setLength(dist);
+  camera.position.copy(base);
+  cena.fog.near = dist;
+  cena.fog.far = dist * 2.2;
+}
+addEventListener('resize', ajustar);
+
+const relogio = new THREE.Clock();
+const alvoOlhar = new THREE.Vector3();
+reiniciar();
+ajustar();
+
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(relogio.getDelta(), .05), tempo = relogio.elapsedTime;
+
+  if (estado === 'jogando') {
+    acc += dt;
+    while (acc >= passo() && estado === 'jogando') { acc -= passo(); tique(); }
+  }
+  if (estado === 'jogando') ultimoT = acc / passo();
+  else if (estado === 'fim') ultimoT = 0;
+  const t = ultimoT;
+
+  // cobra, interpolada entre a casa anterior e a atual
+  cobra.forEach((s, i) => {
+    const p = anterior[i] || s, m = i ? corpo(i) : cabeca;
+    m.visible = true;
+    m.position.set(mundo(p.x + (s.x - p.x) * t), .5, mundo(p.y + (s.y - p.y) * t));
+    const f = i / cobra.length;
+    material(m).color.setHSL(estado === 'fim' && tremor ? 0 : .38 - .1 * f, .75, .52 - .22 * f);
+  });
+  for (let i = cobra.length; i < segs.length; i++) segs[i].visible = false;
+
+  const alvo = Math.atan2(dir.x, dir.y);
+  angulo += Math.atan2(Math.sin(alvo - angulo), Math.cos(alvo - angulo)) * Math.min(1, dt * 18);
+  cabeca.rotation.y = angulo;
+
+  // maçã
+  if (comida) {
+    surgir = Math.min(1, surgir + dt * 3);
+    maca.visible = true;
+    maca.position.set(mundo(comida.x), .55 + Math.sin(tempo * 3) * .1, mundo(comida.y));
+    maca.rotation.y = tempo * 1.5;
+    maca.scale.setScalar(1 - Math.pow(1 - surgir, 3));
+  } else maca.visible = false;
+
+  // faíscas
+  for (let i = faiscas.length - 1; i >= 0; i--) {
+    const f = faiscas[i], d = f.userData;
+    d.v.y -= 14 * dt;
+    f.position.addScaledVector(d.v, dt);
+    d.vida -= dt * 1.4;
+    f.scale.setScalar(Math.max(d.vida, 0));
+    if (d.vida <= 0) { cena.remove(f); f.material.dispose(); faiscas.splice(i, 1); }
+  }
+
+  // câmera: acompanha de leve a cabeça; no menu, balança sozinha
+  const cx = estado === 'jogando' || estado === 'pausado' ? cabeca.position.x * .25 : Math.sin(tempo * .4) * 3;
+  camera.position.x += (base.x + cx - camera.position.x) * Math.min(1, dt * 3);
+  camera.position.y += (base.y - camera.position.y) * Math.min(1, dt * 3);
+  camera.position.z += (base.z - camera.position.z) * Math.min(1, dt * 3);
+  tremor *= Math.pow(.02, dt);
+  camera.position.x += (Math.random() - .5) * tremor;
+  camera.position.y += (Math.random() - .5) * tremor;
+  alvoOlhar.set(cabeca.position.x * .1, 0, 1);
+  camera.lookAt(alvoOlhar);
+
+  renderer.render(cena, camera);
+});
