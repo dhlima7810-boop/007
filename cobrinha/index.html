@@ -14,6 +14,8 @@
          font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: #8aa4c0; }
   .hud b { display: block; font-size: 34px; letter-spacing: 0; color: #fff; font-variant-numeric: tabular-nums; }
   .hud div:last-child { text-align: right; }
+  .dica { position: fixed; inset: auto 0 36px; text-align: center; color: var(--ciano); letter-spacing: .08em; pointer-events: none; }
+  .dica[hidden] { display: none; }
   .painel { position: fixed; inset: 0; display: grid; place-content: center; text-align: center; gap: 10px; padding: 24px;
             background: radial-gradient(closest-side, rgba(11,16,32,.78), rgba(11,16,32,.2)); }
   .painel[hidden] { display: none; }
@@ -31,6 +33,8 @@
   <div>Pontos<b id="pts">0</b></div>
   <div>Recorde<b id="rec">0</b></div>
 </div>
+
+<div class="dica" id="dica" hidden>Aperte uma seta (ou deslize) para a cobra sair</div>
 
 <div class="painel" id="painel">
   <h1 id="titulo">Cobrinha 3D</h1>
@@ -150,7 +154,7 @@ function explodir(x, z, cor) {
 }
 
 // ---------- estado ----------
-let cobra, anterior, dir, fila, comida, pontos, recorde, estado = 'pronto', acc = 0, ultimoT = 0, tremor = 0, angulo = 0, surgir = 1;
+let cobra, anterior, dir, fila, comida, pontos, recorde, estado = 'pronto', acc = 0, ultimoT = 0, aguardando = false, tremor = 0, angulo = 0, surgir = 1;
 try { recorde = +localStorage.getItem('cobrinha-recorde') || 0; } catch { recorde = 0; }
 
 const $ = id => document.getElementById(id);
@@ -215,6 +219,8 @@ function comecar() {
   if (estado === 'pausado') { estado = 'jogando'; $('painel').hidden = true; return; }
   reiniciar();
   estado = 'jogando';
+  aguardando = true;
+  $('dica').hidden = false;
   $('painel').hidden = true;
 }
 
@@ -231,6 +237,13 @@ function pausar() {
 // ---------- entrada ----------
 function virar(x, y) {
   if (estado !== 'jogando') return;
+  if (aguardando) {                       // a cobra só sai do lugar na primeira seta
+    if (x === -dir.x && y === -dir.y) return;
+    aguardando = false;
+    $('dica').hidden = true;
+    dir = { x, y };
+    return;
+  }
   const ultima = fila.at(-1) || dir;
   if ((x === -ultima.x && y === -ultima.y) || (x === ultima.x && y === ultima.y) || fila.length > 2) return;
   fila.push({ x, y });
@@ -289,7 +302,7 @@ ajustar();
 renderer.setAnimationLoop(() => {
   const dt = Math.min(relogio.getDelta(), .05), tempo = relogio.elapsedTime;
 
-  if (estado === 'jogando') {
+  if (estado === 'jogando' && !aguardando) {
     acc += dt;
     while (acc >= passo() && estado === 'jogando') { acc -= passo(); tique(); }
   }
