@@ -14,8 +14,6 @@
          font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: #8aa4c0; }
   .hud b { display: block; font-size: 34px; letter-spacing: 0; color: #fff; font-variant-numeric: tabular-nums; }
   .hud div:last-child { text-align: right; }
-  .dica { position: fixed; inset: auto 0 36px; text-align: center; color: var(--ciano); letter-spacing: .08em; pointer-events: none; }
-  .dica[hidden] { display: none; }
   .painel { position: fixed; inset: 0; display: grid; place-content: center; text-align: center; gap: 10px; padding: 24px;
             background: radial-gradient(closest-side, rgba(11,16,32,.78), rgba(11,16,32,.2)); }
   .painel[hidden] { display: none; }
@@ -34,8 +32,6 @@
   <div>Recorde<b id="rec">0</b></div>
 </div>
 
-<div class="dica" id="dica" hidden>Aperte uma seta (ou deslize) para a cobra sair</div>
-
 <div class="painel" id="painel">
   <h1 id="titulo">Cobrinha 3D</h1>
   <p id="sub">Setas ou WASD · no celular, deslize o dedo</p>
@@ -49,7 +45,7 @@ import * as THREE from './three.module.min.js';
 // ---------- configuração ----------
 const N = 17;                                   // tabuleiro N × N
 const mundo = c => c - (N - 1) / 2;             // célula → coordenada 3D
-const passo = () => Math.max(0.075, 0.17 - pontos * 0.003);   // segundos por casa
+const passo = () => Math.max(0.075, 0.22 - pontos * 0.004);   // segundos por casa
 
 // ---------- cena ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -154,7 +150,7 @@ function explodir(x, z, cor) {
 }
 
 // ---------- estado ----------
-let cobra, anterior, dir, fila, comida, pontos, recorde, estado = 'pronto', acc = 0, ultimoT = 0, aguardando = false, tremor = 0, angulo = 0, surgir = 1;
+let cobra, anterior, dir, fila, comida, pontos, recorde, estado = 'pronto', acc = 0, ultimoT = 0, tremor = 0, angulo = 0, surgir = 1;
 try { recorde = +localStorage.getItem('cobrinha-recorde') || 0; } catch { recorde = 0; }
 
 const $ = id => document.getElementById(id);
@@ -170,7 +166,7 @@ function sorteiaComida() {
 }
 
 function reiniciar() {
-  cobra = [{ x: 8, y: 8 }, { x: 7, y: 8 }, { x: 6, y: 8 }];
+  cobra = [{ x: 4, y: 8 }, { x: 3, y: 8 }, { x: 2, y: 8 }];
   anterior = cobra.map(s => ({ ...s }));
   dir = { x: 1, y: 0 };
   fila = [];
@@ -219,8 +215,6 @@ function comecar() {
   if (estado === 'pausado') { estado = 'jogando'; $('painel').hidden = true; return; }
   reiniciar();
   estado = 'jogando';
-  aguardando = true;
-  $('dica').hidden = false;
   $('painel').hidden = true;
 }
 
@@ -237,13 +231,6 @@ function pausar() {
 // ---------- entrada ----------
 function virar(x, y) {
   if (estado !== 'jogando') return;
-  if (aguardando) {                       // a cobra só sai do lugar na primeira seta
-    if (x === -dir.x && y === -dir.y) return;
-    aguardando = false;
-    $('dica').hidden = true;
-    dir = { x, y };
-    return;
-  }
   const ultima = fila.at(-1) || dir;
   if ((x === -ultima.x && y === -ultima.y) || (x === ultima.x && y === ultima.y) || fila.length > 2) return;
   fila.push({ x, y });
@@ -302,7 +289,7 @@ ajustar();
 renderer.setAnimationLoop(() => {
   const dt = Math.min(relogio.getDelta(), .05), tempo = relogio.elapsedTime;
 
-  if (estado === 'jogando' && !aguardando) {
+  if (estado === 'jogando') {
     acc += dt;
     while (acc >= passo() && estado === 'jogando') { acc -= passo(); tique(); }
   }
