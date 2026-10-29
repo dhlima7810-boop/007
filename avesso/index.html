@@ -19,12 +19,20 @@
 
   <canvas id="tela" role="img" aria-label="Campo do jogo Avesso"></canvas>
 
-  <!-- HUD. mix-blend-mode:difference deixa o placar legivel dos dois lados
-       da inversao sem ninguem precisar trocar a cor dele. -->
+  <!-- HUD. mix-blend-mode:difference deixa tudo legivel dos dois lados da
+       inversao sem ninguem precisar trocar a cor. -->
   <div class="hud" id="hud" hidden>
-    <p class="hud__placar"><span id="placar">0</span><span class="hud__un">m</span></p>
-    <p class="hud__lado">Recorde <span id="hudRecorde">0</span> m</p>
+    <div class="hud__esq">
+      <p class="hud__placar"><span id="placar">0</span><span class="hud__un">m</span></p>
+      <p class="hud__mult" id="mult" hidden>Roçada &times;<span id="multN">1</span></p>
+    </div>
+    <div class="hud__dir">
+      <p class="hud__lado">Recorde <span id="hudRecorde">0</span> m</p>
+      <p class="hud__lado hud__lado--fraco" id="hudSetor">Raso</p>
+    </div>
   </div>
+
+  <p class="aviso" id="aviso" hidden><span id="avisoTexto"></span></p>
 
   <section class="tela tela--inicio" id="inicio" aria-labelledby="marca">
     <p class="selo">Um botão só</p>
@@ -35,11 +43,20 @@
       <kbd>Espaço</kbd><kbd>&uarr;</kbd><kbd>W</kbd><span>ou segure o clique</span>
     </p>
     <p class="teclas teclas--toque"><span>Toque na tela e segure</span></p>
-    <p class="recorde">Recorde <b id="recorde">0</b> m</p>
-    <label class="opcao">
-      <input type="checkbox" id="optInverter" checked>
-      <span>Inverter a tela ao segurar</span>
-    </label>
+    <button class="botao botao--fantasma" id="btVestiario" type="button">
+      Vestiário <span class="botao__cont" id="vestCont">1/30</span>
+    </button>
+    <p class="recorde">Recorde <b id="recorde">0</b> m · <b id="somaTotal">0</b> m somados</p>
+    <p class="opcoes">
+      <label class="opcao">
+        <input type="checkbox" id="optInverter" checked>
+        <span>Inverter a tela</span>
+      </label>
+      <label class="opcao">
+        <input type="checkbox" id="optSom" checked>
+        <span>Som</span>
+      </label>
+    </p>
     <p class="semjs">Este jogo precisa de JavaScript para rodar.</p>
   </section>
 
@@ -47,8 +64,29 @@
     <p class="selo" id="fimSelo">Bateu</p>
     <p class="numero"><span id="fimPlacar">0</span><span class="numero__un">m</span></p>
     <p class="linha" id="fimLinha" aria-live="polite">Recorde de 0 m.</p>
+
+    <div class="novidade" id="novidade" hidden>
+      <p class="novidade__selo">Roupa nova</p>
+      <div class="novidade__lista" id="novidadeLista"></div>
+    </div>
+
+    <div class="barra" id="barra" hidden>
+      <p class="barra__texto" id="barraTexto"></p>
+      <p class="barra__trilho"><span class="barra__cheio" id="barraCheio"></span></p>
+    </div>
+
     <button class="botao" id="btDeNovo" type="button">De novo</button>
-    <button class="botao botao--fantasma" id="btMenu" type="button">Menu</button>
+    <div class="fim__pes">
+      <button class="botao botao--fantasma" id="btVestiario2" type="button">Vestiário</button>
+      <button class="botao botao--fantasma" id="btMenu" type="button">Menu</button>
+    </div>
+  </section>
+
+  <section class="tela tela--vestiario" id="vestiario" hidden aria-labelledby="vestSelo">
+    <p class="selo" id="vestSelo">Vestiário</p>
+    <p class="linha linha--curta" id="vestLinha">1 de 30</p>
+    <div class="grade" id="grade"></div>
+    <button class="botao botao--fantasma" id="btVestFechar" type="button">Voltar</button>
   </section>
 
   <section class="tela tela--pausa" id="pausa" hidden aria-labelledby="pausaSelo">
@@ -62,6 +100,7 @@
 <noscript><p class="semjs semjs--fora">Este jogo precisa de JavaScript para rodar.</p></noscript>
 
 <script src="../assets/vendor/gsap.min.js"></script>
+<script src="personagens.js"></script>
 <script src="jogo.js"></script>
 </body>
 </html>
