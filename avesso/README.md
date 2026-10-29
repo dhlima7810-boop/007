@@ -70,6 +70,28 @@ volta e teleporta o disco para dentro de uma parede.
 cena: o `camX` continua de onde estava e os obstáculos passam a nascer à
 frente. Por isso a pontuação conta a partir de `C.base`, não de zero.
 
+**As telas que saem param de receber clique na hora.** Uma tela leva 0.6s
+saindo, e nesses 0.6s ela ainda está no documento, com os botões inteiros.
+Sem marcar `data-saindo` e cortar o `pointer-events` logo no começo da saída,
+o botão continua clicável o tempo todo — medido, um clique repetido em
+**De novo** reiniciava a corrida a cada quadro, e quem desse um duplo clique
+perdia o começo da partida sem entender por quê.
+
+## Dificuldade, medida
+
+Um piloto automático lendo os pixels do canvas — acha o maior corredor livre a
+20% da largura à frente e persegue o centro dele — fez, em 45 segundos:
+
+| | |
+|---|---|
+| corridas | 6 |
+| distâncias | 16, 29, 30, 42, 57, 84 m |
+| mediana | 42 m |
+
+Esse número é **piso, não teto**: o piloto enxerga uma coluna, quem joga
+enxerga a tela inteira. Ele serve para dizer que a geração não produz paredes
+impossíveis — não para dizer que o ajuste está bom. Isso só o dedo diz.
+
 ## Degradação
 
 | Situação | O que acontece |

@@ -421,8 +421,13 @@
 
   /* §9 — telas ----------------------------------------------------------- */
 
+  // Uma tela leva 0.6s saindo, e nesses 0.6s ela ainda esta no documento. Sem
+  // o aviso de 'saindo' ela continua recebendo clique o tempo todo: medido,
+  // um clique repetido em DE NOVO reiniciava a corrida a cada quadro.
   function abrir(alvo) {
-    if (!alvo.hidden) return;
+    if (!alvo.hidden && alvo.dataset.saindo !== '1') return;
+    alvo.dataset.saindo = '';
+    alvo.style.pointerEvents = '';
     alvo.hidden = false;
     if (!anima) return;
     window.gsap.fromTo(alvo,
@@ -431,11 +436,18 @@
   }
 
   function fechar(alvo) {
-    if (alvo.hidden) return;
+    if (alvo.hidden || alvo.dataset.saindo === '1') return;
     if (!anima) { alvo.hidden = true; return; }
+    alvo.dataset.saindo = '1';
+    alvo.style.pointerEvents = 'none';
     window.gsap.to(alvo, {
       autoAlpha: 0, duration: 0.6, ease: 'power3.out', overwrite: true,
-      onComplete: function () { alvo.hidden = true; window.gsap.set(alvo, { clearProps: 'all' }); }
+      onComplete: function () {
+        alvo.hidden = true;
+        window.gsap.set(alvo, { clearProps: 'all' });
+        alvo.style.pointerEvents = '';
+        alvo.dataset.saindo = '';
+      }
     });
   }
 
