@@ -737,10 +737,30 @@ sem servidor** — esse é o requisito que moldou a estrutura:
   as regras de obstáculo. Metas: **15 / 25 / 40**. Obstáculos começam aos
   **7 / 5 / 3 pontos** e depois nascem a cada X pontos **ou** Y segundos, até o
   máximo do nível.
-- `PODERES` — um registro por poder da maçã dourada (escudo, lento, dobro).
-  **Somar um poder novo é acrescentar uma entrada aqui** e tratar a chave onde
-  ela pesa: `passo()`, `tique()` ou o desenho. Era esse o pedido do dono: ir
-  juntando poderes com o tempo.
+- `PODERES` — um registro por poder (escudo, lento, dobro), com **a cor da
+  maçã que o entrega**. **Somar um poder novo é acrescentar uma entrada aqui**
+  e tratar a chave onde ela pesa: `passo()`, `tique()` ou o desenho. Era esse o
+  pedido do dono: ir juntando poderes com o tempo.
+
+**A cor da maçã é o poder, e isso é contrato.** A **vermelha é só ponto** e não
+muda nada — decisão do dono. A especial (`macaEspecial`) é uma malha só,
+repintada por `pintarEspecial()`, e o poder é **sorteado quando ela nasce**, não
+quando é comida: senão a cor prometeria uma coisa e entregaria outra. Quem
+guarda a promessa é `especialPoder`.
+
+**O comando não espera o fim da casa.** Com o passo longo — o poder lento chega
+a 0,35s — a tecla ficava até um terço de segundo sem resposta, e foi a
+reclamação de quem jogou. `apressar()` encurta **a casa que falta** para no
+máximo `ATRASO` (0,1s), mantendo a fração já andada (`t`) e mexendo só no tempo
+que resta: por isso não há pulo. O passo da casa corrente mora em `passoAtual`,
+não em `passo()` chamado no laço — era preciso um valor que pudesse encurtar.
+Vale **uma vez por casa** e só com a fila vazia: com uma virada já pendente,
+apressar de novo espremeria duas viradas numa casa só. A cabeça também aponta
+para `fila[0]`, e não para `dir`, para responder à tecla antes de a casa virar.
+
+**A cobra é um pouco menor que a casa** (`RAIO`, .47). Abaixo de .45 os gomos
+desencostam de vez e ela vira um colar de contas; acima de .5 ela entope o
+circuito, que era a queixa.
 
 **O menu é raso de propósito:** Jogar, Dificuldade e Configurações. Os três
 níveis moram atrás do botão Dificuldade, num submenu (`#pniveis`), e escolher
@@ -771,9 +791,13 @@ Quatro detalhes que seguram isso de pé:
   ruído: ruído lê como falha de imagem, a onda que decai lê como baque. Um
   baque fraco não corta um forte que ainda está decaindo.
 
-**Cada bloco tem a sua `fase`** — sem isso os 16 pulsam juntos e o tabuleiro
-inteiro pisca. Quebrado pelo escudo ele não some: `estilhacar()` espalha cacos
-que giram e deixa o anel.
+**Pousado, o bloco fica reto.** Sem giro próprio, sem bambolear e sem flutuar:
+`rotation` vai a zero e a altura trava em .46, alinhado com a grade. Um bloco
+torto lê como peça solta no tabuleiro, e o dono pediu que ficassem retos. O
+tombo do ar some depressa depois do pouso, e o que ainda se move nele é só o
+brilho — **cada bloco tem a sua `fase`**, senão os 16 pulsam juntos e o
+tabuleiro inteiro pisca. Quebrado pelo escudo ele não some: `estilhacar()`
+espalha cacos que giram e deixa o anel.
 
 Outras regras que não são óbvias no código:
 

@@ -13,16 +13,19 @@ const NIVEIS = {
 
 // Um registro por poder. Para somar um poder novo, acrescente uma entrada
 // aqui e trate a chave onde ela importa (passo(), tique() ou o desenho).
+// A cor da maçã é o poder. Vermelha é só ponto, e não muda nada — foi o que
+// o dono pediu. `cor` é a casca, `brilho` o que ela emite, `luz` o halo no chão.
 const PODERES = {
-  escudo: { nome: 'Escudo', dica: 'atravessa uma batida', dur: 8, cor: 0x60a5fa },
-  lento:  { nome: 'Lento',  dica: 'tudo mais devagar',    dur: 8, cor: 0xa78bfa },
-  dobro:  { nome: 'Dobro',  dica: 'cada maçã vale 2',     dur: 8, cor: 0xfbbf24 },
+  escudo: { nome: 'Escudo', dica: 'atravessa uma batida', dur: 8, cor: 0x60a5fa, brilho: 0x2563eb, luz: 0x7dd3fc },
+  lento:  { nome: 'Lento',  dica: 'tudo mais devagar',    dur: 8, cor: 0xa78bfa, brilho: 0x7c3aed, luz: 0xc4b5fd },
+  dobro:  { nome: 'Dobro',  dica: 'cada maçã vale 2',     dur: 8, cor: 0xfbbf24, brilho: 0xf59e0b, luz: 0xffd166 },
 };
+const CHAVES_PODER = Object.keys(PODERES);
 
 const CUSTO_BANCO = 10;   // pontos do banco para reviver
 const MAX_TOKENS = 5;
-const CADA_DOURADA = 6;   // maçãs normais entre uma dourada e outra
-const VIDA_DOURADA = 7;   // segundos que ela espera na mesa
+const CADA_ESPECIAL = 6;   // maçãs normais entre uma especial e outra
+const VIDA_ESPECIAL = 7;   // segundos que ela espera na mesa
 
 // ---------- dados guardados ----------
 const PADRAO = { recordes: {}, conquistas: {}, tokens: 0, banco: 0, nivel: 'facil', config: { som: true, pausaAba: true } };
@@ -83,19 +86,22 @@ const neon = new THREE.MeshStandardMaterial({ color: 0x0891b2, emissive: 0x22d3e
   });
 
 // ---------- cobra ----------
-const geoCorpo = new THREE.SphereGeometry(.53, 24, 16);
+// Um pouco menor que a casa: a cobra respira dentro do circuito em vez de
+// entupi-lo. Abaixo de .45 os gomos desencostam e viram contas soltas.
+const RAIO = .47;
+const geoCorpo = new THREE.SphereGeometry(RAIO, 24, 16);
 const segs = [];
 const cabeca = new THREE.Group();
 {
   const crânio = new THREE.Mesh(geoCorpo, new THREE.MeshStandardMaterial({ roughness: .35 }));
-  crânio.scale.setScalar(1.15);
+  crânio.scale.setScalar(1.12);
   crânio.castShadow = true;
   cabeca.add(crânio);
   for (const lado of [-1, 1]) {
-    const olho = new THREE.Mesh(new THREE.SphereGeometry(.17, 12, 10), new THREE.MeshStandardMaterial({ color: 0xffffff }));
-    olho.position.set(lado * .3, .26, .4);
-    const pupila = new THREE.Mesh(new THREE.SphereGeometry(.09, 10, 8), new THREE.MeshBasicMaterial({ color: 0x000000 }));
-    pupila.position.set(0, 0, .11);
+    const olho = new THREE.Mesh(new THREE.SphereGeometry(.15, 12, 10), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+    olho.position.set(lado * .27, .23, .355);
+    const pupila = new THREE.Mesh(new THREE.SphereGeometry(.08, 10, 8), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+    pupila.position.set(0, 0, .1);
     olho.add(pupila);
     cabeca.add(olho);
   }
@@ -115,7 +121,7 @@ const material = m => (m.isGroup ? m.children[0] : m).material;
 
 // bolha do escudo, em volta da cabeça
 const bolha = new THREE.Mesh(
-  new THREE.SphereGeometry(.95, 20, 14),
+  new THREE.SphereGeometry(.86, 20, 14),
   new THREE.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: .22, depthWrite: false })
 );
 bolha.visible = false;
@@ -126,6 +132,7 @@ function fazerMaca(cor, emissiva, luz) {
   const grupo = new THREE.Group();
   grupo.add(new THREE.Mesh(new THREE.SphereGeometry(.42, 24, 16),
     new THREE.MeshStandardMaterial({ color: cor, emissive: emissiva, emissiveIntensity: .7, roughness: .3 })));
+  grupo.userData.casca = grupo.children[0];
   const folha = new THREE.Mesh(new THREE.BoxGeometry(.06, .22, .06), new THREE.MeshStandardMaterial({ color: 0x84cc16 }));
   folha.position.y = .45;
   grupo.add(folha);
@@ -136,8 +143,15 @@ function fazerMaca(cor, emissiva, luz) {
   cena.add(grupo);
   return grupo;
 }
-const maca = fazerMaca(0xef4444, 0xdc2626, 0xff4d4d);
-const macaOuro = fazerMaca(0xfbbf24, 0xf59e0b, 0xffd166);
+const maca = fazerMaca(0xef4444, 0xdc2626, 0xff4d4d);          // vermelha: só ponto
+const macaEspecial = fazerMaca(0xfbbf24, 0xf59e0b, 0xffd166);   // repintada a cada poder
+macaEspecial.userData.luz = macaEspecial.children.find(c => c.isPointLight);
+function pintarEspecial(chave) {
+  const p = PODERES[chave], m = macaEspecial.userData.casca.material;
+  m.color.setHex(p.cor);
+  m.emissive.setHex(p.brilho);
+  macaEspecial.userData.luz.color.setHex(p.luz);
+}
 
 // ---------- obstáculos ----------
 // O bloco não cresce parado: ele sobe do chão girando, passa do ponto e
@@ -241,9 +255,9 @@ function explodir(x, z, cor) {
 }
 
 // ---------- estado ----------
-let cobra, anterior, dir, fila, comida, dourada, blocos = [], pontos, nivel = dados.nivel;
-let estado = 'pronto', acc = 0, ultimoT = 0, tremor = 0, angulo = 0, surgir = 1, surgirOuro = 1;
-let tempoJogo = 0, marcoPontos = 0, marcoTempo = 0, desdeDourada = 0, douradaAte = 0;
+let cobra, anterior, dir, fila, comida, especial, especialPoder = 'escudo', blocos = [], pontos, nivel = dados.nivel;
+let estado = 'pronto', acc = 0, passoAtual = .22, ultimoT = 0, tremor = 0, angulo = 0, surgir = 1, surgirEspecial = 1;
+let tempoJogo = 0, marcoPontos = 0, marcoTempo = 0, desdeEspecial = 0, especialAte = 0;
 let poder = null, poderAte = 0, invul = 0, metaBatida = false, revivido = false, creditado = 0;
 
 const $ = id => document.getElementById(id);
@@ -257,6 +271,20 @@ const passo = () => {
   const p = Math.max(n.piso, n.passo0 - pontos * n.acel);
   return poder === 'lento' ? p * 1.6 : p;
 };
+
+// O comando não pode esperar o fim da casa. Com o passo longo (o poder lento
+// chega a 0,35s) a tecla ficava até um terço de segundo sem resposta, e quem
+// jogou reclamou disso. Aqui a casa que falta é encurtada para `ATRASO`, sem
+// pulo nenhum: a fração já andada (t) é mantida, e só o tempo que resta muda.
+// Vale uma vez por casa — a segunda chamada já encontra o resto curto e sai.
+const ATRASO = .1;
+function apressar() {
+  const resta = passoAtual - acc;
+  if (resta <= ATRASO) return;
+  const t = acc / passoAtual;
+  passoAtual = ATRASO / (1 - t);
+  acc = t * passoAtual;
+}
 
 function hud() {
   const n = NIVEIS[nivel];
@@ -275,7 +303,7 @@ function casasLivres(evitar = []) {
   for (let x = 0; x < N; x++) for (let y = 0; y < N; y++) {
     if (cobra.some(s => s.x === x && s.y === y)) continue;
     if (comida && comida.x === x && comida.y === y) continue;
-    if (dourada && dourada.x === x && dourada.y === y) continue;
+    if (especial && especial.x === x && especial.y === y) continue;
     if (blocos.some(b => b.x === x && b.y === y)) continue;
     if (evitar.some(e => e.x === x && e.y === y)) continue;
     livres.push({ x, y });
@@ -297,10 +325,11 @@ function reiniciar() {
   pontos = 0;
   acc = 0;
   angulo = Math.PI / 2;
-  tempoJogo = marcoPontos = marcoTempo = desdeDourada = 0;
+  passoAtual = NIVEIS[nivel].passo0;
+  tempoJogo = marcoPontos = marcoTempo = desdeEspecial = 0;
   poder = null; poderAte = 0; invul = 0;
   metaBatida = false; revivido = false; creditado = 0;
-  dourada = null;
+  especial = null;
   comida = null;
   comida = sortear();
   surgir = 0;
@@ -315,8 +344,8 @@ function tique() {
   const fora = h.x < 0 || h.y < 0 || h.x >= N || h.y >= N;
   const iBloco = blocos.findIndex(b => !b.caindo && b.x === h.x && b.y === h.y);   // no ar ainda não machuca
   const comeu = comida && h.x === comida.x && h.y === comida.y;
-  const comeuOuro = dourada && h.x === dourada.x && h.y === dourada.y;
-  const cresce = comeu || comeuOuro;
+  const comeuEspecial = especial && h.x === especial.x && h.y === especial.y;
+  const cresce = comeu || comeuEspecial;
   const noCorpo = (cresce ? cobra : cobra.slice(0, -1)).some(s => s.x === h.x && s.y === h.y);
 
   if (fora || iBloco >= 0 || noCorpo) {
@@ -335,14 +364,14 @@ function tique() {
 
   anterior.push({ ...anterior.at(-1) });
   pontos += poder === 'dobro' ? 2 : 1;
-  explodir(mundo(h.x), mundo(h.y), comeuOuro ? 0xfbbf24 : 0xfacc15);
+  explodir(mundo(h.x), mundo(h.y), comeuEspecial ? PODERES[especialPoder].cor : 0xfacc15);
   som(520 + pontos * 12, .12);
 
-  if (comeuOuro) {
-    dourada = null;
-    ativarPoder();
+  if (comeuEspecial) {
+    especial = null;
+    ativarPoder(especialPoder);
   } else {
-    desdeDourada++;
+    desdeEspecial++;
     comida = sortear();
     if (!comida) return morrer(true);
   }
@@ -350,9 +379,8 @@ function tique() {
   hud();
 }
 
-function ativarPoder() {
-  const chaves = Object.keys(PODERES);
-  poder = chaves[Math.floor(Math.random() * chaves.length)];
+function ativarPoder(chave) {
+  poder = chave;
   poderAte = PODERES[poder].dur;
   som(880, .25);
   avisar(`${PODERES[poder].nome}! ${PODERES[poder].dica}`);
@@ -385,25 +413,27 @@ function conferirBlocos() {
   blocos.push({
     ...casa, fase: Math.random() * Math.PI * 2,
     alt: 13 + Math.random() * 4, vel: 0, caindo: true, quiques: 0, esmaga: 0,
-    rotX: 0, rotZ: 0, giroX: (Math.random() - .5) * 5, giroZ: (Math.random() - .5) * 5,
+    rotX: 0, rotZ: 0, giroX: (Math.random() - .5) * 1.5, giroZ: (Math.random() - .5) * 1.5,
   });
   marcoPontos = pontos;
   marcoTempo = tempoJogo;
   som(180, .18, 'square');
 }
 
-function conferirDourada() {
-  if (dourada) {
-    if (tempoJogo > douradaAte) dourada = null;
+function conferirEspecial() {
+  if (especial) {
+    if (tempoJogo > especialAte) especial = null;
     return;
   }
-  if (desdeDourada < CADA_DOURADA) return;
+  if (desdeEspecial < CADA_ESPECIAL) return;
   const casa = sortear();
   if (!casa) return;
-  dourada = casa;
-  douradaAte = tempoJogo + VIDA_DOURADA;
-  desdeDourada = 0;
-  surgirOuro = 0;
+  especial = casa;
+  especialPoder = CHAVES_PODER[Math.floor(Math.random() * CHAVES_PODER.length)];
+  pintarEspecial(especialPoder);                       // a cor já diz o que ela dá
+  especialAte = tempoJogo + VIDA_ESPECIAL;
+  desdeEspecial = 0;
+  surgirEspecial = 0;
   som(760, .15);
 }
 
@@ -435,7 +465,7 @@ function reviver(fonte) {
   fila = [];
   angulo = Math.PI / 2;
   blocos = blocos.filter(b => Math.abs(b.x - c) > 3 || Math.abs(b.y - c) > 3);
-  invul = 2; tremor = 0; acc = 0;
+  invul = 2; tremor = 0; acc = 0; passoAtual = passo();
   estado = 'jogando';
   fecharPaineis();
   som(660, .35);
@@ -522,6 +552,7 @@ function virar(x, y) {
   const ultima = fila.at(-1) || dir;
   if ((x === -ultima.x && y === -ultima.y) || (x === ultima.x && y === ultima.y) || fila.length > 2) return;
   fila.push({ x, y });
+  if (fila.length === 1) apressar();
 }
 const teclas = {
   ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1],
@@ -620,10 +651,10 @@ renderer.setAnimationLoop(() => {
       hud();
     }
     acc += dt;
-    while (acc >= passo() && estado === 'jogando') { acc -= passo(); tique(); }
-    if (estado === 'jogando') { conferirBlocos(); conferirDourada(); }
+    while (acc >= passoAtual && estado === 'jogando') { acc -= passoAtual; tique(); passoAtual = passo(); }
+    if (estado === 'jogando') { conferirBlocos(); conferirEspecial(); }
   }
-  if (estado === 'jogando') ultimoT = acc / passo();
+  if (estado === 'jogando') ultimoT = Math.min(1, acc / passoAtual);
   else if (estado === 'fim') ultimoT = 0;
   const t = ultimoT;
 
@@ -637,7 +668,8 @@ renderer.setAnimationLoop(() => {
   });
   for (let i = cobra.length; i < segs.length; i++) segs[i].visible = false;
 
-  const alvo = Math.atan2(dir.x, dir.y);
+  const proximo = fila[0] || dir;                    // a cabeça responde à tecla, não ao tique
+  const alvo = Math.atan2(proximo.x, proximo.y);
   angulo += Math.atan2(Math.sin(alvo - angulo), Math.cos(alvo - angulo)) * Math.min(1, dt * 18);
   cabeca.rotation.y = angulo;
 
@@ -656,14 +688,14 @@ renderer.setAnimationLoop(() => {
     maca.scale.setScalar(1 - Math.pow(1 - surgir, 3));
   } else maca.visible = false;
 
-  if (dourada) {
-    surgirOuro = Math.min(1, surgirOuro + dt * 3);
-    const resta = Math.max(0, douradaAte - tempoJogo);
-    macaOuro.visible = resta > 1.2 || Math.sin(tempo * 18) > 0;   // pisca quando vai sumir
-    macaOuro.position.set(mundo(dourada.x), .6 + Math.sin(tempo * 4) * .14, mundo(dourada.y));
-    macaOuro.rotation.y = tempo * 3;
-    macaOuro.scale.setScalar(1.08 * (1 - Math.pow(1 - surgirOuro, 3)));
-  } else macaOuro.visible = false;
+  if (especial) {
+    surgirEspecial = Math.min(1, surgirEspecial + dt * 3);
+    const resta = Math.max(0, especialAte - tempoJogo);
+    macaEspecial.visible = resta > 1.2 || Math.sin(tempo * 18) > 0;   // pisca quando vai sumir
+    macaEspecial.position.set(mundo(especial.x), .6 + Math.sin(tempo * 4) * .14, mundo(especial.y));
+    macaEspecial.rotation.y = tempo * 3;
+    macaEspecial.scale.setScalar(1.08 * (1 - Math.pow(1 - surgirEspecial, 3)));
+  } else macaEspecial.visible = false;
 
   // obstáculos: caem do alto, batem, quicam e assentam
   for (let i = blocos.length - 1; i >= 0; i--) {
@@ -700,14 +732,15 @@ renderer.setAnimationLoop(() => {
       marca.scale.setScalar(1.7 - perto * .75);
     } else {
       marca.visible = false;
-      b.rotX *= Math.pow(.004, dt);                         // o tombo assenta
-      b.rotZ *= Math.pow(.004, dt);
+      b.rotX *= Math.pow(.00004, dt);                       // o tombo assenta depressa, e reto
+      b.rotZ *= Math.pow(.00004, dt);
+      if (Math.abs(b.rotX) < .004) b.rotX = 0;
+      if (Math.abs(b.rotZ) < .004) b.rotZ = 0;
     }
 
     b.esmaga = Math.max(0, b.esmaga - dt * 3.4);
     const e = b.esmaga, ey = 1 - e * .42, exz = 1 + e * .3;
     const treme = Math.sin(abaloT * 46) * abalo * Math.exp(-abaloT * 7) * .35;
-    const r = tempo * .55 + b.fase;
 
     m.visible = true;
     // No alto, a sombra projetada cai longe e lê como um buraco no chão, longe
@@ -715,8 +748,8 @@ renderer.setAnimationLoop(() => {
     // quando ele encosta.
     m.children[0].castShadow = !b.caindo;
     m.scale.set(exz, ey, exz);
-    m.position.set(x, Math.max(b.alt, .46 * ey) + (b.caindo ? 0 : Math.sin(r * 1.6) * .045 + treme), z);
-    m.rotation.set(b.rotX + (b.caindo ? 0 : Math.sin(r * .9) * .05), b.fase + b.alt * .1, b.rotZ + (b.caindo ? 0 : Math.cos(r * 1.1) * .05));
+    m.position.set(x, Math.max(b.alt, .46 * ey) + (b.caindo ? 0 : treme), z);
+    m.rotation.set(b.rotX, 0, b.rotZ);                      // alinhado com a grade: nada de bloco torto
     m.children[0].material.emissiveIntensity = (b.caindo ? .5 : .3) + Math.sin(tempo * 2 + b.fase) * .18;
     m.children[1].material.opacity = .6 + Math.sin(tempo * 2 + b.fase) * .25;
   }
