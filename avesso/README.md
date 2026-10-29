@@ -50,8 +50,18 @@ apertando o campo de verdade em vez de só acelerar.
 
 | `LIMITES` | O que dá |
 |---|---|
-| `[1000, 2500]` | os números que o dono quis ver, **em vigor** |
-| `[250, 625]` | a mesma proporção numa escala alcançável |
+| `[1000, 2500, 4000]` | os números que o dono quis ver, **em vigor** |
+| `[250, 625, 1000]` | a mesma proporção numa escala alcançável |
+
+Os **dois primeiros** são limites de verdade: é por eles que o ato muda. O
+terceiro é só o fim escrito do último ato na legenda do menu, e o alvo do
+desafio mais difícil — o Desabamento não acaba ali, dali para a frente ele
+continua, só mais rápido.
+
+**A legenda dos atos é uma linha, não um quadro.** Em bloco com borda ela
+media 112px e empurrava o recorde e as opções para baixo da dobra em tela
+curta. Agora são 17px em paisagem e 30px no celular, com um ponto na cor do
+ato.
 
 Com `[1000, 2500]`, medido com o piloto automático em 110 s: **12 corridas,
 mediana 152 m, melhor 315 m, nenhuma chegou aos 1.000**. Só o Subsolo

@@ -60,14 +60,19 @@
 
   // OS LIMITES DOS ATOS, em metros. Mexe-se AQUI e em mais lugar nenhum.
   //
-  //   [1000, 2500]  os numeros que o dono quis ver, e que estao valendo
-  //   [250, 625]    a proporcao dele numa escala alcancavel (o que havia antes)
+  //   [1000, 2500, 4000]  os numeros que o dono quis ver, e que estao valendo
+  //   [250, 625, 1000]    a mesma proporcao numa escala alcancavel
+  //
+  // Os DOIS primeiros sao limites de verdade: e por eles que o ato muda. O
+  // terceiro e so o fim escrito do ultimo ato na lista do menu (e o alvo do
+  // desafio mais dificil). O Desabamento nao acaba ali — dali para a frente
+  // ele continua, so mais rapido.
   //
   // A conta que motivou a dúvida: 1.000 m sao 20.000px, uns 50 segundos vivo,
   // e a corrida mediana dura 5. Com o fim do primeiro ato ali, quase toda
   // partida acaba no Subsolo. Ficou assim por escolha de quem manda, para
   // ver com os proprios olhos; voltar e trocar esta linha.
-  var LIMITES = [1000, 2500];
+  var LIMITES = [1000, 2500, 4000];
 
   // TRES ATOS de 300 m. Um tema cada, uma dificuldade dita em voz alta.
   //
@@ -196,7 +201,7 @@
           ? 'Chegar ' + ATOS[i].art + ' ' + ATOS[i].nome
           : 'Passar dos ' + n + ' m';
       },
-      alvos: [LIMITES[0], LIMITES[1], 4000], premios: [36, 74, 134], le: function (e) { return e.m; } },
+      alvos: [LIMITES[0], LIMITES[1], LIMITES[2]], premios: [36, 74, 134], le: function (e) { return e.m; } },
 
     { id: 'tempo',  diz: function (n) { return 'Ficar ' + n + ' segundos vivo'; },
       alvos: [12, 20, 30], premios: [32, 68, 116], le: function (e) { return e.tempo; } },
@@ -1584,15 +1589,25 @@
     atualizarMenu();
   }
 
+  // Uma linha só, e não um quadro: a lista dos atos é legenda, e estava
+  // ocupando altura demais no menu, empurrando o recorde e as opções para
+  // baixo da dobra em tela curta.
   function montarAtos() {
     el.atos.textContent = '';
     for (var i = 0; i < ATOS.length; i++) {
-      var d = document.createElement('p');
+      var d = document.createElement('span');
       d.className = 'ato';
+
+      var c = document.createElement('span');
+      c.className = 'ato__ponto';
+      c.style.background = ATOS[i].cor;
+      d.appendChild(c);
 
       var f = document.createElement('span');
       f.className = 'ato__faixa';
-      f.textContent = (i ? ATOS[i - 1].ate : 0) + (i < ATOS.length - 1 ? '–' + ATOS[i].ate : '+') + ' m';
+      // o último ato mostra o fim escrito (LIMITES[2]) em vez de um '+'
+      f.textContent = (i ? ATOS[i - 1].ate : 0) + '–' +
+        (i < ATOS.length - 1 ? ATOS[i].ate : LIMITES[LIMITES.length - 1]);
       d.appendChild(f);
 
       var n = document.createElement('span');

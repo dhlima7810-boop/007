@@ -356,20 +356,20 @@ kbd{
 .metas--fim .meta{padding:8px 13px}
 
 /* ---------- os tres atos, no menu ---------- */
+/* Legenda, nao quadro: em bloco com borda isto comia altura demais e
+   empurrava o recorde e as opcoes para baixo da dobra em tela curta. */
 
 .atos{
-  display:flex;flex-direction:column;gap:1px;
-  width:min(360px,84vw);
-  background:var(--fio);border:1px solid var(--fio);border-radius:8px;overflow:hidden;
+  margin:0;
+  display:flex;flex-wrap:wrap;justify-content:center;
+  gap:3px 16px;
+  max-width:min(600px,92vw);
+  font-size:clamp(9px,.95vw,11px);
+  letter-spacing:.1em;text-transform:uppercase;line-height:1.5;
 }
-.ato{
-  display:flex;align-items:center;gap:10px;
-  background:var(--tinta);padding:9px 14px;
-  font-size:clamp(10px,1.05vw,12px);letter-spacing:.12em;text-transform:uppercase;
-}
-.ato__faixa{
-  flex:none;width:7.5em;text-align:left;
-  color:rgba(237,234,227,.4);font-variant-numeric:tabular-nums;
-}
-.ato__nome{flex:1;font-weight:700;text-align:left}
-.ato__dif{flex:none;color:rgba(237,234,227,.42)}
+
+.ato{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.ato__ponto{width:6px;height:6px;border-radius:50%;flex:none}
+.ato__faixa{color:rgba(237,234,227,.36);font-variant-numeric:tabular-nums}
+.ato__nome{font-weight:700;color:rgba(237,234,227,.74)}
+.ato__dif{color:rgba(237,234,227,.3)}
