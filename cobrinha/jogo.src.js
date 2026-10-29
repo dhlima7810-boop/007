@@ -161,9 +161,32 @@ const meshBloco = i => {
   return blocosMesh[i];
 };
 
-// curvas: uma que assenta e outra que passa do ponto e volta
-const saida = t => 1 - Math.pow(1 - t, 3);
-const estufa = t => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2);
+// A marca no chão é o aviso: aparece antes do bloco e diz onde ele vai cair.
+// Sem ela a queda é injusta — ninguém desvia do que não viu.
+const geoMarca = new THREE.CircleGeometry(.46, 26);
+const matMarcaBase = new THREE.MeshBasicMaterial({ color: 0x67e8f9, transparent: true, opacity: .2, depthWrite: false });
+const marcasMesh = [];
+const marcaBloco = i => {
+  while (marcasMesh.length <= i) {
+    const m = new THREE.Mesh(geoMarca, matMarcaBase.clone());
+    m.rotation.x = -Math.PI / 2;
+    cena.add(m);
+    marcasMesh.push(m);
+  }
+  return marcasMesh[i];
+};
+
+const GRAVIDADE = 34;        // unidades por segundo ao quadrado
+const QUIQUE = .26;          // quanto da velocidade volta a cada batida
+
+// O chão treme por oscilação amortecida, não por ruído: ruído lê como falha
+// de imagem, a onda que decai lê como baque.
+let abalo = 0, abaloT = 0;
+function sacudir(forca) {
+  if (forca <= abalo * Math.exp(-abaloT * 7)) return;   // um baque fraco não corta um forte
+  abalo = forca;
+  abaloT = 0;
+}
 
 // anel de choque no chão, para o bloco chegar com peso
 const ondas = [];
@@ -175,6 +198,19 @@ function onda(x, z, cor = 0x67e8f9) {
   m.userData = { vida: 1 };
   cena.add(m);
   ondas.push(m);
+}
+
+// poeira levantada na batida: sai rasteira, para fora, e assenta
+function poeira(x, z, forca) {
+  const n = 5 + Math.round(forca * 9);
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, v = 1.6 + Math.random() * 4.5 * forca;
+    const m = new THREE.Mesh(geoFaisca, new THREE.MeshBasicMaterial({ color: 0x4b6a8a, transparent: true, opacity: .75 }));
+    m.position.set(x + Math.cos(a) * .32, .16, z + Math.sin(a) * .32);
+    m.userData = { v: new THREE.Vector3(Math.cos(a) * v, .9 + Math.random() * 1.8, Math.sin(a) * v), vida: 1, leve: true };
+    cena.add(m);
+    faiscas.push(m);
+  }
 }
 
 // o bloco não some: ele estoura em cacos e deixa o anel
@@ -277,7 +313,7 @@ function tique() {
   let h = { x: cobra[0].x + dir.x, y: cobra[0].y + dir.y };
 
   const fora = h.x < 0 || h.y < 0 || h.x >= N || h.y >= N;
-  const iBloco = blocos.findIndex(b => b.x === h.x && b.y === h.y);
+  const iBloco = blocos.findIndex(b => !b.caindo && b.x === h.x && b.y === h.y);   // no ar ainda não machuca
   const comeu = comida && h.x === comida.x && h.y === comida.y;
   const comeuOuro = dourada && h.x === dourada.x && h.y === dourada.y;
   const cresce = comeu || comeuOuro;
@@ -346,7 +382,11 @@ function conferirBlocos() {
   const frente = [1, 2, 3].map(k => ({ x: cobra[0].x + dir.x * k, y: cobra[0].y + dir.y * k }));
   const casa = sortear(frente);
   if (!casa) return;
-  blocos.push({ ...casa, surgir: 0, fase: Math.random() * Math.PI * 2, pousou: false });
+  blocos.push({
+    ...casa, fase: Math.random() * Math.PI * 2,
+    alt: 13 + Math.random() * 4, vel: 0, caindo: true, quiques: 0, esmaga: 0,
+    rotX: 0, rotZ: 0, giroX: (Math.random() - .5) * 5, giroZ: (Math.random() - .5) * 5,
+  });
   marcoPontos = pontos;
   marcoTempo = tempoJogo;
   som(180, .18, 'square');
@@ -625,30 +665,63 @@ renderer.setAnimationLoop(() => {
     macaOuro.scale.setScalar(1.08 * (1 - Math.pow(1 - surgirOuro, 3)));
   } else macaOuro.visible = false;
 
-  // obstáculos: sobem do chão girando, passam do ponto, assentam e respiram
-  blocos.forEach((b, i) => {
-    const m = meshBloco(i);
-    const antes = b.surgir;
-    b.surgir = Math.min(1, b.surgir + dt * 1.7);
-    const e = b.surgir, x = mundo(b.x), z = mundo(b.y);
-    m.visible = true;
+  // obstáculos: caem do alto, batem, quicam e assentam
+  for (let i = blocos.length - 1; i >= 0; i--) {
+    const b = blocos[i], m = meshBloco(i), marca = marcaBloco(i), x = mundo(b.x), z = mundo(b.y);
 
-    if (e < 1) {
-      const sobe = saida(e), pop = estufa(e);
-      m.position.set(x, -.55 + (.46 + .55) * sobe, z);
-      m.rotation.set(0, b.fase + (1 - sobe) * Math.PI * 1.6, (1 - sobe) * .5);
-      m.scale.set(pop, 1.25 - .25 * pop, pop);          // esticado na subida, achatado ao pousar
-      if (antes < .62 && e >= .62) { onda(x, z); som(140, .12, 'square'); }   // o baque
+    if (b.caindo) {
+      b.vel += GRAVIDADE * dt;
+      b.alt -= b.vel * dt;
+      b.rotX += b.giroX * dt;
+      b.rotZ += b.giroZ * dt;
+
+      if (b.alt <= .46) {                                   // bateu no chão
+        const forca = Math.min(1, b.vel / 17);
+        b.alt = .46;
+        b.esmaga = Math.max(b.esmaga, .35 + forca * .65);
+        b.quiques++;
+        b.giroX *= .28; b.giroZ *= .28;
+        onda(x, z);
+        poeira(x, z, forca);
+        sacudir(.07 + forca * .13);
+        som(80 + forca * 60, .18, 'square');
+        if (b.quiques <= 2 && b.vel > 5.5) b.vel = -b.vel * QUIQUE;   // ainda tem quique
+        else { b.caindo = false; b.vel = 0; }
+        if (cobra.some(c => c.x === b.x && c.y === b.y)) {  // pousou nas costas da cobra
+          estilhacar(x, z);                                 // estoura em vez de matar de graça
+          blocos.splice(i, 1);
+          continue;
+        }
+      }
+      const perto = Math.min(1, Math.max(0, (13 - b.alt) / 12));      // a marca acende na descida
+      marca.visible = true;
+      marca.position.set(x, .02, z);
+      marca.material.opacity = .06 + perto * .34;
+      marca.scale.setScalar(1.7 - perto * .75);
     } else {
-      const r = tempo * .55 + b.fase;
-      m.position.set(x, .46 + Math.sin(r * 1.6) * .045, z);
-      m.rotation.set(Math.sin(r * .9) * .05, b.fase + Math.sin(r) * .12, Math.cos(r * 1.1) * .05);
-      m.scale.setScalar(1);
+      marca.visible = false;
+      b.rotX *= Math.pow(.004, dt);                         // o tombo assenta
+      b.rotZ *= Math.pow(.004, dt);
     }
-    m.children[0].material.emissiveIntensity = .3 + Math.sin(tempo * 2 + b.fase) * .18;
+
+    b.esmaga = Math.max(0, b.esmaga - dt * 3.4);
+    const e = b.esmaga, ey = 1 - e * .42, exz = 1 + e * .3;
+    const treme = Math.sin(abaloT * 46) * abalo * Math.exp(-abaloT * 7) * .35;
+    const r = tempo * .55 + b.fase;
+
+    m.visible = true;
+    // No alto, a sombra projetada cai longe e lê como um buraco no chão, longe
+    // da casa onde o bloco vai pousar. Quem avisa é a marca; a sombra só volta
+    // quando ele encosta.
+    m.children[0].castShadow = !b.caindo;
+    m.scale.set(exz, ey, exz);
+    m.position.set(x, Math.max(b.alt, .46 * ey) + (b.caindo ? 0 : Math.sin(r * 1.6) * .045 + treme), z);
+    m.rotation.set(b.rotX + (b.caindo ? 0 : Math.sin(r * .9) * .05), b.fase + b.alt * .1, b.rotZ + (b.caindo ? 0 : Math.cos(r * 1.1) * .05));
+    m.children[0].material.emissiveIntensity = (b.caindo ? .5 : .3) + Math.sin(tempo * 2 + b.fase) * .18;
     m.children[1].material.opacity = .6 + Math.sin(tempo * 2 + b.fase) * .25;
-  });
+  }
   for (let i = blocos.length; i < blocosMesh.length; i++) blocosMesh[i].visible = false;
+  for (let i = blocos.length; i < marcasMesh.length; i++) marcasMesh[i].visible = false;
 
   // faíscas
   for (let i = faiscas.length - 1; i >= 0; i--) {
@@ -656,8 +729,10 @@ renderer.setAnimationLoop(() => {
     d.v.y -= 14 * dt;
     f.position.addScaledVector(d.v, dt);
     if (d.gira) f.rotation.x += dt * 7, f.rotation.z += dt * 5;
-    d.vida -= dt * 1.4;
-    f.scale.setScalar(Math.max(d.vida, 0) * (d.gira ? 1.6 : 1));
+    if (d.leve) { d.v.y += 9 * dt; d.v.multiplyScalar(1 - dt * 2.4); }   // poeira não despenca
+    d.vida -= dt * (d.leve ? 1.1 : 1.4);
+    f.scale.setScalar(Math.max(d.vida, 0) * (d.gira ? 1.6 : d.leve ? .75 : 1));
+    if (d.leve) f.material.opacity = Math.max(0, d.vida) * .75;
     if (d.vida <= 0) { cena.remove(f); f.material.dispose(); faiscas.splice(i, 1); }
   }
 
@@ -678,6 +753,13 @@ renderer.setAnimationLoop(() => {
   tremor *= Math.pow(.02, dt);
   camera.position.x += (Math.random() - .5) * tremor;
   camera.position.y += (Math.random() - .5) * tremor;
+  if (abalo > 0) {                                    // o baque do bloco: onda que decai
+    abaloT += dt;
+    const amp = abalo * Math.exp(-abaloT * 7);
+    camera.position.y += Math.sin(abaloT * 46) * amp;
+    camera.position.x += Math.sin(abaloT * 31) * amp * .45;
+    if (amp < .0015) abalo = 0;
+  }
   alvoOlhar.set(cabeca.position.x * .1, 0, 1);
   camera.lookAt(alvoOlhar);
 

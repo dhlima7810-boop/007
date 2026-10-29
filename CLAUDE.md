@@ -749,12 +749,31 @@ botão carrega a escolha escrita (`Dificuldade · Médio`), senão não há como
 saber no que se vai jogar. As teclas 1/2/3 continuam valendo como atalho: no
 menu elas já começam a partida, dentro do submenu elas só escolhem.
 
-**O obstáculo não cresce parado.** Ele sobe de baixo do chão girando, estica na
-subida, passa do ponto e achata ao pousar (`estufa`, uma curva que ultrapassa),
-e no pouso solta um anel de choque (`onda`) com um baque grave. Parado, respira:
-balança devagar e pulsa o brilho das arestas. **Cada bloco tem a sua `fase`** —
-sem isso os 16 pulsam juntos e o tabuleiro inteiro pisca. Quebrado pelo escudo
-ele não some: `estilhacar()` espalha cacos que giram e deixa o anel.
+**O obstáculo cai do céu, e a queda é física, não curva.** Ele nasce a 13–17
+unidades de altura e desce por aceleração (`GRAVIDADE`), tombando no ar. Curva
+de entrada foi tentada antes e lia como enfeite; o que lê como peso é a
+velocidade crescendo sozinha. Ao bater: achata na medida da pancada, **quica até
+duas vezes** (`QUIQUE`), levanta `poeira()`, deixa o anel de `onda()` e sacode a
+câmera. Depois o tombo assenta e ele passa a respirar, balançando devagar e
+pulsando o brilho das arestas.
+
+Quatro detalhes que seguram isso de pé:
+
+- **A marca no chão é o aviso** (`marcaBloco`), e acende conforme ele desce.
+  Sem ela a queda é injusta: ninguém desvia do que não viu.
+- **No ar o bloco não machuca.** `tique()` só o considera com `!b.caindo`, e se
+  ele pousar em cima da cobra **estoura em vez de matar** — morte sem defesa não
+  é dificuldade, é sorteio.
+- **Enquanto cai, `castShadow` fica desligado.** Lá no alto a sombra projetada
+  cai longe da casa onde ele vai pousar e lê como um buraco no chão, brigando
+  com a marca. Ela volta quando o bloco encosta.
+- **O chão treme por oscilação amortecida** (`sacudir`/`abalo`), nunca por
+  ruído: ruído lê como falha de imagem, a onda que decai lê como baque. Um
+  baque fraco não corta um forte que ainda está decaindo.
+
+**Cada bloco tem a sua `fase`** — sem isso os 16 pulsam juntos e o tabuleiro
+inteiro pisca. Quebrado pelo escudo ele não some: `estilhacar()` espalha cacos
+que giram e deixa o anel.
 
 Outras regras que não são óbvias no código:
 
