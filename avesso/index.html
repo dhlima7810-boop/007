@@ -22,13 +22,11 @@
   <!-- HUD. mix-blend-mode:difference deixa tudo legivel dos dois lados da
        inversao sem ninguem precisar trocar a cor. -->
   <div class="hud" id="hud" hidden>
-    <div class="hud__esq">
-      <p class="hud__placar"><span id="placar">0</span><span class="hud__un">m</span></p>
-      <p class="hud__mult" id="mult" hidden>Roçada &times;<span id="multN">1</span></p>
-    </div>
-    <div class="hud__dir">
-      <p class="hud__lado"><span id="hudSetor">Raso</span><span class="hud__sep">·</span>Recorde <span id="hudRecorde">0</span> m</p>
-    </div>
+    <p class="hud__placar"><span id="placar">0</span><span class="hud__un">m</span></p>
+    <p class="hud__lado">
+      <span class="hud__mult" id="mult" hidden>Roçada &times;<span id="multN">1</span><span class="hud__sep">·</span></span>
+      <span id="hudSetor">Subsolo</span> <span class="hud__dif" id="hudDif">Fácil</span><span class="hud__sep">·</span>Recorde <span id="hudRecorde">0</span> m
+    </p>
   </div>
 
   <p class="aviso" id="aviso" hidden><span id="avisoTexto"></span></p>
@@ -45,6 +43,7 @@
     <button class="botao botao--fantasma" id="btVestiario" type="button">
       Vestiário <span class="botao__cont" id="vestCont">1/30</span>
     </button>
+    <div class="atos" id="atos"></div>
     <p class="recorde">Recorde <b id="recorde">0</b> m · <b id="somaTotal">0</b> m somados</p>
     <p class="opcoes">
       <label class="opcao">

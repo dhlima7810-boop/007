@@ -38,20 +38,23 @@ body{
 
 .hud{
   position:absolute;top:0;left:0;right:0;
-  display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
-  padding:clamp(14px,2.4vw,30px);
-  padding-top:max(clamp(14px,2.4vw,30px), env(safe-area-inset-top,0px));
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  /* O HUD mora DENTRO da faixa do teto, e o tamanho do numero sai da altura
+     dela. Cruzando a borda, a linha do chao cortava o numero ao meio; abaixo
+     dela, os obstaculos passavam por tras. Dentro da faixa nada atravessa o
+     placar, porque ali so existe a faixa.
+     `--faixa` e escrito pelo jogo: ela engrossa a cada ato e muda com o
+     tamanho da janela, entao nem o recuo nem o corpo podem ser fixos. */
+  height:var(--faixa, 62px);
+  padding:0 clamp(14px,2.4vw,30px);
   pointer-events:none;
   mix-blend-mode:difference;
   color:#fff;
 }
 .hud[hidden]{display:none}
-.hud__esq,.hud__dir{display:flex;flex-direction:column;gap:6px;min-width:0}
-.hud__dir{align-items:flex-end;text-align:right}
-
 .hud__placar{
   margin:0;font-weight:700;
-  font-size:clamp(42px,7.4vw,92px);
+  font-size:calc(var(--faixa, 62px) * .58);
   line-height:.84;letter-spacing:-.045em;
   font-variant-numeric:tabular-nums;
 }
@@ -63,20 +66,16 @@ body{
 
 .hud__lado{
   margin:0;
-  font-size:clamp(10px,1.1vw,12px);
+  font-size:clamp(9.5px, calc(var(--faixa, 62px) * .185), 13px);
   letter-spacing:.14em;text-transform:uppercase;
   font-variant-numeric:tabular-nums;
-  opacity:.88;
+  opacity:.88;text-align:right;
 }
 .hud__lado--fraco{opacity:.8}
 .hud__sep{margin:0 .55em;opacity:.45}
+.hud__dif{opacity:.55}
 
-.hud__mult{
-  margin:0;
-  font-size:clamp(11px,1.3vw,14px);font-weight:700;
-  letter-spacing:.14em;text-transform:uppercase;
-  font-variant-numeric:tabular-nums;
-}
+.hud__mult{font-weight:700}
 .hud__mult[hidden]{display:none}
 
 /* aviso do meio: nome do setor, recorde batido */
@@ -349,3 +348,22 @@ kbd{
 }
 
 .metas--fim .meta{padding:8px 13px}
+
+/* ---------- os tres atos, no menu ---------- */
+
+.atos{
+  display:flex;flex-direction:column;gap:1px;
+  width:min(360px,84vw);
+  background:var(--fio);border:1px solid var(--fio);border-radius:8px;overflow:hidden;
+}
+.ato{
+  display:flex;align-items:center;gap:10px;
+  background:var(--tinta);padding:9px 14px;
+  font-size:clamp(10px,1.05vw,12px);letter-spacing:.12em;text-transform:uppercase;
+}
+.ato__faixa{
+  flex:none;width:7.5em;text-align:left;
+  color:rgba(237,234,227,.4);font-variant-numeric:tabular-nums;
+}
+.ato__nome{flex:1;font-weight:700;text-align:left}
+.ato__dif{flex:none;color:rgba(237,234,227,.42)}

@@ -43,12 +43,12 @@
     rastro: 11,
     inverteEm: 0.055,
 
-    // Setor a cada 50 m, nao 500: a mediana medida e 42 m e a melhor corrida
-    // automatizada foi 84 m. Com 500 m ninguem veria UMA troca de setor.
-    // Suba este numero junto com a dificuldade, nunca sozinho.
-    setorM: 50,
-
-    passoM: 50,          // px de mundo que valem 1 metro
+    // A REGUA. Um setor mede 2550px de mundo; com 1 m = 17px ele vale 150 m,
+    // e os seis setores dao exatamente 900 m, em tres atos de 300. Mexer
+    // nestes dois numeros muda so a escala do placar, nunca a dificuldade:
+    // quem decide o quanto aperta e a tabela ATOS, mais a rampa de velocidade.
+    setorM: 300,         // um ato
+    passoM: 7,           // px de mundo que valem 1 metro
     rocada: 24,          // folga que ainda conta como rocada
     multMax: 8,
     perigo: 20,          // folga que dispara a camera lenta
@@ -58,27 +58,28 @@
   var TINTA = [12, 13, 16];
   var OSSO = [237, 234, 227];
 
-  // A cara do mundo por setor. `fFaixa` e a espessura do chao e do teto em
-  // fracao da altura — ela ENGROSSA a cada setor, e e por isso que o campo
-  // aperta de verdade em vez de so acelerar. Tudo que e gerado guarda fracao
-  // da altura util, nunca pixel: assim a faixa pode crescer (e a janela pode
-  // mudar de tamanho) sem fechar um vao que ja existia.
-  // A cara do mundo por setor. `fFaixa` e a espessura do chao e do teto em
-  // fracao da altura — ela ENGROSSA a cada setor, e e por isso que o campo
-  // aperta de verdade em vez de so acelerar. Tudo que e gerado guarda fracao
-  // da altura util, nunca pixel: assim a faixa pode crescer (e a janela pode
-  // mudar de tamanho) sem fechar um vao que ja existia.
+  // TRES ATOS de 300 m. Um tema cada, uma dificuldade dita em voz alta.
   //
-  // `tema` so muda o DESENHO. Faisca, pedra e roda de fogo nao tem colisao
-  // nenhuma: quem mata continua sendo o retangulo, e so ele. Um enfeite que
-  // mata e um enfeite que mente.
-  var SETORES = [
-    { nome: 'Raso',    tema: 'terra',   fFaixa: 0.075, vel: 0,   esp: 1.00, vao: 0.00, laje: 0.00, movel: 0,    aperto: 0,   cor: '#6f7b86' },
-    { nome: 'Vão',     tema: 'madeira', fFaixa: 0.086, vel: 40,  esp: 0.96, vao: 0.34, laje: 0.00, movel: 0,    aperto: 0,   cor: '#4f9ec4' },
-    { nome: 'Laje',    tema: 'fogo',    fFaixa: 0.097, vel: 80,  esp: 0.92, vao: 0.30, laje: 0.22, movel: 0,    aperto: 0.2, cor: '#4fb38d' },
-    { nome: 'Pêndulo', tema: 'fogo',    fFaixa: 0.108, vel: 120, esp: 0.88, vao: 0.28, laje: 0.24, movel: 0.55, aperto: 0.4, cor: '#c9a44a' },
-    { nome: 'Agulha',  tema: 'pedra',   fFaixa: 0.119, vel: 170, esp: 0.82, vao: 0.40, laje: 0.22, movel: 0.6,  aperto: 0.7, cor: '#e07a2a' },
-    { nome: 'Avesso',  tema: 'pedra',   fFaixa: 0.131, vel: 220, esp: 0.78, vao: 0.36, laje: 0.28, movel: 0.7,  aperto: 1.0, cor: '#e03a2a' }
+  // Antes eram seis setores em 900 m, o que dava 2,6s de mundo por setor:
+  // a cara mudava antes de a pessoa reparar que tinha mudado. Com tres, cada
+  // ato dura de 3 a 5 segundos e da para ver o que ele e.
+  //
+  // `fFaixa` e a espessura do chao e do teto em fracao da altura — ela
+  // ENGROSSA a cada ato, e e por isso que o campo aperta de verdade em vez
+  // de so acelerar. Tudo que e gerado guarda fracao da altura util, nunca
+  // pixel: assim a faixa pode crescer (e a janela pode mudar de tamanho) sem
+  // fechar um vao que ja existia.
+  //
+  // `tema` so muda o DESENHO. Faisca, cascalho e espinho de pendulo nao tem
+  // colisao nenhuma: quem mata e a caixa, e so ela. Um enfeite que mata e um
+  // enfeite que mente.
+  var ATOS = [
+    { nome: 'Subsolo',     dif: 'Fácil',   tema: 'terra', cor: '#8a9aa6',
+      fFaixa: 0.078, vel: 0,   esp: 1.00, vao: 0.22, laje: 0.08, pendulo: 0,    aperto: 0 },
+    { nome: 'Forja',       dif: 'Médio',   tema: 'fogo',  cor: '#e07a2a',
+      fFaixa: 0.100, vel: 95,  esp: 0.90, vao: 0.30, laje: 0.20, pendulo: 0.30, aperto: 0.45 },
+    { nome: 'Desabamento', dif: 'Difícil', tema: 'pedra', cor: '#c2493a',
+      fFaixa: 0.125, vel: 195, esp: 0.80, vao: 0.34, laje: 0.16, pendulo: 0.50, aperto: 1.0 }
   ];
 
   var COR_FAISCA = '#ff7a1a';   // brilho 148: aparece no preto e no osso
@@ -87,24 +88,49 @@
   // Tres desafios por partida, sorteados: um facil, um medio, um dificil,
   // sempre nessa ordem. `le` tira o progresso do estado da corrida; cumprido,
   // o premio entra como metros de bonus, iguais aos da rocada.
+  // Tres desafios por partida, sorteados: um facil, um medio, um dificil,
+  // sempre nessa ordem. `le` tira o progresso do estado da corrida; cumprido,
+  // o premio entra como metros de bonus, iguais aos da rocada.
+  //
+  // Os premios sao calibrados contra uma corrida mediana de ~300 m: cumprir
+  // um facil soma pouco, cumprir o dificil muda a corrida. Cumprir os tres
+  // e raro e deve pagar bem.
   var DESAFIOS = [
-    { id: 'dist',   diz: function (n) { return 'Chegar a ' + n + ' m'; },                        alvos: [45, 70, 100], premios: [18, 30, 45], le: function (e) { return e.m; } },
-    { id: 'rocar',  diz: function (n) { return 'Roçar ' + n + (n > 1 ? ' vezes' : ' vez'); },     alvos: [3, 6, 10],    premios: [20, 34, 52], le: function (e) { return e.rocadas; } },
-    { id: 'mult',  diz: function (n) { return 'Levar a roçada a ×' + n; },                       alvos: [3, 5, 7],     premios: [22, 36, 55], le: function (e) { return e.maxMult; } },
-    { id: 'voo',    diz: function (n) { return 'Passar ' + n + ' obstáculos sem tocar nas bordas'; }, alvos: [4, 7, 11], premios: [24, 38, 58], le: function (e) { return e.maxSemTocar; } },
-    { id: 'setor',  diz: function (n) { return 'Alcançar o setor ' + n; },                       alvos: [2, 3, 4],     premios: [20, 35, 55], le: function (e) { return e.setor + 1; } },
-    { id: 'tempo',  diz: function (n) { return 'Ficar ' + n + ' segundos vivo'; },               alvos: [12, 20, 30],  premios: [18, 30, 46], le: function (e) { return e.tempo; } },
-    { id: 'passar', diz: function (n) { return 'Passar ' + n + ' obstáculos'; },                 alvos: [8, 14, 20],   premios: [16, 28, 44], le: function (e) { return e.passados; } },
-    { id: 'limpo',  diz: function (n) { return 'Passar ' + n + ' obstáculos seguidos sem roçar'; }, alvos: [5, 8, 12], premios: [18, 30, 46], le: function (e) { return e.maxLimpo; } }
+    { id: 'dist',   diz: function (n) { return 'Chegar a ' + n + ' m'; },
+      alvos: [150, 300, 480], premios: [45, 95, 170], le: function (e) { return e.m; } },
+
+    { id: 'rocar',  diz: function (n) { return 'Roçar ' + n + (n > 1 ? ' vezes' : ' vez'); },
+      alvos: [3, 6, 10], premios: [50, 105, 185], le: function (e) { return e.rocadas; } },
+
+    { id: 'mult',   diz: function (n) { return 'Levar a roçada a ×' + n; },
+      alvos: [3, 5, 7], premios: [55, 110, 195], le: function (e) { return e.maxMult; } },
+
+    { id: 'voo',    diz: function (n) { return 'Passar ' + n + ' obstáculos sem tocar nas bordas'; },
+      alvos: [4, 7, 11], premios: [60, 120, 210], le: function (e) { return e.maxSemTocar; } },
+
+    { id: 'ato',    diz: function (n) {
+        var i = Math.floor(n / A.setorM);
+        return i < ATOS.length ? 'Chegar ao ' + ATOS[i].nome : 'Passar dos ' + n + ' m';
+      },
+      alvos: [300, 600, 900], premios: [50, 105, 190], le: function (e) { return e.m; } },
+
+    { id: 'tempo',  diz: function (n) { return 'Ficar ' + n + ' segundos vivo'; },
+      alvos: [12, 20, 30], premios: [45, 95, 165], le: function (e) { return e.tempo; } },
+
+    { id: 'passar', diz: function (n) { return 'Passar ' + n + ' obstáculos'; },
+      alvos: [8, 14, 20], premios: [40, 90, 160], le: function (e) { return e.passados; } },
+
+    { id: 'limpo',  diz: function (n) { return 'Passar ' + n + ' obstáculos seguidos sem roçar'; },
+      alvos: [5, 8, 12], premios: [45, 95, 165], le: function (e) { return e.maxLimpo; } }
   ];
 
   var PROEZAS = {
-    cem:      'Chegar a 100 m numa corrida',
-    duzentos: 'Chegar a 200 m numa corrida',
+    cem:      'Chegar a 400 m numa corrida',
+    duzentos: 'Chegar a 800 m numa corrida',
     voo:      'Passar 10 obstáculos sem tocar no chão nem no teto',
     fio:      'Levar a roçada até ×8',
-    fundo:    'Alcançar o setor 4',
-    cegas:    'Fazer 40 m com a inversão da tela desligada',
+    fundo:    'Alcançar o Desabamento',
+    cegas:    'Fazer 250 m com a inversão da tela desligada',
     folego:   'Ficar 30 segundos vivo numa corrida',
     limalha:  'Roçar 20 vezes numa única corrida'
   };
@@ -118,8 +144,8 @@
     obst: [], proximoX: 0,
     rastro: [], cacos: [], faiscas: [], part: [],
     inv: 0, tremor: 0,
-    larg: 1280, alt: 720,
-    fFaixa: SETORES[0].fFaixa,
+    larg: 1280, alt: 720, altCSS: 720,
+    fFaixa: ATOS[0].fFaixa,
     setor: 0,
     escalaTempo: 1,
     mult: 0, bonus: 0, rocadas: 0, semTocar: 0,
@@ -212,6 +238,7 @@
     rocada: function (n)    { tom(540 + n * 95, 540 + n * 95, 0.055, 'triangle', 0.055); },
     morte:  function ()     { tom(200, 55, 0.38, 'sawtooth', 0.09); },
     setor:  function ()     { tom(330, 495, 0.22, 'triangle', 0.06); },
+    ato:    function ()     { tom(196, 294, 0.5, 'sawtooth', 0.055); },
     marca:  function ()     { tom(660, 990, 0.3, 'triangle', 0.07); },
     meta:   function ()     { tom(700, 1050, 0.26, 'triangle', 0.07); },
     conta:  function (n)    { tom(n > 1 ? 380 : 620, n > 1 ? 380 : 780, 0.12, 'triangle', 0.05); },
@@ -237,6 +264,7 @@
 
     C.larg = larg;
     C.alt = alt;
+    C.altCSS = ap;
 
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     cv.width = Math.round(lp * dpr);
@@ -250,12 +278,16 @@
 
   /* §6 — setores --------------------------------------------------------- */
 
-  function setorDe(x) {
-    var i = Math.floor((x - C.base) / (A.setorM * A.passoM));
-    return i < 0 ? 0 : (i > SETORES.length - 1 ? SETORES.length - 1 : i);
+  // O setor sai do PLACAR, e nao da distancia crua. O placar ja soma o bonus
+  // da rocada e dos desafios; com o setor preso so a distancia, o numero na
+  // tela e a troca de mundo andavam em unidades diferentes, e a divisao
+  // "0 a 300 e facil" nunca fechava com o que se via.
+  function setorDeM(m) {
+    var i = Math.floor(m / A.setorM);
+    return i < 0 ? 0 : (i > ATOS.length - 1 ? ATOS.length - 1 : i);
   }
 
-  function corSetorEm(x) { return SETORES[setorDe(x)].cor; }
+  function corSetorEmM(m) { return ATOS[setorDeM(m)].cor; }
 
   /* §7 — mundo ----------------------------------------------------------- */
 
@@ -267,45 +299,84 @@
   // Tudo guardado em FRACAO da altura util. A faixa engrossa a cada setor e
   // a janela pode mudar de tamanho: com pixel gravado, um vao ja existente
   // fecharia sozinho e mataria quem estivesse dentro dele.
-  function caixa(g, p) {
-    var f = faixa(), H = C.alt - f * 2, h = p.fh * H;
-    if (p.anc === 'teto') return { x: g.x, y: f, w: g.w, h: h };
-    if (p.anc === 'chao') return { x: g.x, y: C.alt - f - h, w: g.w, h: h };
+  function geo(g, p) {
+    var f = faixa(), H = C.alt - f * 2;
+
+    if (p.anc === 'pendulo') {
+      var L = p.fL * H, r = p.fr * H;
+      var ang = p.amp * Math.sin(p.fase + C.tempo * p.vel);
+      var ox = g.x + g.w / 2;
+      var oy = p.lado === 'teto' ? f : C.alt - f;
+      var lado = p.lado === 'teto' ? 1 : -1;
+      return { tipo: 'bola', r: r, amp: p.amp, L: L, ang: ang, lado: lado,
+        ox: ox, oy: oy, cx: ox + Math.sin(ang) * L, cy: oy + lado * Math.cos(ang) * L };
+    }
+
+    var h = p.fh * H;
+    if (p.anc === 'teto') return { tipo: 'ret', x: g.x, y: f, w: g.w, h: h };
+    if (p.anc === 'chao') return { tipo: 'ret', x: g.x, y: C.alt - f - h, w: g.w, h: h };
     var fc = p.fc + (p.mov ? p.mov.fa * Math.sin(p.mov.fase + C.tempo * p.mov.vel) : 0);
-    return { x: g.x, y: f + fc * H - h / 2, w: g.w, h: h };
+    return { tipo: 'ret', x: g.x, y: f + fc * H - h / 2, w: g.w, h: h };
+  }
+
+  // A folga de uma peca ate o disco. Para a bola do pendulo e circulo contra
+  // circulo, nao a caixa que a cerca: com caixa, os cantos matariam sem
+  // encostar, e o desenho estaria mentindo.
+  function folgaPeca(b, jx, jy) {
+    if (b.tipo === 'bola') {
+      var dx = jx - b.cx, dy = jy - b.cy;
+      return Math.sqrt(dx * dx + dy * dy) - b.r - A.raio;
+    }
+    return folga(jx, jy, A.raio, b.x, b.y, b.w, b.h);
   }
 
   function gerar() {
-    while (C.proximoX < C.camX + C.larg + 600) {
+    while (C.proximoX < C.camX + C.larg + 700) {
       var k = dureza();
-      var s = SETORES[setorDe(C.proximoX)];
+      var s = ATOS[C.setor];
       var w = acaso(46, 80);
-      var g = { x: C.proximoX, w: w, pecas: [], dmin: Infinity, pronto: false };
-      var sorte = Math.random(), folgaExtra = 0;
+      var g = { x: C.proximoX, w: w, setor: C.setor, pecas: [], dmin: Infinity, pronto: false };
+      var folgaExtra = 0;
+      var sorte = Math.random();
 
-      if (sorte < s.vao) {
+      // O primeiro obstaculo da corrida e sempre um bloco de TETO. Quem
+      // comeca nasce parado, encostado no chao: um bloco de chao logo de
+      // cara pede uma subida do zero com pouco aviso, e um de teto nao pede
+      // nada. Medido antes disso: 7 de 11 corridas morriam no mesmo lugar,
+      // sempre no ponto onde cai o primeiro obstaculo.
+      var corte1 = C.primeiro ? 0 : s.vao;
+      var corte2 = C.primeiro ? 0 : corte1 + s.pendulo;
+      var corte3 = C.primeiro ? 0 : corte2 + s.laje;
+
+      if (sorte < corte1) {
+        // vao: duas pecas e uma fresta no meio
         var fvao = Math.max(0.28, 0.46 - 0.12 * k - 0.06 * s.aperto);
         var marg = 0.07;
         var fc = acaso(fvao / 2 + marg, 1 - fvao / 2 - marg);
         g.pecas.push({ anc: 'teto', fh: fc - fvao / 2 });
         g.pecas.push({ anc: 'chao', fh: 1 - (fc + fvao / 2) });
-        folgaExtra = 60;
+        folgaExtra = 70;
 
-      } else if (sorte < s.vao + s.laje) {
-        var fh = acaso(0.10, 0.19);
-        var movel = Math.random() < s.movel;
-        g.pecas.push({
-          anc: 'livre', fh: fh, fc: acaso(0.30, 0.70),
-          mov: movel ? { fa: acaso(0.08, 0.16), vel: acaso(0.7, 1.5), fase: Math.random() * 6.2832 } : null
-        });
-        folgaExtra = 60;
+      } else if (sorte < corte2) {
+        // Pendulo: bola de espinhos presa por corrente a um pino no teto ou
+        // no chao, varrendo um arco. A largura do GRUPO cobre o arco inteiro
+        // — sem isso a bola sai da faixa que o jogo olha e mata por tras.
+        var lado = Math.random() < 0.62 ? 'teto' : 'chao';
+        var fL = acaso(0.34, 0.50);
+        var fr = acaso(0.085, 0.125);
+        var amp = acaso(0.62, 1.15);
+        g.pecas.push({ anc: 'pendulo', lado: lado, fL: fL, fr: fr, amp: amp,
+          vel: acaso(1.2, 2.1), fase: Math.random() * 6.2832 });
+        var Href = C.alt * (1 - s.fFaixa * 2);
+        g.w = Math.max(w, (2 * Math.sin(amp) * fL + 2 * fr) * Href);
+        folgaExtra = 150;
+
+      } else if (sorte < corte3) {
+        // laje solta no meio do campo
+        g.pecas.push({ anc: 'livre', fh: acaso(0.10, 0.19), fc: acaso(0.30, 0.70), mov: null });
+        folgaExtra = 70;
 
       } else {
-        // O primeiro obstaculo da corrida nunca sai do chao. Quem comeca
-        // nasce parado, encostado no chao: um bloco de chao logo de cara
-        // pede uma subida do zero com pouco aviso, e um de teto nao pede
-        // nada. Medido antes disso: 7 de 11 corridas morriam no mesmo lugar,
-        // sempre aos 16 m, que e exatamente onde cai o primeiro obstaculo.
         g.pecas.push({
           anc: C.primeiro ? 'teto' : (Math.random() < 0.5 ? 'chao' : 'teto'),
           fh: C.primeiro ? acaso(0.16, 0.26) : Math.min(0.62, acaso(0.16, 0.38 + 0.16 * k))
@@ -317,12 +388,12 @@
       // quadro e o obstaculo fica fervendo
       for (var q = 0; q < g.pecas.length; q++) g.pecas[q].s = Math.random();
       C.obst.push(g);
-      C.proximoX += w + (A.espBase - A.espCorte * k) * s.esp + folgaExtra;
+      C.proximoX += g.w + (A.espBase - A.espCorte * k) * s.esp + folgaExtra;
     }
 
     var i = 0;
     while (i < C.obst.length) {
-      if (C.obst[i].x + C.obst[i].w < C.camX - 160) C.obst.splice(i, 1); else i++;
+      if (C.obst[i].x + C.obst[i].w < C.camX - 200) C.obst.splice(i, 1); else i++;
     }
   }
 
@@ -352,18 +423,21 @@
 
   function passo(dt) {
     var d = C.camX - C.base;
-    var s = SETORES[C.setor];
+    var s = ATOS[C.setor];
     var vel = A.velBase + Math.min(d / A.velRampa, A.velGanho) + s.vel;
     C.camX += vel * dt;
     C.tempo += dt;
 
-    var novo = setorDe(C.camX);
+    var novo = setorDeM(placarAgora());
     if (novo !== C.setor) {
       C.setor = novo;
-      if (novo > 0) { avisar(SETORES[novo].nome, SETORES[novo].cor); SONS.setor(); }
+      // o ato e o que a pessoa guarda — "cheguei na Forja" —, entao ele diz
+      // o nome E a dificuldade, em voz alta
+      avisar(ATOS[novo].nome + ' · ' + ATOS[novo].dif, ATOS[novo].cor, 1900);
+      SONS.ato();
     }
     // a faixa engrossa devagar: de uma vez ela empurraria quem esta encostado
-    C.fFaixa += (SETORES[C.setor].fFaixa - C.fFaixa) * Math.min(1, dt / 0.5);
+    C.fFaixa += (ATOS[C.setor].fFaixa - C.fFaixa) * Math.min(1, dt / 0.5);
 
     C.vy += (C.segurando ? -A.grav : A.grav) * dt;
     if (C.vy > A.vyMax) C.vy = A.vyMax;
@@ -388,8 +462,8 @@
 
       if (g.x <= jx + A.raio + 40 && g.x + g.w >= jx - A.raio - 40) {
         for (var j = 0; j < g.pecas.length; j++) {
-          var b = caixa(g, g.pecas[j]);
-          var fo = folga(jx, C.y, A.raio, b.x, b.y, b.w, b.h);
+          var b = geo(g, g.pecas[j]);
+          var fo = folgaPeca(b, jx, C.y);
           if (fo < 0) { morrer(); return; }
           if (fo < g.dmin) g.dmin = fo;
           if (fo < maisPerto) maisPerto = fo;
@@ -436,7 +510,11 @@
       el.mult.hidden = C.mult < 1;
       el.multN.textContent = C.mult;
     }
-    if (C.setor !== setorEscrito) { setorEscrito = C.setor; el.hudSetor.textContent = SETORES[C.setor].nome; }
+    if (C.setor !== setorEscrito) {
+      setorEscrito = C.setor;
+      el.hudSetor.textContent = ATOS[C.setor].nome;
+      el.hudDif.textContent = ATOS[C.setor].dif;
+    }
 
     conferirProezas(m);
     conferirDesafios(m);
@@ -453,12 +531,23 @@
       var g = C.obst[i];
       var sx = g.x - C.camX;
       if (sx > C.larg || sx + g.w < 0) continue;
-      var tema = SETORES[setorDe(g.x)].tema;
+      var tema = ATOS[C.setor].tema;
       if (tema !== 'fogo' && tema !== 'pedra') continue;
 
       for (var j = 0; j < g.pecas.length; j++) {
         var pc = g.pecas[j];
-        var b = caixa(g, pc);
+        var b = geo(g, pc);
+
+        if (b.tipo === 'bola') {
+          // solta no fundo do arco, que e onde ela corre mais rapido
+          if (Math.abs(b.ang) > b.amp * 0.4) continue;
+          if (Math.random() > dt * 14) continue;
+          C.part.push({ t: tema === 'pedra' ? 'p' : 'f',
+            x: b.cx + acaso(-b.r, b.r), y: b.cy + acaso(-b.r, b.r),
+            vx: acaso(-140, -20), vy: acaso(-110, 110), r: acaso(1.8, 3.2), v: acaso(0.5, 1) });
+          continue;
+        }
+
         if (tema === 'fogo') {
           if (Math.random() > dt * 10) continue;
           var py = pc.anc === 'teto' ? b.y + b.h : (pc.anc === 'chao' ? b.y : b.y + Math.random() * b.h);
@@ -505,12 +594,12 @@
   }
 
   function conferirProezas(m) {
-    if (m >= 100) marcar('cem');
-    if (m >= 200) marcar('duzentos');
+    if (m >= 400) marcar('cem');
+    if (m >= 800) marcar('duzentos');
     if (C.semTocar >= 10) marcar('voo');
     if (C.mult >= A.multMax) marcar('fio');
-    if (C.setor >= 3) marcar('fundo');
-    if (!C.inverter && m >= 40) marcar('cegas');
+    if (C.setor >= 2) marcar('fundo');
+    if (!C.inverter && m >= 250) marcar('cegas');
     if (C.tempo >= 30) marcar('folego');
     if (C.rocadas >= 20) marcar('limalha');
   }
@@ -521,7 +610,23 @@
     guardar('avesso.proezas', Object.keys(C.proezas).join(','));
   }
 
+  // O CSS precisa saber onde a faixa acaba para pousar o HUD abaixo dela.
+  // So escreve quando muda de verdade: escrever variavel do documento a cada
+  // quadro refaz layout a cada quadro, que e exatamente o tremor que a regra
+  // do `transform` no CLAUDE.md existe para evitar.
+  var faixaEscrita = -1;
+  function avisarFaixa() {
+    // C.altCSS vem do medir(), nunca de uma leitura aqui: ler clientHeight
+    // dentro do laco forca o navegador a recalcular layout a cada quadro,
+    // que e exatamente o tremor que a regra do transform existe para evitar.
+    var px = Math.round(C.fFaixa * C.altCSS);
+    if (px === faixaEscrita) return;
+    faixaEscrita = px;
+    document.documentElement.style.setProperty('--faixa', px + 'px');
+  }
+
   function atualizar(dtReal) {
+    avisarFaixa();
     var dt = dtReal * (C.estado === 'jogando' ? C.escalaTempo : 1);
 
     if (C.estado === 'jogando') passo(dt);
@@ -680,6 +785,66 @@
     cx.restore();
   }
 
+  // No Subsolo as pecas se dividem entre terra e madeira pela propria
+  // semente, para o ato nao ficar de uma cor so.
+  function temaDa(tema, pc) {
+    if (tema !== 'terra') return tema;
+    return (pc.s || 0) < 0.5 ? 'terra' : 'madeira';
+  }
+
+  // O pendulo e desenhado por inteiro: o arco que ele varre, a corrente, o
+  // pino e a bola de espinhos. O arco e o que torna ele justo — avisa para
+  // onde a bola vai antes de ela ir. Os espinhos ficam TODOS dentro do raio
+  // que mata; o que passa da conta mentiria.
+  function desenharPendulo(b, solido, fundo, tema) {
+    var ox = b.ox - C.camX, bx = b.cx - C.camX;
+    var base = b.lado > 0 ? 1.5708 : -1.5708;
+    cx.save();
+
+    cx.strokeStyle = solido;
+    cx.globalAlpha = 0.14;
+    cx.lineWidth = Math.max(2, b.r * 0.18);
+    cx.beginPath();
+    cx.arc(ox, b.oy, b.L, base - b.amp, base + b.amp, b.lado < 0);
+    cx.stroke();
+    cx.globalAlpha = 1;
+
+    // corrente: elos, nao um risco. É o que faz ler como peso pendurado
+    var elos = Math.max(3, Math.round(b.L / 26));
+    cx.lineWidth = Math.max(2.5, b.r * 0.17);
+    cx.lineCap = 'round';
+    for (var i = 0; i < elos; i++) {
+      var t0 = i / elos, t1 = (i + 0.62) / elos;
+      cx.beginPath();
+      cx.moveTo(ox + (bx - ox) * t0, b.oy + (b.cy - b.oy) * t0);
+      cx.lineTo(ox + (bx - ox) * t1, b.oy + (b.cy - b.oy) * t1);
+      cx.stroke();
+    }
+
+    cx.fillStyle = solido;
+    cx.beginPath(); cx.arc(ox, b.oy, Math.max(5, b.r * 0.3), 0, 6.2832); cx.fill();
+
+    cx.translate(bx, b.cy);
+    cx.rotate(b.ang * 1.7);
+    cx.beginPath();
+    for (var k = 0; k < 12; k++) {
+      var an = (k / 12) * 6.2832;
+      var rr = k % 2 ? b.r * 0.58 : b.r;
+      var px = Math.cos(an) * rr, py = Math.sin(an) * rr;
+      if (k) cx.lineTo(px, py); else cx.moveTo(px, py);
+    }
+    cx.closePath(); cx.fill();
+
+    cx.fillStyle = fundo;
+    cx.beginPath(); cx.arc(0, 0, b.r * 0.3, 0, 6.2832); cx.fill();
+    if (tema === 'fogo') {
+      cx.fillStyle = COR_FAISCA;
+      cx.globalAlpha = 0.9;
+      cx.beginPath(); cx.arc(0, 0, b.r * 0.17, 0, 6.2832); cx.fill();
+    }
+    cx.restore();
+  }
+
   function anguloDe(p) {
     if (p.giro === 'roda') return (C.camX / 34) % 6.2832;
     if (p.giro === 'inclina') return (C.vy / A.vyMax) * 0.55;
@@ -711,7 +876,7 @@
       var mX = marcaX() - C.camX;
       if (mX > -40 && mX < C.larg + 40) {
         cx.save();
-        cx.fillStyle = corSetorEm(marcaX());
+        cx.fillStyle = corSetorEmM(C.recorde);
         cx.globalAlpha = 0.5; cx.fillRect(mX - 1.5, f, 3, C.alt - f * 2);
         cx.globalAlpha = 1; cx.fillRect(mX - 9, f, 18, 7); cx.fillRect(mX - 9, C.alt - f - 7, 18, 7);
         cx.restore();
@@ -726,13 +891,15 @@
       var g = C.obst[i];
       var sx = g.x - C.camX;
       if (sx > C.larg + 8 || sx + g.w < -8) continue;
-      var tema = SETORES[setorDe(g.x)].tema;
+      var tema = ATOS[C.setor].tema;
       for (var j = 0; j < g.pecas.length; j++) {
-        var b = caixa(g, g.pecas[j]);
+        var pc = g.pecas[j];
+        var b = geo(g, pc);
+        if (b.tipo === 'bola') { desenharPendulo(b, solido, fundo, tema); continue; }
         b.x -= C.camX;
         cx.fillStyle = solido;
         cx.fillRect(b.x, b.y, b.w, b.h);
-        textura(b, tema, g.pecas[j], fundo);
+        textura(b, temaDa(tema, pc), pc, fundo);
       }
     }
 
@@ -897,14 +1064,15 @@
   function comecar() {
     C.base = C.camX;
     C.setor = 0; setorEscrito = -1; multEscrito = -1; placarEscrito = -1;
-    C.fFaixa = SETORES[0].fFaixa;
+    C.fFaixa = ATOS[0].fFaixa;
     C.tempo = 0;
     limparMundo();
     C.proximoX = C.camX + C.larg * 0.95;
     C.podeReiniciar = false;
     el.placar.textContent = '0';
     el.hudRecorde.textContent = C.recorde;
-    el.hudSetor.textContent = SETORES[0].nome;
+    el.hudSetor.textContent = ATOS[0].nome;
+    el.hudDif.textContent = ATOS[0].dif;
     el.mult.hidden = true;
     C.estado = 'jogando';
     abrir(el.hud);
@@ -972,7 +1140,7 @@
     if (contaTimer) { window.clearTimeout(contaTimer); contaTimer = null; }
     C.estado = 'menu';
     C.podeReiniciar = false; C.segurando = false;
-    C.fFaixa = SETORES[0].fFaixa;
+    C.fFaixa = ATOS[0].fFaixa;
     limparMundo();
     atualizarMenu();
     fechar(el.hud); fechar(el.fim); fechar(el.pausa); fechar(el.vestiario); fechar(el.largada);
@@ -1025,7 +1193,7 @@
   }
 
   var avisoTimer = null;
-  function avisar(texto, corTexto) {
+  function avisar(texto, corTexto, dura) {
     el.avisoTexto.textContent = texto;
     el.aviso.style.color = corTexto;
     el.aviso.hidden = false;
@@ -1039,7 +1207,7 @@
         window.gsap.to(el.aviso, { autoAlpha: 0, duration: 0.6, ease: 'power3.out', overwrite: true,
           onComplete: function () { el.aviso.hidden = true; } });
       } else { el.aviso.hidden = true; }
-    }, 1200);
+    }, dura || 1200);
   }
 
   function montarMetas(onde, lista, comResultado) {
@@ -1156,6 +1324,31 @@
     C.vestido = id;
     guardar('avesso.vestido', id);
     atualizarMenu();
+  }
+
+  function montarAtos() {
+    el.atos.textContent = '';
+    for (var i = 0; i < ATOS.length; i++) {
+      var d = document.createElement('p');
+      d.className = 'ato';
+
+      var f = document.createElement('span');
+      f.className = 'ato__faixa';
+      f.textContent = (i * A.setorM) + '–' + ((i + 1) * A.setorM) + ' m';
+      d.appendChild(f);
+
+      var n = document.createElement('span');
+      n.className = 'ato__nome';
+      n.textContent = ATOS[i].nome;
+      d.appendChild(n);
+
+      var g = document.createElement('span');
+      g.className = 'ato__dif';
+      g.textContent = ATOS[i].dif;
+      d.appendChild(g);
+
+      el.atos.appendChild(d);
+    }
   }
 
   function atualizarMenu() {
@@ -1292,7 +1485,7 @@
   function pegar() {
     var ids = ['palco', 'tela', 'hud', 'placar', 'hudRecorde', 'hudSetor', 'mult', 'multN',
       'aviso', 'avisoTexto', 'inicio', 'fim', 'pausa', 'vestiario', 'grade', 'vestLinha',
-      'largada', 'metas', 'conta', 'metasFim',
+      'largada', 'metas', 'conta', 'metasFim', 'hudDif', 'atos',
       'btJogar', 'btDeNovo', 'btMenu', 'btVoltar', 'btSair', 'btVestiario', 'btVestiario2',
       'btVestFechar', 'fimPlacar', 'fimSelo', 'fimLinha', 'recorde', 'somaTotal', 'vestCont',
       'optInverter', 'optSom', 'novidade', 'novidadeLista', 'barra', 'barraTexto', 'barraCheio'];
@@ -1318,6 +1511,20 @@
 
     C.recorde = parseInt(lerGuardado('avesso.recorde', '0'), 10) || 0;
     C.total = parseInt(lerGuardado('avesso.total', '0'), 10) || 0;
+
+    // O metro encolheu de 50px para 17px para os atos caírem em 0/300/600/900.
+    // Tudo que esta guardado foi medido na regua antiga, entao passa pela
+    // mesma conta — senao o recorde de ontem viraria um numero pequeno e os
+    // metros somados valeriam um terço do que valiam. Uma vez so.
+    var totalAntigo = C.total;   // para a migracao das roupas, mais abaixo
+    if (lerGuardado('avesso.regua', '1') !== '2') {
+      var fator = 50 / A.passoM;
+      C.recorde = Math.round(C.recorde * fator);
+      C.total = Math.round(C.total * fator);
+      guardar('avesso.recorde', C.recorde);
+      guardar('avesso.total', C.total);
+      guardar('avesso.regua', '2');
+    }
     C.inverter = lerGuardado('avesso.inverter', '1') !== '0';
     C.som = lerGuardado('avesso.som', '1') !== '0';
 
@@ -1331,7 +1538,7 @@
       // total ja passava e credita as primeiras roupas por soma, na ordem.
       var antigos = window.AVESSO_CORTES_ANTIGOS || [];
       var n = 0, soma = [];
-      for (var q = 0; q < antigos.length; q++) if (C.total >= antigos[q]) n++;
+      for (var q = 0; q < antigos.length; q++) if (totalAntigo >= antigos[q]) n++;
       for (var w = 0; w < P.length; w++) if (P[w].por.tipo === 'soma') soma.push(P[w].id);
       for (var z = 0; z < n && z < soma.length; z++) C.ganhas[soma[z]] = 1;
     } else {
@@ -1348,6 +1555,7 @@
 
     medir();
     limparMundo();
+    montarAtos();
     atualizarMenu();
     ligarEntrada();
     ligarLaco();

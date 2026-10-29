@@ -27,40 +27,66 @@ morrer com o dedo afundado, apertar de novo e já subir, sem soltar no meio.
 
 ## Os sistemas
 
-### Setores
+### Três atos
 
-A cada **50 m** o mundo muda de cara: entra um tipo novo de obstáculo, a
-velocidade dá um degrau e **a faixa do chão e do teto engrossa**, apertando o
-campo de verdade em vez de só acelerar. São seis, e depois do sexto fica nele.
+A corrida tem **três atos de 300 m**, e cada um diz o próprio nome e a
+própria dificuldade em voz alta quando começa.
 
-| | Setor | O que entra | Cara |
+| Ato | Metros | Dificuldade | Cara |
 |---|---|---|---|
-| 1 | Raso | só blocos | terra, com grão |
-| 2 | Vão | frestas entre duas peças | madeira, com veio e nó |
-| 3 | Laje | lajes flutuantes | fogo: roda girando, faísca |
-| 4 | Pêndulo | as lajes passam a balançar | fogo |
-| 5 | Agulha | vãos apertados, menos respiro | pedra: lasca na borda, cascalho caindo |
-| 6 | Avesso | tudo, no mais rápido | pedra |
+| **Subsolo** | 0–300 | Fácil | terra com grão e madeira com veio, parados |
+| **Forja** | 300–600 | Médio | fogo: roda girando, faísca saindo |
+| **Desabamento** | 600–900 | Difícil | pedra: lasca na borda, cascalho caindo |
 
-**O tema só muda o desenho.** Faísca, cascalho e roda de fogo **não têm
-colisão nenhuma** — quem mata continua sendo o retângulo, e só ele. Um
-enfeite que mata é um enfeite que mente. A roda de fogo gira **inscrita
-dentro** do retângulo pelo mesmo motivo: o que gira nunca passa da caixa que
-mata.
+Passados os 900 m fica no Desabamento, só mais rápido. A cada ato a
+velocidade dá um degrau e **a faixa do chão e do teto engrossa**, apertando o
+campo de verdade em vez de só acelerar.
+
+**Já foram seis setores em 900 m**, e não funcionou: dava 2,6 s de mundo por
+setor — a cara mudava antes de a pessoa reparar que tinha mudado. Com três,
+cada ato dura de 3 a 5 segundos e dá para ver o que ele é.
+
+**A régua.** Um ato mede 2.100px de mundo, e com 1 m = 7px ele vale 300 m.
+Mexer em `A.setorM` e `A.passoM` muda só a escala do placar, nunca a
+dificuldade: quem decide o quanto aperta é a tabela `ATOS` mais a rampa de
+velocidade. A corrida mediana medida dá 307 m — ou seja, a Forja começa
+exatamente onde o jogador mediano morre.
+
+**O ato sai do PLACAR, não da distância crua.** O placar soma o bônus da
+roçada e dos desafios; com o ato preso apenas à distância, o número na tela e
+a troca de mundo andavam em unidades diferentes e a divisão "0 a 300 é fácil"
+nunca fechava com o que se via.
+
+**O tema de um obstáculo é o do ato de agora**, não o do ato em que ele
+nasceu. A geração enche até ~2.000px à frente, que na régua nova são ~285 m:
+quase um ato inteiro. Com o tema gravado no nascimento, o mundo só mudava de
+cara 285 m depois de o aviso anunciar a troca.
+
+**O tema só muda o desenho.** Faísca, cascalho e espinho de pêndulo **não têm
+colisão nenhuma** — quem mata é a caixa, e só ela. Um enfeite que mata é um
+enfeite que mente. A roda de fogo gira **inscrita dentro** do retângulo pelo
+mesmo motivo.
 
 A textura é pintada **na cor do fundo**, nunca numa cor própria: assim ela
 inverte junto com o mundo sem ninguém escrever a regra duas vezes. E cada
 peça carrega uma semente fixa — sem ela a textura sorteia de novo a cada
 quadro e o obstáculo ferve.
 
-O tema de um obstáculo vem do setor **em que ele está**, não daquele em que
-você está. Na virada, o mundo muda na frente dos seus olhos em vez de piscar
-inteiro de uma vez.
+### Pêndulos
 
-**Por que 50 m e não 500 m**, que foi o pedido: a mediana medida é 42 m e a
-melhor corrida automatizada deu 95 m. Com 500 m ninguém veria uma única troca
-de setor — o recurso existiria e nunca apareceria. O valor mora em
-`A.setorM`, num lugar só: suba junto com a dificuldade, nunca sozinho.
+No Forja e no Desabamento aparecem **pêndulos**: uma bola de espinhos presa
+por corrente a um pino no teto ou no chão, varrendo um arco.
+
+- **A bola é círculo contra círculo**, não a caixa que a cerca. Com caixa, os
+  cantos matariam sem encostar, e o desenho estaria mentindo.
+- **Os espinhos ficam todos dentro do raio que mata.** O que passasse da
+  conta seria desenho prometendo o que a física não cumpre.
+- **O arco fica desenhado na tela.** É o que torna o pêndulo justo: avisa
+  para onde a bola vai antes de ela ir. Sem ele, seria sorte.
+- **A largura do grupo cobre o arco inteiro.** Sem isso a bola sai da faixa
+  que o jogo olha e mata por trás.
+- A corrente é feita de **elos**, não de um risco: é o que faz ler como peso
+  pendurado em vez de linha esticada.
 
 ### Desafios da partida
 
@@ -70,8 +96,10 @@ paga **metros de bônus**, iguais aos da roçada: entram no placar, no recorde
 e nos metros somados.
 
 São oito tipos (distância, roçadas, multiplicador, voo sem tocar nas bordas,
-setor alcançado, tempo vivo, obstáculos passados, passagens limpas seguidas),
-cada um com três níveis e três prêmios, de +16 m a +58 m.
+ato alcançado, tempo vivo, obstáculos passados, passagens limpas seguidas),
+cada um com três níveis e três prêmios, de **+40 m a +210 m**. Os prêmios são
+calibrados contra uma corrida mediana de ~307 m: cumprir o fácil soma pouco,
+cumprir o difícil muda a corrida, e cumprir os três é raro e paga bem.
 
 **A contagem é pulável, e isso é de propósito.** Uma corrida dura uns dez
 segundos; 2,2 s de pré-jogo obrigatório a cada tentativa viraria castigo lá
@@ -96,9 +124,10 @@ desenho: forma × casca × cor × rastro × giro. Aparência não mexe em nada d
 jogo — a colisão é sempre o mesmo círculo de raio `A.raio`, qualquer que seja
 a forma. Roupa que muda dificuldade faz a pessoa escolher a feia.
 
-- **21 por metros somados** de todas as corridas, de **150 m a 83.000 m**. A
-  soma nunca anda para trás: uma corrida ruim de 11 m ainda aproxima da
-  próxima. As três primeiras saem cedo (150, 300, 550) e a curva abre depois.
+- **21 por metros somados** de todas as corridas, de **800 m a 340.000 m**. A
+  soma nunca anda para trás: uma corrida ruim ainda aproxima da próxima. As
+  três primeiras saem cedo (800, 1.800, 3.200 — duas a três corridas cada) e
+  a curva abre depois.
 - **Uma vez ganha, nunca se perde.** O conjunto fica gravado em
   `avesso.ganhas`. A curva já subiu uma vez e pode subir de novo; sem esse
   registro, apertar a exigência **tira do armário** uma roupa que a pessoa já
@@ -148,11 +177,22 @@ zero com pouco aviso, e um de teto não pede nada. Medido antes da correção:
 exatamente onde cai o primeiro obstáculo. Depois: mínimo de 29 m e mediana
 de 43 m.
 
-**O HUD cabe numa linha só.** O setor e o recorde já moraram em duas, e a
-segunda caía em cima da borda da faixa. A faixa mede 7,5% da altura no setor
-1 — 61px numa janela de 810, e menos ainda numa janela baixa — e duas linhas
-de 12px com respiro não cabem lá. Numa linha, a borda nunca atravessa texto:
-medido, a linha termina em 46px com a faixa indo até 61px.
+**O HUD mora DENTRO da faixa do teto, e o corpo do número sai da altura
+dela** (`calc(var(--faixa) * .58)`). Foram três tentativas:
+
+1. cruzando a borda, a linha do chão cortava o número ao meio;
+2. abaixo da faixa, os obstáculos passavam por trás dele;
+3. dentro da faixa, nada atravessa o placar — porque ali só existe a faixa.
+
+A faixa engrossa a cada ato e muda com o tamanho da janela, então nem o recuo
+nem o corpo podem ser fixos: o jogo escreve `--faixa` e o CSS lê. Medido:
+47px de base numa faixa de 63 (paisagem), 62 em 84 (tela grande), 49 em 66
+(retrato) e 25 em 33 (janela de 700×420).
+
+**`--faixa` nunca é lido do layout dentro do laço.** `clientHeight` a cada
+quadro força o navegador a recalcular layout a cada quadro — exatamente o
+tremor que a regra do `transform` existe para evitar. O valor vem do
+`medir()`, e só é reescrito quando muda de pixel.
 
 **A câmera lenta sobe depressa e desce devagar.** Com a mesma constante nos
 dois sentidos ela pisca ao raspar de leve. Sobe em 35ms, volta em 220ms.
@@ -188,12 +228,10 @@ a 34% da largura à frente e persegue o centro dele:
 
 | | |
 |---|---|
-| corridas | 5 em 50 s |
-| distâncias | 42, 42, 43, 100, 110 m |
-| mediana | 43 m |
-
-As duas corridas de três dígitos são desafios cumpridos: o bônus entra no
-placar.
+| corridas | 8 em 55 s |
+| distâncias | 210, 213, 257, 306, 307, 347, 458, 502 m |
+| mediana | 307 m |
+| atos alcançados | Subsolo e Forja |
 
 É **piso, não teto**: o piloto enxerga uma coluna, quem joga enxerga a tela
 inteira. Serve para dizer que a geração não produz parede impossível — não
