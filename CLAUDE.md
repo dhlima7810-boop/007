@@ -1,7 +1,14 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Pizza Mia — site
 
 Site estático da pizzaria Pizza Mia (Av. Emilio Ribas, 3175 — Vila Galvão,
 Guarulhos / SP). HTML, CSS e JavaScript puros, sem build e sem framework.
+
+Não há testes nem lint: `npm test` é um placeholder que falha. Para ver o
+site, abra `index.html` ou rode `python3 -m http.server 8000` na raiz.
 
 ## Regra de animação
 
@@ -693,3 +700,10 @@ O `_headers` também é ignorado.
 
 O `README` traz as opções em ordem. Não feche esses agentes sem o dono pedir, e
 não publique em subcaminho achando que tanto faz.
+
+## Só o site mora aqui
+
+Este repositório é publicado a partir da raiz, então **tudo o que for commitado
+vai para o domínio da pizzaria**. Por decisão do dono, só o site da Pizza Mia
+fica aqui. Jogos, dashboards, telas de app e qualquer outro projeto vão para
+repositório e domínio próprios — nunca para esta árvore.
