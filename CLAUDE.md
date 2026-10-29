@@ -7,10 +7,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Site estático da pizzaria Pizza Mia (Av. Emilio Ribas, 3175 — Vila Galvão,
 Guarulhos / SP). HTML, CSS e JavaScript puros, sem build e sem framework.
 
-O repositório também guarda dois projetos à parte (`cobrinha/` e `src/`), que
-**não fazem parte do site** e não seguem as regras de animação abaixo. Veja
-"Outros projetos no repositório" no fim.
-
 Não há testes nem lint: `npm test` é um placeholder que falha. Para ver o
 site, abra `index.html` ou rode `python3 -m http.server 8000` na raiz.
 
@@ -487,9 +483,8 @@ alvo.
 
 ## Sem componentes
 
-O **site** ainda não tem camada de componentes. Nada de React, Vue, web
-components ou um sistema de componentes próprio. (Os componentes React de
-`src/` são de outro projeto e não entram na página.) É uma página só, em
+O projeto ainda **não** tem camada de componentes. Nada de React, Vue, web
+components ou um sistema de componentes próprio. É uma página só, em
 `index.html`, com o CSS em um arquivo e o JS em outro. Quando for preciso
 repetir um bloco, repita o HTML.
 
@@ -606,8 +601,6 @@ assets/css/style.css  estilos
 assets/js/main.js     Lenis + GSAP + ScrollTrigger
 assets/img/           fotos (cada foto aparece uma vez só no site)
 assets/vendor/        libs
-cobrinha/             jogo da cobrinha 3D (projeto à parte)
-src/                  telas do app Ascend em React (projeto à parte)
 ```
 
 ## Conteúdo
@@ -708,122 +701,9 @@ O `_headers` também é ignorado.
 O `README` traz as opções em ordem. Não feche esses agentes sem o dono pedir, e
 não publique em subcaminho achando que tanto faz.
 
-## Outros projetos no repositório
+## Só o site mora aqui
 
-Nenhum dos dois entra no `index.html` nem usa Lenis/GSAP.
-
-### `cobrinha/` — jogo da cobrinha 3D
-
-Three.js (0.170.0), tabuleiro 17×17, uma página só. **Abre com duplo clique,
-sem servidor** — esse é o requisito que moldou a estrutura:
-
-- **A fonte é `jogo.src.js`; `jogo.js` é gerado.** O `index.html` carrega só
-  `jogo.js`, como `<script>` comum. Módulo ES (`type="module"`) é bloqueado em
-  `file://`: o menu aparecia e o jogo nunca iniciava. Depois de editar a fonte:
-  `npx esbuild jogo.src.js --bundle --minify --format=iife --outfile=jogo.js`
-  (esbuild não é dependência do projeto; rode com `npx`). Commite os dois.
-- `three.module.min.js` fica na pasta só como entrada do empacotamento.
-- Estado de jogo em `estado`: `pronto` / `jogando` / `pausado` / `fim`.
-  O passo da lógica (`passo()`) é separado do desenho: a cobra é interpolada
-  entre a casa anterior (`anterior`) e a atual (`cobra`) a cada quadro.
-- Começa a andar assim que se escolhe o nível, de propósito: a cobra nasce a 12
-  casas do muro e devagar para dar tempo de reagir. Uma versão que esperava a
-  primeira seta foi descartada a pedido do dono.
-
-**Duas tabelas mandam no jogo**, e é nelas que se mexe primeiro:
-
-- `NIVEIS` — um registro por nível (Fácil / Médio / Difícil), com a meta de
-  pontos, a velocidade inicial, a aceleração por ponto, o piso de velocidade e
-  as regras de obstáculo. Metas: **15 / 25 / 40**. Obstáculos começam aos
-  **7 / 5 / 3 pontos** e depois nascem a cada X pontos **ou** Y segundos, até o
-  máximo do nível.
-- `PODERES` — um registro por poder (escudo, lento, dobro), com **a cor da
-  maçã que o entrega**. **Somar um poder novo é acrescentar uma entrada aqui**
-  e tratar a chave onde ela pesa: `passo()`, `tique()` ou o desenho. Era esse o
-  pedido do dono: ir juntando poderes com o tempo.
-
-**A cor da maçã é o poder, e isso é contrato.** A **vermelha é só ponto** e não
-muda nada — decisão do dono. A especial (`macaEspecial`) é uma malha só,
-repintada por `pintarEspecial()`, e o poder é **sorteado quando ela nasce**, não
-quando é comida: senão a cor prometeria uma coisa e entregaria outra. Quem
-guarda a promessa é `especialPoder`.
-
-**O comando não espera o fim da casa.** Com o passo longo — o poder lento chega
-a 0,35s — a tecla ficava até um terço de segundo sem resposta, e foi a
-reclamação de quem jogou. `apressar()` encurta **a casa que falta** para no
-máximo `ATRASO` (0,1s), mantendo a fração já andada (`t`) e mexendo só no tempo
-que resta: por isso não há pulo. O passo da casa corrente mora em `passoAtual`,
-não em `passo()` chamado no laço — era preciso um valor que pudesse encurtar.
-Vale **uma vez por casa** e só com a fila vazia: com uma virada já pendente,
-apressar de novo espremeria duas viradas numa casa só. A cabeça também aponta
-para `fila[0]`, e não para `dir`, para responder à tecla antes de a casa virar.
-
-**A cobra é um pouco menor que a casa** (`RAIO`, .47). Abaixo de .45 os gomos
-desencostam de vez e ela vira um colar de contas; acima de .5 ela entope o
-circuito, que era a queixa.
-
-**O menu é raso de propósito:** Jogar, Dificuldade e Configurações. Os três
-níveis moram atrás do botão Dificuldade, num submenu (`#pniveis`), e escolher
-um **volta ao menu em vez de começar** — quem começa é o Jogar, e só ele. O
-botão carrega a escolha escrita (`Dificuldade · Médio`), senão não há como
-saber no que se vai jogar. As teclas 1/2/3 continuam valendo como atalho: no
-menu elas já começam a partida, dentro do submenu elas só escolhem.
-
-**O obstáculo cai do céu, e a queda é física, não curva.** Ele nasce a 13–17
-unidades de altura e desce por aceleração (`GRAVIDADE`), tombando no ar. Curva
-de entrada foi tentada antes e lia como enfeite; o que lê como peso é a
-velocidade crescendo sozinha. Ao bater: achata na medida da pancada, **quica até
-duas vezes** (`QUIQUE`), levanta `poeira()`, deixa o anel de `onda()` e sacode a
-câmera. Depois o tombo assenta e ele passa a respirar, balançando devagar e
-pulsando o brilho das arestas.
-
-Quatro detalhes que seguram isso de pé:
-
-- **A marca no chão é o aviso** (`marcaBloco`), e acende conforme ele desce.
-  Sem ela a queda é injusta: ninguém desvia do que não viu.
-- **No ar o bloco não machuca.** `tique()` só o considera com `!b.caindo`, e se
-  ele pousar em cima da cobra **estoura em vez de matar** — morte sem defesa não
-  é dificuldade, é sorteio.
-- **Enquanto cai, `castShadow` fica desligado.** Lá no alto a sombra projetada
-  cai longe da casa onde ele vai pousar e lê como um buraco no chão, brigando
-  com a marca. Ela volta quando o bloco encosta.
-- **O chão treme por oscilação amortecida** (`sacudir`/`abalo`), nunca por
-  ruído: ruído lê como falha de imagem, a onda que decai lê como baque. Um
-  baque fraco não corta um forte que ainda está decaindo.
-
-**Pousado, o bloco fica reto.** Sem giro próprio, sem bambolear e sem flutuar:
-`rotation` vai a zero e a altura trava em .46, alinhado com a grade. Um bloco
-torto lê como peça solta no tabuleiro, e o dono pediu que ficassem retos. O
-tombo do ar some depressa depois do pouso, e o que ainda se move nele é só o
-brilho — **cada bloco tem a sua `fase`**, senão os 16 pulsam juntos e o
-tabuleiro inteiro pisca. Quebrado pelo escudo ele não some: `estilhacar()`
-espalha cacos que giram e deixa o anel.
-
-Outras regras que não são óbvias no código:
-
-- **`conquistar()` é o gancho das recompensas.** Toda meta batida passa por
-  ela, e é ali que entram as recompensas maiores quando forem desenhadas.
-- **O banco credita cada ponto uma vez só** (`creditado`). Sem isso, morrer,
-  reviver e morrer de novo somaria os mesmos pontos duas vezes.
-- **Reviver é uma vez por partida** (`revivido`) e **não mexe no recorde**.
-  Custa 1 token ou 10 pontos do banco.
-- **Escudo e invulnerabilidade atravessam**, não absorvem parados: na parede a
-  cobra sai do outro lado, no bloco ela o despedaça. Parar encostado no muro
-  mataria a cobra no quadro seguinte, o que não é proteção nenhuma.
-- **`visibilitychange` é escutado no `document`, nunca na janela.** Posto na
-  janela só funciona porque o evento borbulha; o alvo certo é o documento.
-- **Tudo o que é guardado vive numa chave só**, `cobrinha` no `localStorage`:
-  recordes por nível, conquistas, tokens, banco, nível escolhido e as
-  configurações (som, pausa ao sair da aba).
-- **`dt` é limitado a 0,05s por quadro.** Abaixo de 20 quadros por segundo o
-  jogo anda em câmera lenta em vez de teletransportar a cobra. É de propósito,
-  mas atrapalha teste automatizado: espere pelo relógio do jogo (`tempoJogo`),
-  não pelo relógio da parede.
-
-### `src/` — telas do app Ascend
-
-Quatro telas 1080×1920 em React + TypeScript, feitas para renderizar em
-Remotion (`src/projetos/ascend/README.md` tem a paleta e as props). Os
-componentes não têm relógio próprio: o tempo entra por props. Reaproveitáveis
-em `src/cenas/`. Não há `tsconfig`, bundler nem dependência React no
-`package.json` — o código ainda não compila neste repositório.
+Este repositório é publicado a partir da raiz, então **tudo o que for commitado
+vai para o domínio da pizzaria**. Por decisão do dono, só o site da Pizza Mia
+fica aqui. Jogos, dashboards, telas de app e qualquer outro projeto vão para
+repositório e domínio próprios — nunca para esta árvore.
