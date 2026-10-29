@@ -1,9 +1,39 @@
 import * as THREE from './three.module.min.js';
 
-// ---------- configuração ----------
+// ---------- tabelas de regra ----------
 const N = 17;                                   // tabuleiro N × N
 const mundo = c => c - (N - 1) / 2;             // célula → coordenada 3D
-const passo = () => Math.max(0.075, 0.22 - pontos * 0.004);   // segundos por casa
+
+// Um registro por nível. Mexeu aqui, mexeu no jogo inteiro.
+const NIVEIS = {
+  facil:   { nome: 'Fácil',   meta: 15, passo0: .22, acel: .004, piso: .10, obsDe: 7, obsPontos: 5, obsSeg: 25, obsMax: 5 },
+  medio:   { nome: 'Médio',   meta: 25, passo0: .17, acel: .004, piso: .08, obsDe: 5, obsPontos: 3, obsSeg: 15, obsMax: 10 },
+  dificil: { nome: 'Difícil', meta: 40, passo0: .13, acel: .003, piso: .06, obsDe: 3, obsPontos: 2, obsSeg: 10, obsMax: 16 },
+};
+
+// Um registro por poder. Para somar um poder novo, acrescente uma entrada
+// aqui e trate a chave onde ela importa (passo(), tique() ou o desenho).
+const PODERES = {
+  escudo: { nome: 'Escudo', dica: 'atravessa uma batida', dur: 8, cor: 0x60a5fa },
+  lento:  { nome: 'Lento',  dica: 'tudo mais devagar',    dur: 8, cor: 0xa78bfa },
+  dobro:  { nome: 'Dobro',  dica: 'cada maçã vale 2',     dur: 8, cor: 0xfbbf24 },
+};
+
+const CUSTO_BANCO = 10;   // pontos do banco para reviver
+const MAX_TOKENS = 5;
+const CADA_DOURADA = 6;   // maçãs normais entre uma dourada e outra
+const VIDA_DOURADA = 7;   // segundos que ela espera na mesa
+
+// ---------- dados guardados ----------
+const PADRAO = { recordes: {}, conquistas: {}, tokens: 0, banco: 0, nivel: 'facil', config: { som: true, pausaAba: true } };
+let dados;
+try { dados = JSON.parse(localStorage.getItem('cobrinha') || '{}'); } catch { dados = {}; }
+dados = { ...PADRAO, ...dados };
+dados.recordes = { ...dados.recordes };
+dados.conquistas = { ...dados.conquistas };
+dados.config = { ...PADRAO.config, ...dados.config };
+if (!NIVEIS[dados.nivel]) dados.nivel = 'facil';
+const salvar = () => { try { localStorage.setItem('cobrinha', JSON.stringify(dados)); } catch {} };
 
 // ---------- cena ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -83,18 +113,47 @@ const corpo = i => {
 };
 const material = m => (m.isGroup ? m.children[0] : m).material;
 
-// ---------- maçã e partículas ----------
-const maca = new THREE.Group();
-maca.add(new THREE.Mesh(new THREE.SphereGeometry(.42, 24, 16), new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xdc2626, emissiveIntensity: .7, roughness: .3 })));
-const folha = new THREE.Mesh(new THREE.BoxGeometry(.06, .22, .06), new THREE.MeshStandardMaterial({ color: 0x84cc16 }));
-folha.position.y = .45;
-maca.add(folha);
-const luzMaca = new THREE.PointLight(0xff4d4d, 8, 5);
-luzMaca.position.y = .8;
-maca.add(luzMaca);
-maca.children.forEach(c => (c.castShadow = true));
-cena.add(maca);
+// bolha do escudo, em volta da cabeça
+const bolha = new THREE.Mesh(
+  new THREE.SphereGeometry(.95, 20, 14),
+  new THREE.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: .22, depthWrite: false })
+);
+bolha.visible = false;
+cena.add(bolha);
 
+// ---------- maçãs ----------
+function fazerMaca(cor, emissiva, luz) {
+  const grupo = new THREE.Group();
+  grupo.add(new THREE.Mesh(new THREE.SphereGeometry(.42, 24, 16),
+    new THREE.MeshStandardMaterial({ color: cor, emissive: emissiva, emissiveIntensity: .7, roughness: .3 })));
+  const folha = new THREE.Mesh(new THREE.BoxGeometry(.06, .22, .06), new THREE.MeshStandardMaterial({ color: 0x84cc16 }));
+  folha.position.y = .45;
+  grupo.add(folha);
+  const ponto = new THREE.PointLight(luz, 8, 5);
+  ponto.position.y = .8;
+  grupo.add(ponto);
+  grupo.children.forEach(c => (c.castShadow = true));
+  cena.add(grupo);
+  return grupo;
+}
+const maca = fazerMaca(0xef4444, 0xdc2626, 0xff4d4d);
+const macaOuro = fazerMaca(0xfbbf24, 0xf59e0b, 0xffd166);
+
+// ---------- obstáculos ----------
+const geoBloco = new THREE.BoxGeometry(.92, .92, .92);
+const matBloco = new THREE.MeshStandardMaterial({ color: 0x334e68, emissive: 0x0e7490, emissiveIntensity: .35, roughness: .6 });
+const blocosMesh = [];
+const meshBloco = i => {
+  while (blocosMesh.length <= i) {
+    const m = new THREE.Mesh(geoBloco, matBloco);
+    m.castShadow = m.receiveShadow = true;
+    cena.add(m);
+    blocosMesh.push(m);
+  }
+  return blocosMesh[i];
+};
+
+// ---------- faíscas ----------
 const faiscas = [];
 const geoFaisca = new THREE.BoxGeometry(.16, .16, .16);
 function explodir(x, z, cor) {
@@ -108,82 +167,260 @@ function explodir(x, z, cor) {
 }
 
 // ---------- estado ----------
-let cobra, anterior, dir, fila, comida, pontos, recorde, estado = 'pronto', acc = 0, ultimoT = 0, tremor = 0, angulo = 0, surgir = 1;
-try { recorde = +localStorage.getItem('cobrinha-recorde') || 0; } catch { recorde = 0; }
+let cobra, anterior, dir, fila, comida, dourada, blocos = [], pontos, nivel = dados.nivel;
+let estado = 'pronto', acc = 0, ultimoT = 0, tremor = 0, angulo = 0, surgir = 1, surgirOuro = 1;
+let tempoJogo = 0, marcoPontos = 0, marcoTempo = 0, desdeDourada = 0, douradaAte = 0;
+let poder = null, poderAte = 0, invul = 0, metaBatida = false, revivido = false, creditado = 0;
 
 const $ = id => document.getElementById(id);
-const hud = () => { $('pts').textContent = pontos; $('rec').textContent = recorde; };
+const recorde = () => dados.recordes[nivel] || 0;
+const protegido = () => invul > 0 || poder === 'escudo';
+const podeToken = () => dados.tokens >= 1;
+const podeBanco = () => dados.banco >= CUSTO_BANCO;
 
-function sorteiaComida() {
-  const livres = [];
-  for (let x = 0; x < N; x++) for (let y = 0; y < N; y++)
-    if (!cobra.some(s => s.x === x && s.y === y)) livres.push({ x, y });
-  if (!livres.length) return null;
-  surgir = 0;
-  return livres[Math.floor(Math.random() * livres.length)];
+const passo = () => {
+  const n = NIVEIS[nivel];
+  const p = Math.max(n.piso, n.passo0 - pontos * n.acel);
+  return poder === 'lento' ? p * 1.6 : p;
+};
+
+function hud() {
+  const n = NIVEIS[nivel];
+  $('pts').textContent = pontos ?? 0;
+  $('rec').textContent = recorde();
+  $('meta').textContent = `${n.nome} · meta ${n.meta}`;
+  $('saldo').textContent = `${dados.tokens} token${dados.tokens === 1 ? '' : 's'} · banco ${dados.banco}`;
+  const p = poder && PODERES[poder];
+  $('poder').hidden = !p;
+  if (p) $('poder').textContent = `${p.nome} ${Math.ceil(poderAte)}s · ${p.dica}`;
 }
 
+// ---------- sorteio de casas ----------
+function casasLivres(evitar = []) {
+  const livres = [];
+  for (let x = 0; x < N; x++) for (let y = 0; y < N; y++) {
+    if (cobra.some(s => s.x === x && s.y === y)) continue;
+    if (comida && comida.x === x && comida.y === y) continue;
+    if (dourada && dourada.x === x && dourada.y === y) continue;
+    if (blocos.some(b => b.x === x && b.y === y)) continue;
+    if (evitar.some(e => e.x === x && e.y === y)) continue;
+    livres.push({ x, y });
+  }
+  return livres;
+}
+const sortear = (evitar) => {
+  const livres = casasLivres(evitar);
+  return livres.length ? livres[Math.floor(Math.random() * livres.length)] : null;
+};
+
+// ---------- partida ----------
 function reiniciar() {
   cobra = [{ x: 4, y: 8 }, { x: 3, y: 8 }, { x: 2, y: 8 }];
   anterior = cobra.map(s => ({ ...s }));
   dir = { x: 1, y: 0 };
   fila = [];
+  blocos = [];
   pontos = 0;
   acc = 0;
   angulo = Math.PI / 2;
-  comida = sorteiaComida();
+  tempoJogo = marcoPontos = marcoTempo = desdeDourada = 0;
+  poder = null; poderAte = 0; invul = 0;
+  metaBatida = false; revivido = false; creditado = 0;
+  dourada = null;
+  comida = null;
+  comida = sortear();
+  surgir = 0;
   hud();
 }
 
 function tique() {
   if (fila.length) dir = fila.shift();
   anterior = cobra.map(s => ({ ...s }));
-  const h = { x: cobra[0].x + dir.x, y: cobra[0].y + dir.y };
-  const come = comida && h.x === comida.x && h.y === comida.y;
-  const ocupado = (come ? cobra : cobra.slice(0, -1)).some(s => s.x === h.x && s.y === h.y);
-  if (h.x < 0 || h.y < 0 || h.x >= N || h.y >= N || ocupado) return morrer();
+  let h = { x: cobra[0].x + dir.x, y: cobra[0].y + dir.y };
+
+  const fora = h.x < 0 || h.y < 0 || h.x >= N || h.y >= N;
+  const iBloco = blocos.findIndex(b => b.x === h.x && b.y === h.y);
+  const comeu = comida && h.x === comida.x && h.y === comida.y;
+  const comeuOuro = dourada && h.x === dourada.x && h.y === dourada.y;
+  const cresce = comeu || comeuOuro;
+  const noCorpo = (cresce ? cobra : cobra.slice(0, -1)).some(s => s.x === h.x && s.y === h.y);
+
+  if (fora || iBloco >= 0 || noCorpo) {
+    if (!protegido()) return morrer();
+    if (invul <= 0) { poder = null; poderAte = 0; }        // o escudo se gasta aqui
+    som(300, .25);
+    if (fora) h = { x: (h.x + N) % N, y: (h.y + N) % N };  // atravessa a parede
+    if (iBloco >= 0) {                                      // e despedaça o bloco
+      explodir(mundo(h.x), mundo(h.y), 0x60a5fa);
+      blocos.splice(iBloco, 1);
+    }
+  }
+
   cobra.unshift(h);
-  if (!come) return cobra.pop();
+  if (!cresce) { cobra.pop(); return; }
+
   anterior.push({ ...anterior.at(-1) });
-  pontos++;
-  explodir(mundo(h.x), mundo(h.y), 0xfacc15);
+  pontos += poder === 'dobro' ? 2 : 1;
+  explodir(mundo(h.x), mundo(h.y), comeuOuro ? 0xfbbf24 : 0xfacc15);
   som(520 + pontos * 12, .12);
-  comida = sorteiaComida();
-  if (!comida) return morrer(true);
+
+  if (comeuOuro) {
+    dourada = null;
+    ativarPoder();
+  } else {
+    desdeDourada++;
+    comida = sortear();
+    if (!comida) return morrer(true);
+  }
+  if (!metaBatida && pontos >= NIVEIS[nivel].meta) { metaBatida = true; conquistar(); }
   hud();
 }
 
+function ativarPoder() {
+  const chaves = Object.keys(PODERES);
+  poder = chaves[Math.floor(Math.random() * chaves.length)];
+  poderAte = PODERES[poder].dur;
+  som(880, .25);
+  avisar(`${PODERES[poder].nome}! ${PODERES[poder].dica}`);
+}
+
+// O gancho das recompensas: toda conquista de meta passa por aqui.
+function conquistar() {
+  const primeira = !dados.conquistas[nivel];
+  dados.conquistas[nivel] = true;
+  dados.tokens = Math.min(MAX_TOKENS, dados.tokens + 1);
+  salvar();
+  som(1040, .4);
+  explodir(mundo(cobra[0].x), mundo(cobra[0].y), 0x4ade80);
+  avisar(primeira
+    ? `Nível ${NIVEIS[nivel].nome} conquistado! +1 token`
+    : `Meta de ${NIVEIS[nivel].nome} batida de novo! +1 token`);
+}
+
+// ---------- obstáculos ----------
+function conferirBlocos() {
+  const n = NIVEIS[nivel];
+  if (blocos.length >= n.obsMax || pontos < n.obsDe) return;
+  const porPontos = pontos - marcoPontos >= n.obsPontos;
+  const porTempo = tempoJogo - marcoTempo >= n.obsSeg;
+  if (blocos.length && !porPontos && !porTempo) return;
+  // nunca nas três casas à frente da cabeça: ninguém morre sem poder desviar
+  const frente = [1, 2, 3].map(k => ({ x: cobra[0].x + dir.x * k, y: cobra[0].y + dir.y * k }));
+  const casa = sortear(frente);
+  if (!casa) return;
+  blocos.push({ ...casa, surgir: 0 });
+  marcoPontos = pontos;
+  marcoTempo = tempoJogo;
+  som(180, .18, 'square');
+}
+
+function conferirDourada() {
+  if (dourada) {
+    if (tempoJogo > douradaAte) dourada = null;
+    return;
+  }
+  if (desdeDourada < CADA_DOURADA) return;
+  const casa = sortear();
+  if (!casa) return;
+  dourada = casa;
+  douradaAte = tempoJogo + VIDA_DOURADA;
+  desdeDourada = 0;
+  surgirOuro = 0;
+  som(760, .15);
+}
+
+// ---------- fim, reviver ----------
 function morrer(venceu) {
   estado = 'fim';
   tremor = venceu ? 0 : .6;
   som(venceu ? 880 : 110, .5, 'sawtooth');
-  if (pontos > recorde) {
-    recorde = pontos;
-    try { localStorage.setItem('cobrinha-recorde', recorde); } catch {}
-  }
+  dados.banco += pontos - creditado;          // o banco recebe cada ponto uma vez só
+  creditado = pontos;
+  if (pontos > recorde()) dados.recordes[nivel] = pontos;
+  salvar();
   hud();
-  $('titulo').textContent = venceu ? 'Você venceu!' : 'Fim de jogo';
-  $('sub').textContent = `${pontos} ponto${pontos === 1 ? '' : 's'} · recorde ${recorde}`;
-  $('jogar').textContent = 'Jogar de novo';
-  setTimeout(() => estado === 'fim' && ($('painel').hidden = false), 700);
+  const fim = venceu ? 'Você venceu!' : 'Fim de jogo';
+  setTimeout(() => estado === 'fim' && abrirPainel('fim', fim,
+    `${pontos} ponto${pontos === 1 ? '' : 's'} em ${NIVEIS[nivel].nome} · recorde ${recorde()}`), 700);
 }
 
-function comecar() {
+function reviver(fonte) {
+  if (estado !== 'fim' || revivido) return;
+  if (fonte === 'token' ? !podeToken() : !podeBanco()) return;
+  if (fonte === 'token') dados.tokens--; else dados.banco -= CUSTO_BANCO;
+  salvar();
+  revivido = true;
+  const c = Math.floor(N / 2);
+  cobra = cobra.map((_, i) => ({ x: Math.max(0, c - i), y: c }));
+  anterior = cobra.map(s => ({ ...s }));
+  dir = { x: 1, y: 0 };
+  fila = [];
+  angulo = Math.PI / 2;
+  blocos = blocos.filter(b => Math.abs(b.x - c) > 3 || Math.abs(b.y - c) > 3);
+  invul = 2; tremor = 0; acc = 0;
+  estado = 'jogando';
+  fecharPaineis();
+  som(660, .35);
+  avisar('Mais uma chance · 2s de escudo');
+  hud();
+}
+
+// ---------- painéis ----------
+let avisoTimer;
+function avisar(texto) {
+  $('aviso').textContent = texto;
+  $('aviso').hidden = false;
+  clearTimeout(avisoTimer);
+  avisoTimer = setTimeout(() => ($('aviso').hidden = true), 2500);
+}
+
+function abrirPainel(modo, titulo, sub) {
+  $('titulo').textContent = titulo;
+  $('sub').textContent = sub;
+  $('niveis').hidden = modo === 'pausa';
+  $('acoes').hidden = modo !== 'pausa';
+  $('dica').hidden = modo === 'pausa';
+  const ofertas = modo === 'fim' && !revivido;
+  $('revToken').hidden = !(ofertas && podeToken());
+  $('revBanco').hidden = !(ofertas && podeBanco());
+  $('revToken').textContent = `Reviver · 1 token (tem ${dados.tokens})`;
+  $('revBanco').textContent = `Reviver · ${CUSTO_BANCO} pontos (banco ${dados.banco})`;
+  $('pconfig').hidden = true;
+  $('painel').hidden = false;
+  $('pausa').hidden = true;
+}
+
+function fecharPaineis() {
+  $('painel').hidden = $('pconfig').hidden = true;
+  $('pausa').hidden = estado !== 'jogando';
+}
+
+function comecar(n) {
+  if (n) { nivel = n; dados.nivel = n; salvar(); }
   if (estado === 'jogando') return;
-  if (estado === 'pausado') { estado = 'jogando'; $('painel').hidden = true; return; }
   reiniciar();
   estado = 'jogando';
-  $('painel').hidden = true;
+  fecharPaineis();
 }
 
 function pausar() {
   if (estado === 'jogando') {
     estado = 'pausado';
-    $('titulo').textContent = 'Pausado';
-    $('sub').textContent = 'Espaço ou P para continuar';
-    $('jogar').textContent = 'Continuar';
-    $('painel').hidden = false;
-  } else if (estado === 'pausado') comecar();
+    abrirPainel('pausa', 'Pausado', `${pontos} ponto${pontos === 1 ? '' : 's'} em ${NIVEIS[nivel].nome}`);
+  } else if (estado === 'pausado') {
+    estado = 'jogando';
+    fecharPaineis();
+  }
+}
+
+function sairParaMenu() {
+  estado = 'pronto';
+  abrirPainel('menu', 'Cobrinha 3D', 'Escolha o nível');
+}
+
+function pintarConfig() {
+  $('tSom').textContent = `Som: ${dados.config.som ? 'ligado' : 'desligado'}`;
+  $('tAba').textContent = `Pausar ao sair da aba: ${dados.config.pausaAba ? 'sim' : 'não'}`;
 }
 
 // ---------- entrada ----------
@@ -197,23 +434,51 @@ const teclas = {
   ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1],
   ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0],
 };
+const porNumero = { Digit1: 'facil', Digit2: 'medio', Digit3: 'dificil' };
 addEventListener('keydown', e => {
-  if (teclas[e.code]) { e.preventDefault(); virar(...teclas[e.code]); }
-  else if (e.code === 'KeyP' || (e.code === 'Escape' && estado === 'jogando')) pausar();
-  else if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); estado === 'pausado' ? pausar() : comecar(); }
+  if (teclas[e.code]) { e.preventDefault(); virar(...teclas[e.code]); return; }
+  if (!$('pconfig').hidden) {                      // configurações abertas: só Esc sai
+    if (e.code === 'Escape') { $('pconfig').hidden = true; $('painel').hidden = false; }
+    return;
+  }
+  if (porNumero[e.code] && estado !== 'jogando' && estado !== 'pausado') comecar(porNumero[e.code]);
+  else if (e.code === 'KeyP' || e.code === 'Escape') pausar();
+  else if (e.code === 'Space' || e.code === 'Enter') {
+    e.preventDefault();
+    estado === 'pausado' ? pausar() : estado !== 'jogando' && comecar();
+  }
 });
 let toque;
 addEventListener('touchstart', e => (toque = e.touches[0]), { passive: true });
 addEventListener('touchend', e => {
+  if (!toque) return;
   const t = e.changedTouches[0], dx = t.clientX - toque.clientX, dy = t.clientY - toque.clientY;
   if (Math.hypot(dx, dy) < 24) return;
   Math.abs(dx) > Math.abs(dy) ? virar(Math.sign(dx), 0) : virar(0, Math.sign(dy));
 });
-$('jogar').addEventListener('click', () => (estado === 'pausado' ? pausar() : comecar()));
+
+document.querySelectorAll('[data-nivel]').forEach(b =>
+  b.addEventListener('click', () => comecar(b.dataset.nivel)));
+$('pausa').addEventListener('click', pausar);
+$('continuar').addEventListener('click', pausar);
+$('sair').addEventListener('click', sairParaMenu);
+$('revToken').addEventListener('click', () => reviver('token'));
+$('revBanco').addEventListener('click', () => reviver('banco'));
+$('abrirConfig').addEventListener('click', () => { $('painel').hidden = true; $('pconfig').hidden = false; pintarConfig(); });
+$('menuConfig').addEventListener('click', () => { $('painel').hidden = true; $('pconfig').hidden = false; pintarConfig(); });
+$('fecharConfig').addEventListener('click', () => { $('pconfig').hidden = true; $('painel').hidden = false; });
+$('tSom').addEventListener('click', () => { dados.config.som = !dados.config.som; salvar(); pintarConfig(); if (dados.config.som) som(700, .12); });
+$('tAba').addEventListener('click', () => { dados.config.pausaAba = !dados.config.pausaAba; salvar(); pintarConfig(); });
+
+// no documento, nunca na janela: é o documento que dispara visibilitychange
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && dados.config.pausaAba && estado === 'jogando') pausar();
+});
 
 // ---------- som (um bipe de WebAudio, sem arquivos) ----------
 let audio;
 function som(freq, dur, tipo = 'triangle') {
+  if (!dados.config.som) return;
   try {
     audio ||= new AudioContext();
     const o = audio.createOscillator(), v = audio.createGain();
@@ -242,14 +507,24 @@ addEventListener('resize', ajustar);
 const relogio = new THREE.Clock();
 const alvoOlhar = new THREE.Vector3();
 reiniciar();
+hud();
 ajustar();
+abrirPainel('menu', 'Cobrinha 3D', 'Escolha o nível');
 
 renderer.setAnimationLoop(() => {
   const dt = Math.min(relogio.getDelta(), .05), tempo = relogio.elapsedTime;
 
   if (estado === 'jogando') {
+    tempoJogo += dt;
+    if (invul > 0) invul -= dt;
+    if (poder) {
+      poderAte -= dt;
+      if (poderAte <= 0) { poder = null; poderAte = 0; }
+      hud();
+    }
     acc += dt;
     while (acc >= passo() && estado === 'jogando') { acc -= passo(); tique(); }
+    if (estado === 'jogando') { conferirBlocos(); conferirDourada(); }
   }
   if (estado === 'jogando') ultimoT = acc / passo();
   else if (estado === 'fim') ultimoT = 0;
@@ -269,7 +544,13 @@ renderer.setAnimationLoop(() => {
   angulo += Math.atan2(Math.sin(alvo - angulo), Math.cos(alvo - angulo)) * Math.min(1, dt * 18);
   cabeca.rotation.y = angulo;
 
-  // maçã
+  bolha.visible = protegido() && estado !== 'fim';
+  if (bolha.visible) {
+    bolha.position.copy(cabeca.position);
+    bolha.scale.setScalar(1 + Math.sin(tempo * 8) * .05);
+  }
+
+  // maçãs
   if (comida) {
     surgir = Math.min(1, surgir + dt * 3);
     maca.visible = true;
@@ -277,6 +558,25 @@ renderer.setAnimationLoop(() => {
     maca.rotation.y = tempo * 1.5;
     maca.scale.setScalar(1 - Math.pow(1 - surgir, 3));
   } else maca.visible = false;
+
+  if (dourada) {
+    surgirOuro = Math.min(1, surgirOuro + dt * 3);
+    const resta = Math.max(0, douradaAte - tempoJogo);
+    macaOuro.visible = resta > 1.2 || Math.sin(tempo * 18) > 0;   // pisca quando vai sumir
+    macaOuro.position.set(mundo(dourada.x), .6 + Math.sin(tempo * 4) * .14, mundo(dourada.y));
+    macaOuro.rotation.y = tempo * 3;
+    macaOuro.scale.setScalar(1.08 * (1 - Math.pow(1 - surgirOuro, 3)));
+  } else macaOuro.visible = false;
+
+  // obstáculos
+  blocos.forEach((b, i) => {
+    const m = meshBloco(i);
+    b.surgir = Math.min(1, b.surgir + dt * 2.2);
+    m.visible = true;
+    m.position.set(mundo(b.x), .46, mundo(b.y));
+    m.scale.setScalar(1 - Math.pow(1 - b.surgir, 3));
+  });
+  for (let i = blocos.length; i < blocosMesh.length; i++) blocosMesh[i].visible = false;
 
   // faíscas
   for (let i = faiscas.length - 1; i >= 0; i--) {

@@ -726,9 +726,42 @@ sem servidor** — esse é o requisito que moldou a estrutura:
 - Estado de jogo em `estado`: `pronto` / `jogando` / `pausado` / `fim`.
   O passo da lógica (`passo()`) é separado do desenho: a cobra é interpolada
   entre a casa anterior (`anterior`) e a atual (`cobra`) a cada quadro.
-- Começa a andar assim que se clica em Jogar, de propósito: a cobra nasce a 12
-  casas do muro e devagar (0,22s por casa) para dar tempo de reagir. Uma
-  versão que esperava a primeira seta foi descartada a pedido do dono.
+- Começa a andar assim que se escolhe o nível, de propósito: a cobra nasce a 12
+  casas do muro e devagar para dar tempo de reagir. Uma versão que esperava a
+  primeira seta foi descartada a pedido do dono.
+
+**Duas tabelas mandam no jogo**, e é nelas que se mexe primeiro:
+
+- `NIVEIS` — um registro por nível (Fácil / Médio / Difícil), com a meta de
+  pontos, a velocidade inicial, a aceleração por ponto, o piso de velocidade e
+  as regras de obstáculo. Metas: **15 / 25 / 40**. Obstáculos começam aos
+  **7 / 5 / 3 pontos** e depois nascem a cada X pontos **ou** Y segundos, até o
+  máximo do nível.
+- `PODERES` — um registro por poder da maçã dourada (escudo, lento, dobro).
+  **Somar um poder novo é acrescentar uma entrada aqui** e tratar a chave onde
+  ela pesa: `passo()`, `tique()` ou o desenho. Era esse o pedido do dono: ir
+  juntando poderes com o tempo.
+
+Outras regras que não são óbvias no código:
+
+- **`conquistar()` é o gancho das recompensas.** Toda meta batida passa por
+  ela, e é ali que entram as recompensas maiores quando forem desenhadas.
+- **O banco credita cada ponto uma vez só** (`creditado`). Sem isso, morrer,
+  reviver e morrer de novo somaria os mesmos pontos duas vezes.
+- **Reviver é uma vez por partida** (`revivido`) e **não mexe no recorde**.
+  Custa 1 token ou 10 pontos do banco.
+- **Escudo e invulnerabilidade atravessam**, não absorvem parados: na parede a
+  cobra sai do outro lado, no bloco ela o despedaça. Parar encostado no muro
+  mataria a cobra no quadro seguinte, o que não é proteção nenhuma.
+- **`visibilitychange` é escutado no `document`, nunca na janela.** Posto na
+  janela só funciona porque o evento borbulha; o alvo certo é o documento.
+- **Tudo o que é guardado vive numa chave só**, `cobrinha` no `localStorage`:
+  recordes por nível, conquistas, tokens, banco, nível escolhido e as
+  configurações (som, pausa ao sair da aba).
+- **`dt` é limitado a 0,05s por quadro.** Abaixo de 20 quadros por segundo o
+  jogo anda em câmera lenta em vez de teletransportar a cobra. É de propósito,
+  mas atrapalha teste automatizado: espere pelo relógio do jogo (`tempoJogo`),
+  não pelo relógio da parede.
 
 ### `src/` — telas do app Ascend
 
