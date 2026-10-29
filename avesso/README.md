@@ -29,48 +29,54 @@ morrer com o dedo afundado, apertar de novo e já subir, sem soltar no meio.
 
 ### Três atos
 
-A corrida tem **três atos de 300 m**, e cada um diz o próprio nome e a
-própria dificuldade em voz alta quando começa.
+A corrida tem três atos, e **quem diz qual é o ato é o mundo, não o texto**.
 
-| Ato | Metros | Dificuldade | Cara |
+| Ato | Metros | | O que se vê |
 |---|---|---|---|
-| **Subsolo** | 0–300 | Fácil | terra com grão e madeira com veio, parados |
-| **Forja** | 300–600 | Médio | fogo: roda girando, faísca saindo |
-| **Desabamento** | 600–900 | Difícil | pedra: lasca na borda, cascalho caindo |
+| **Subsolo** | 0–150 | Fácil | terra caindo do teto, aresta desmoronada, estacas de madeira velha largando terra |
+| **Forja** | 150–400 | Médio | brasa subindo do chão, fio quente na borda, escória pingando, rodas girando |
+| **Desabamento** | 400+ | Difícil | cascalho despencando, rocha lascada na aresta, pêndulos |
 
-Passados os 900 m fica no Desabamento, só mais rápido. A cada ato a
-velocidade dá um degrau e **a faixa do chão e do teto engrossa**, apertando o
-campo de verdade em vez de só acelerar.
+Cada ato tem **paleta própria** — o Subsolo é terroso, a Forja é quente, o
+Desabamento é frio — e a paleta **caminha** até a do ato em 0,8s, para a
+troca ser uma virada de luz e não um pisca. O nome do ato aparece em letra
+pequena quando ele começa: é lembrete, não manchete.
 
-**Já foram seis setores em 900 m**, e não funcionou: dava 2,6 s de mundo por
-setor — a cara mudava antes de a pessoa reparar que tinha mudado. Com três,
-cada ato dura de 3 a 5 segundos e dá para ver o que ele é.
+A cada ato a velocidade dá um degrau e **a faixa do chão e do teto engrossa**,
+apertando o campo de verdade em vez de só acelerar.
 
-**A régua.** Um ato mede 2.100px de mundo, e com 1 m = 7px ele vale 300 m.
-Mexer em `A.setorM` e `A.passoM` muda só a escala do placar, nunca a
-dificuldade: quem decide o quanto aperta é a tabela `ATOS` mais a rampa de
-velocidade. A corrida mediana medida dá 307 m — ou seja, a Forja começa
-exatamente onde o jogador mediano morre.
+**Os atos crescem**: o primeiro é curto porque é onde quase toda corrida
+acaba; os seguintes são mais largos porque ali já se corre mais rápido e o
+mesmo número de metros passa em menos tempo.
+
+**A régua: 1 m = 20px.** A 400px/s o contador sobe uns 20 m por segundo e dá
+para atravessar a tela antes de chegar aos 100. Com 7px ele subia três vezes
+mais rápido e o número inflava antes de a pessoa sair do lugar. Mexer em
+`A.passoM` muda só a escala do placar, nunca a dificuldade: quem decide o
+quanto aperta é a tabela `ATOS` mais a rampa de velocidade.
 
 **O ato sai do PLACAR, não da distância crua.** O placar soma o bônus da
 roçada e dos desafios; com o ato preso apenas à distância, o número na tela e
-a troca de mundo andavam em unidades diferentes e a divisão "0 a 300 é fácil"
-nunca fechava com o que se via.
+a troca de mundo andavam em unidades diferentes e a divisão nunca fechava com
+o que se via.
 
 **O tema de um obstáculo é o do ato de agora**, não o do ato em que ele
-nasceu. A geração enche até ~2.000px à frente, que na régua nova são ~285 m:
-quase um ato inteiro. Com o tema gravado no nascimento, o mundo só mudava de
-cara 285 m depois de o aviso anunciar a troca.
+nasceu. A geração enche bem à frente; com o tema gravado no nascimento, o
+mundo mudava de cara muito depois do aviso.
 
-**O tema só muda o desenho.** Faísca, cascalho e espinho de pêndulo **não têm
-colisão nenhuma** — quem mata é a caixa, e só ela. Um enfeite que mata é um
-enfeite que mente. A roda de fogo gira **inscrita dentro** do retângulo pelo
-mesmo motivo.
+**Nenhum enfeite tem colisão.** Faísca, cascalho, terra, escória, recorte de
+borda e espinho de pêndulo são só desenho — quem mata é a caixa, e só ela. Um
+enfeite que mata é um enfeite que mente. Por isso o recorte da borda só
+**tira** da faixa ou pendura algo curto, e nunca sugere chão onde não há.
 
 A textura é pintada **na cor do fundo**, nunca numa cor própria: assim ela
 inverte junto com o mundo sem ninguém escrever a regra duas vezes. E cada
 peça carrega uma semente fixa — sem ela a textura sorteia de novo a cada
 quadro e o obstáculo ferve.
+
+**A borda e as lascas são irregulares de propósito.** Em tamanho parelho e
+sem pular nenhuma, o olho pega a repetição antes de pegar o tema: vira renda
+no Subsolo e serrilha de selo no Desabamento.
 
 ### Pêndulos
 
@@ -97,8 +103,8 @@ e nos metros somados.
 
 São oito tipos (distância, roçadas, multiplicador, voo sem tocar nas bordas,
 ato alcançado, tempo vivo, obstáculos passados, passagens limpas seguidas),
-cada um com três níveis e três prêmios, de **+40 m a +210 m**. Os prêmios são
-calibrados contra uma corrida mediana de ~307 m: cumprir o fácil soma pouco,
+cada um com três níveis e três prêmios, de **+14 m a +74 m**. Os prêmios são
+calibrados contra uma corrida mediana de ~107 m: cumprir o fácil soma pouco,
 cumprir o difícil muda a corrida, e cumprir os três é raro e paga bem.
 
 **A contagem é pulável, e isso é de propósito.** Uma corrida dura uns dez
@@ -120,30 +126,43 @@ vão conta uma roçada só, não duas.
 ### Roupas
 
 São **30**, e cada uma é uma linha de dados em `personagens.js`, não um
-desenho: forma × casca × cor × rastro × giro. Aparência não mexe em nada do
-jogo — a colisão é sempre o mesmo círculo de raio `A.raio`, qualquer que seja
-a forma. Roupa que muda dificuldade faz a pessoa escolher a feia.
+desenho: forma × casca × cor × rastro × **movimento**.
 
-- **21 por metros somados** de todas as corridas, de **800 m a 340.000 m**. A
-  soma nunca anda para trás: uma corrida ruim ainda aproxima da próxima. As
-  três primeiras saem cedo (800, 1.800, 3.200 — duas a três corridas cada) e
-  a curva abre depois.
-- **Uma vez ganha, nunca se perde.** O conjunto fica gravado em
-  `avesso.ganhas`. A curva já subiu uma vez e pode subir de novo; sem esse
-  registro, apertar a exigência **tira do armário** uma roupa que a pessoa já
-  tinha — a pior coisa que uma coleção pode fazer. A subida anterior trouxe
-  junto uma migração de uma vez só, que lê os cortes antigos de
-  `AVESSO_CORTES_ANTIGOS` e credita o que era devido.
-- **8 por proeza** — chegar a 100 m, passar 10 obstáculos sem tocar nas
-  bordas, levar a roçada a ×8, alcançar o setor 4, e assim por diante.
+**O nome é o movimento.** Prumo pende, Mola salta, Relógio anda de segundo em
+segundo, Espelho se inverte, Eco deixa um fantasma atrás, Bússola aponta para
+onde a gravidade puxa, Hélice gira mais rápido quanto mais rápido se cai. São
+30 movimentos, um por roupa. Se um dia o movimento mudar, o nome muda junto —
+nome que não descreve o que se vê é só rótulo.
+
+**Movimento não é física.** Nada em `MOVS` mexe na colisão: ela continua sendo
+o mesmo círculo de raio `A.raio` no centro de onde o disco está de verdade.
+`dx`, `dy`, `ex` e `ey` só deslocam e deformam o desenho. Uma roupa que
+esticasse a caixa faria a pessoa escolher a mais estreita, e o jogo deixaria
+de ser sobre conduzir para ser sobre escolher bem no armário.
+
+**No vestiário os 30 cartões se mexem**, cada um do seu jeito, com um estado
+de mentira que inverte a gravidade a cada 1,2s. Cartão parado não conta o que
+a roupa é. Medido: 30 quadros distintos entre si, de 30.
+
+- **21 por metros somados** de todas as corridas, de **300 m a 119.000 m**. A
+  soma nunca anda para trás: uma corrida ruim ainda aproxima da próxima.
+- **8 por proeza** — chegar a 200 m, passar 10 obstáculos sem tocar nas
+  bordas, levar a roçada a ×8, alcançar o Desabamento, e assim por diante.
 - **1 de saída**, a Avesso.
+
+**Uma vez ganha, nunca se perde.** O conjunto fica em `avesso.ganhas`. A
+régua e a curva já mudaram três vezes; sem esse registro, cada mudança
+**tiraria do armário** uma roupa que a pessoa já tinha — a pior coisa que uma
+coleção pode fazer. `avesso.regua` diz qual régua gerou os números no disco, e
+cada mudança passa o que está guardado pela mesma conta. Medido nas três
+gerações de save: quem tinha 6 de 30 continua com 6 de 30.
+
+**Os `id` não mudam nunca**: é por eles que o armário lembra. Nome, forma, cor
+e movimento podem mudar.
 
 **A cor não é livre.** A tela inverte, então a cor precisa contrastar com o
 preto **e** com o osso: em brilho percebido, ficar entre 68 e 180. Há um teste
 que confere as 30.
-
-No vestiário as travadas aparecem **com nome e silhueta**, e com a condição
-escrita. Ver o que falta é o que dá vontade; esconder mata o sistema.
 
 ### A marca do recorde
 
@@ -228,10 +247,12 @@ a 34% da largura à frente e persegue o centro dele:
 
 | | |
 |---|---|
-| corridas | 8 em 55 s |
-| distâncias | 210, 213, 257, 306, 307, 347, 458, 502 m |
-| mediana | 307 m |
-| atos alcançados | Subsolo e Forja |
+| corrida mediana | ~107 m (Subsolo) |
+| corrida boa | ~275 m (Forja) |
+| corrida ótima | 400 m+ (Desabamento) |
+
+A medição vale para o piloto automático, que lê uma coluna de pixels; quem
+joga enxerga a tela inteira e vai mais longe.
 
 É **piso, não teto**: o piloto enxerga uma coluna, quem joga enxerga a tela
 inteira. Serve para dizer que a geração não produz parede impossível — não

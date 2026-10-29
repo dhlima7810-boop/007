@@ -43,12 +43,12 @@
     rastro: 11,
     inverteEm: 0.055,
 
-    // A REGUA. Um setor mede 2550px de mundo; com 1 m = 17px ele vale 150 m,
-    // e os seis setores dao exatamente 900 m, em tres atos de 300. Mexer
-    // nestes dois numeros muda so a escala do placar, nunca a dificuldade:
+    // A REGUA. 1 m = 20px: a 400px/s o contador sobe uns 20 m por segundo, e
+    // dá para atravessar a tela antes de chegar nos 100. Com 7px ele subia
+    // tres vezes mais rapido e o numero inflava antes de a pessoa sair do
+    // lugar. Mexer aqui muda so a escala do placar, nunca a dificuldade:
     // quem decide o quanto aperta e a tabela ATOS, mais a rampa de velocidade.
-    setorM: 300,         // um ato
-    passoM: 7,           // px de mundo que valem 1 metro
+    passoM: 20,
     rocada: 24,          // folga que ainda conta como rocada
     multMax: 8,
     perigo: 20,          // folga que dispara a camera lenta
@@ -74,16 +74,85 @@
   // colisao nenhuma: quem mata e a caixa, e so ela. Um enfeite que mata e um
   // enfeite que mente.
   var ATOS = [
-    { nome: 'Subsolo',     dif: 'Fácil',   tema: 'terra', cor: '#8a9aa6',
+    { nome: 'Subsolo',     dif: 'Fácil',   tema: 'terra', cor: '#b08c5a', ate: 150,
+      tinta: [21, 17, 12], osso: [228, 217, 196], pino: '#8a7355',
       fFaixa: 0.078, vel: 0,   esp: 1.00, vao: 0.22, laje: 0.08, pendulo: 0,    aperto: 0 },
-    { nome: 'Forja',       dif: 'Médio',   tema: 'fogo',  cor: '#e07a2a',
+    { nome: 'Forja',       dif: 'Médio',   tema: 'fogo',  cor: '#ff7a1a', ate: 400,
+      tinta: [25, 13, 10], osso: [244, 228, 205], pino: '#ff7a1a',
       fFaixa: 0.100, vel: 95,  esp: 0.90, vao: 0.30, laje: 0.20, pendulo: 0.30, aperto: 0.45 },
-    { nome: 'Desabamento', dif: 'Difícil', tema: 'pedra', cor: '#c2493a',
+    { nome: 'Desabamento', dif: 'Difícil', tema: 'pedra', cor: '#9aa0a6', ate: Infinity,
+      tinta: [13, 15, 19], osso: [223, 225, 224], pino: '#9a9890',
       fFaixa: 0.125, vel: 195, esp: 0.80, vao: 0.34, laje: 0.16, pendulo: 0.50, aperto: 1.0 }
   ];
 
+  // O MOVIMENTO DE CADA ROUPA. O nome da roupa e o que ela faz: Prumo pende,
+  // Mola salta, Relogio anda de segundo em segundo, Eco deixa um fantasma.
+  //
+  // NADA AQUI MEXE NA FISICA. A colisao continua sendo o mesmo circulo de
+  // raio A.raio no centro de onde o disco esta de verdade — `dx`, `dy`, `ex`
+  // e `ey` so deslocam e deformam o DESENHO. Uma roupa que esticasse a caixa
+  // faria a pessoa escolher a mais estreita, e o jogo deixaria de ser sobre
+  // conduzir para ser sobre escolher bem no armario.
+  //
+  // Cada funcao recebe o estado e devolve, tudo opcional:
+  //   r  giro em radianos        dx, dy  deslocamento em px
+  //   ex, ey  escala por eixo    a  opacidade     eco  desenha um fantasma
+  var MOVS = {
+    fixo:    function ()  { return {}; },
+
+    // meia volta a cada inversao, assentando em 0.25s
+    vira:    function (e) {
+      var t = Math.min(1, (e.t - e.virou) / 0.25), f = 1 - Math.pow(1 - t, 3);
+      var de = e.segurando ? 0 : Math.PI, ate = e.segurando ? Math.PI : 0;
+      return { r: de + (ate - de) * f };
+    },
+    pulsa:   function (e) { var k = 1 + Math.sin(e.t * 13) * 0.09; return { ex: k, ey: k }; },
+    pende:   function (e) { return { r: Math.atan2(e.vy, 900) * 1.4 }; },
+    escorre: function (e) { var v = e.vy / e.vyMax; return { ex: 1 - v * v * 0.3, ey: 1 + v * v * 0.45 }; },
+    fia:     function (e) { return { r: e.t * 9 }; },
+    bate:    function (e) {
+      var f = (e.t * 1.5) % 1;
+      return { ex: 1 + Math.exp(-f * 20) * 0.17 + Math.exp(-Math.max(0, f - 0.17) * 20) * 0.11,
+               ey: 1 + Math.exp(-f * 20) * 0.17 + Math.exp(-Math.max(0, f - 0.17) * 20) * 0.11 };
+    },
+    ondula:  function (e) { return { dy: Math.sin(e.t * 4.5) * e.raio * 0.5 }; },
+    boia:    function (e) { return { dy: Math.sin(e.t * 2.1) * e.raio * 0.45, r: Math.sin(e.t * 1.7) * 0.22 }; },
+    piao:    function (e) { return { r: e.t * 11, ex: 1 + Math.sin(e.t * 11) * 0.17 }; },
+    some:    function (e) { return { a: 0.38 + 0.62 * (0.5 + 0.5 * Math.sin(e.t * 2.3)) }; },
+    treme:   function (e) { return { dx: (Math.random() - 0.5) * e.raio * 0.34,
+                                     dy: (Math.random() - 0.5) * e.raio * 0.34 }; },
+    roda:    function (e) { return { r: e.camX / 34 }; },
+    tique:   function (e) { return { r: Math.floor(e.t) * (6.2832 / 12) }; },
+    infla:   function (e) { var k = Math.sin(e.t * 3.4); return { ex: 1 + k * 0.23, ey: 1 - k * 0.19 }; },
+    flutua:  function (e) { return { dy: Math.sin(e.t * 1.6) * e.raio * 0.6,
+                                     dx: Math.cos(e.t * 1.1) * e.raio * 0.32,
+                                     r: Math.sin(e.t * 0.9) * 0.42 }; },
+    volta:   function (e) { var f = (e.t * 0.85) % 1;
+                            return { r: (f < 0.72 ? f / 0.72 : 1 - (f - 0.72) / 0.28) * 6.2832 }; },
+    afunda:  function (e) { return { dy: (e.vy / e.vyMax) * e.raio * 0.85 }; },
+    pisca:   function (e) { var k = Math.sin(e.t * 26);
+                            return { a: k > 0 ? 1 : 0.38, ex: 1 + k * 0.11, ey: 1 + k * 0.11 }; },
+    serra:   function (e) { return { r: Math.floor(e.t * 14) * (6.2832 / 14) }; },
+    lasca:   function (e) { return { r: Math.sin(Math.floor(e.t * 2.2) * 91.7) * 0.55 }; },
+    repete:  function ()  { return { eco: true }; },
+    salta:   function (e) {
+      var t = Math.min(1, (e.t - e.virou) / 0.45);
+      var k = Math.exp(-t * 7) * Math.cos(t * 26) * 0.3;
+      return { ex: 1 - k, ey: 1 + k };
+    },
+    aponta:  function (e) { return { r: e.segurando ? -1.5708 : 1.5708 }; },
+    ventila: function (e) { return { r: e.giro }; },
+    ata:     function (e) { return { r: Math.sin(e.t * 9) * 0.5 }; },
+    rolar:   function (e) { return { r: Math.floor(e.camX / 95) * 1.5708 }; },
+    reflete: function (e) { return { ex: Math.sin(e.t * 2.4) > 0 ? 1 : -1 }; },
+    respira: function (e) { var k = 1 + Math.sin(e.t * 1.5) * 0.17; return { ex: k, ey: k }; },
+    risca:   function (e) { return { ex: 1.38, ey: 0.78, r: Math.atan2(e.vy, 1400) }; },
+    atrai:   function (e) { return { dy: (e.segurando ? -1 : 1) * (0.5 + 0.5 * Math.sin(e.t * 7)) * e.raio * 0.42 }; }
+  };
+
   var COR_FAISCA = '#ff7a1a';   // brilho 148: aparece no preto e no osso
   var COR_PEDRA = '#8a7f74';    // brilho 138
+  var COR_TERRA = '#8a7355';    // brilho 119
 
   // Tres desafios por partida, sorteados: um facil, um medio, um dificil,
   // sempre nessa ordem. `le` tira o progresso do estado da corrida; cumprido,
@@ -92,45 +161,45 @@
   // sempre nessa ordem. `le` tira o progresso do estado da corrida; cumprido,
   // o premio entra como metros de bonus, iguais aos da rocada.
   //
-  // Os premios sao calibrados contra uma corrida mediana de ~300 m: cumprir
+  // Os premios sao calibrados contra uma corrida mediana de ~107 m: cumprir
   // um facil soma pouco, cumprir o dificil muda a corrida. Cumprir os tres
   // e raro e deve pagar bem.
   var DESAFIOS = [
     { id: 'dist',   diz: function (n) { return 'Chegar a ' + n + ' m'; },
-      alvos: [150, 300, 480], premios: [45, 95, 170], le: function (e) { return e.m; } },
+      alvos: [50, 110, 180], premios: [16, 34, 60], le: function (e) { return e.m; } },
 
     { id: 'rocar',  diz: function (n) { return 'Roçar ' + n + (n > 1 ? ' vezes' : ' vez'); },
-      alvos: [3, 6, 10], premios: [50, 105, 185], le: function (e) { return e.rocadas; } },
+      alvos: [3, 6, 10], premios: [18, 37, 65], le: function (e) { return e.rocadas; } },
 
     { id: 'mult',   diz: function (n) { return 'Levar a roçada a ×' + n; },
-      alvos: [3, 5, 7], premios: [55, 110, 195], le: function (e) { return e.maxMult; } },
+      alvos: [3, 5, 7], premios: [20, 39, 68], le: function (e) { return e.maxMult; } },
 
     { id: 'voo',    diz: function (n) { return 'Passar ' + n + ' obstáculos sem tocar nas bordas'; },
-      alvos: [4, 7, 11], premios: [60, 120, 210], le: function (e) { return e.maxSemTocar; } },
+      alvos: [4, 7, 11], premios: [21, 42, 74], le: function (e) { return e.maxSemTocar; } },
 
     { id: 'ato',    diz: function (n) {
-        var i = Math.floor(n / A.setorM);
-        return i < ATOS.length ? 'Chegar ao ' + ATOS[i].nome : 'Passar dos ' + n + ' m';
+        var i = setorDeM(n);
+        return (i > 0 && ATOS[i - 1].ate === n) ? 'Chegar ao ' + ATOS[i].nome : 'Passar dos ' + n + ' m';
       },
-      alvos: [300, 600, 900], premios: [50, 105, 190], le: function (e) { return e.m; } },
+      alvos: [150, 400, 700], premios: [18, 37, 67], le: function (e) { return e.m; } },
 
     { id: 'tempo',  diz: function (n) { return 'Ficar ' + n + ' segundos vivo'; },
-      alvos: [12, 20, 30], premios: [45, 95, 165], le: function (e) { return e.tempo; } },
+      alvos: [12, 20, 30], premios: [16, 34, 58], le: function (e) { return e.tempo; } },
 
     { id: 'passar', diz: function (n) { return 'Passar ' + n + ' obstáculos'; },
-      alvos: [8, 14, 20], premios: [40, 90, 160], le: function (e) { return e.passados; } },
+      alvos: [8, 14, 20], premios: [14, 32, 56], le: function (e) { return e.passados; } },
 
     { id: 'limpo',  diz: function (n) { return 'Passar ' + n + ' obstáculos seguidos sem roçar'; },
-      alvos: [5, 8, 12], premios: [45, 95, 165], le: function (e) { return e.maxLimpo; } }
+      alvos: [5, 8, 12], premios: [16, 34, 58], le: function (e) { return e.maxLimpo; } }
   ];
 
   var PROEZAS = {
-    cem:      'Chegar a 400 m numa corrida',
-    duzentos: 'Chegar a 800 m numa corrida',
+    cem:      'Chegar a 200 m numa corrida',
+    duzentos: 'Chegar a 500 m numa corrida',
     voo:      'Passar 10 obstáculos sem tocar no chão nem no teto',
     fio:      'Levar a roçada até ×8',
     fundo:    'Alcançar o Desabamento',
-    cegas:    'Fazer 250 m com a inversão da tela desligada',
+    cegas:    'Fazer 100 m com a inversão da tela desligada',
     folego:   'Ficar 30 segundos vivo numa corrida',
     limalha:  'Roçar 20 vezes numa única corrida'
   };
@@ -145,9 +214,10 @@
     rastro: [], cacos: [], faiscas: [], part: [],
     inv: 0, tremor: 0,
     larg: 1280, alt: 720, altCSS: 720,
+    tintaC: [21, 17, 12], ossoC: [228, 217, 196],
     fFaixa: ATOS[0].fFaixa,
     setor: 0,
-    escalaTempo: 1,
+    escalaTempo: 1, virou: 0, segAntes: false, giro: 0, relogio: 0, cartoes: [],
     mult: 0, bonus: 0, rocadas: 0, semTocar: 0,
     maxMult: 0, maxSemTocar: 0, limpo: 0, maxLimpo: 0, passados: 0,
     desafios: [], premioDesafios: 0,
@@ -282,9 +352,12 @@
   // da rocada e dos desafios; com o setor preso so a distancia, o numero na
   // tela e a troca de mundo andavam em unidades diferentes, e a divisao
   // "0 a 300 e facil" nunca fechava com o que se via.
+  // Os atos crescem: o primeiro e curto porque e onde quase toda corrida
+  // acaba, e os seguintes sao mais largos porque ali ja se corre mais rapido
+  // e o mesmo numero de metros passa em menos tempo.
   function setorDeM(m) {
-    var i = Math.floor(m / A.setorM);
-    return i < 0 ? 0 : (i > ATOS.length - 1 ? ATOS.length - 1 : i);
+    for (var i = 0; i < ATOS.length - 1; i++) if (m < ATOS[i].ate) return i;
+    return ATOS.length - 1;
   }
 
   function corSetorEmM(m) { return ATOS[setorDeM(m)].cor; }
@@ -433,7 +506,7 @@
       C.setor = novo;
       // o ato e o que a pessoa guarda — "cheguei na Forja" —, entao ele diz
       // o nome E a dificuldade, em voz alta
-      avisar(ATOS[novo].nome + ' · ' + ATOS[novo].dif, ATOS[novo].cor, 1900);
+      avisar(ATOS[novo].nome + ' · ' + ATOS[novo].dif, ATOS[novo].cor, 1900, 'ato');
       SONS.ato();
     }
     // a faixa engrossa devagar: de uma vez ela empurraria quem esta encostado
@@ -525,14 +598,39 @@
   /* Nada disto tem colisao. Quem mata e o retangulo, e so ele: um enfeite
      que mata e um enfeite que mente. */
 
+  // O AR DO ATO. Terra caindo do teto no Subsolo, brasa subindo do chao na
+  // Forja, cascalho despencando no Desabamento. E a coisa que mais diz o
+  // tema, porque acontece na tela inteira e o tempo todo — nao so onde ha
+  // obstaculo. Como tudo que e enfeite aqui, nao tem colisao nenhuma.
+  function ambiente(dt) {
+    if (C.poucoMov || C.part.length > 170) return;
+    var tema = ATOS[C.setor].tema, f = faixa();
+    var taxa = tema === 'fogo' ? 9 : 11;
+    if (Math.random() > dt * taxa) return;
+    var x = C.camX + acaso(-40, C.larg + 40);
+
+    // `d` e o quanto a vida desce por segundo: sem ele a terra morria em
+    // menos de 1s e nao saia de perto do teto — caia 35px e sumia.
+    if (tema === 'terra') {
+      C.part.push({ t: 'a', cor: COR_TERRA, x: x, y: f + acaso(0, 8),
+        vx: acaso(-40, 5), vy: acaso(70, 190), r: acaso(1.4, 3), v: 1, d: 0.3, g: 110 });
+    } else if (tema === 'fogo') {
+      C.part.push({ t: 'a', cor: COR_FAISCA, x: x, y: C.alt - f - acaso(0, 8),
+        vx: acaso(-70, 10), vy: acaso(-190, -80), r: acaso(1.6, 3.2), v: 1, d: 0.42, g: -25 });
+    } else {
+      C.part.push({ t: 'p', x: x, y: f + acaso(0, 10),
+        vx: acaso(-45, 0), vy: acaso(60, 150), r: acaso(2.2, 5), v: 1, d: 0.34 });
+    }
+  }
+
   function emitir(dt) {
+    ambiente(dt);
     if (C.poucoMov || C.part.length > 140) return;
     for (var i = 0; i < C.obst.length; i++) {
       var g = C.obst[i];
       var sx = g.x - C.camX;
       if (sx > C.larg || sx + g.w < 0) continue;
       var tema = ATOS[C.setor].tema;
-      if (tema !== 'fogo' && tema !== 'pedra') continue;
 
       for (var j = 0; j < g.pecas.length; j++) {
         var pc = g.pecas[j];
@@ -545,6 +643,15 @@
           C.part.push({ t: tema === 'pedra' ? 'p' : 'f',
             x: b.cx + acaso(-b.r, b.r), y: b.cy + acaso(-b.r, b.r),
             vx: acaso(-140, -20), vy: acaso(-110, 110), r: acaso(1.8, 3.2), v: acaso(0.5, 1) });
+          continue;
+        }
+
+        if (tema === 'terra') {
+          // estaca velha largando terra pela aresta virada para o campo
+          if (b.tipo === 'bola' || Math.random() > dt * 3.2) continue;
+          var ey = pc.anc === 'teto' ? b.y + b.h : (pc.anc === 'chao' ? b.y : b.y + b.h);
+          C.part.push({ t: 'a', cor: COR_TERRA, x: b.x + acaso(2, b.w - 2), y: ey,
+            vx: acaso(-40, 0), vy: acaso(20, 90), r: acaso(1.3, 2.6), v: 1, d: 0.35, g: 110 });
           continue;
         }
 
@@ -594,12 +701,12 @@
   }
 
   function conferirProezas(m) {
-    if (m >= 400) marcar('cem');
-    if (m >= 800) marcar('duzentos');
+    if (m >= 200) marcar('cem');
+    if (m >= 500) marcar('duzentos');
     if (C.semTocar >= 10) marcar('voo');
     if (C.mult >= A.multMax) marcar('fio');
     if (C.setor >= 2) marcar('fundo');
-    if (!C.inverter && m >= 250) marcar('cegas');
+    if (!C.inverter && m >= 100) marcar('cegas');
     if (C.tempo >= 30) marcar('folego');
     if (C.rocadas >= 20) marcar('limalha');
   }
@@ -627,6 +734,7 @@
 
   function atualizar(dtReal) {
     avisarFaixa();
+    if (!C.poucoMov) C.relogio += dtReal;
     var dt = dtReal * (C.estado === 'jogando' ? C.escalaTempo : 1);
 
     if (C.estado === 'jogando') passo(dt);
@@ -644,6 +752,9 @@
       var w = C.part[q];
       if (w.t === 'p') {
         w.vy += 900 * dt;
+      } else if (w.t === 'a') {
+        w.vy += (w.g || 0) * dt;
+        w.vx -= w.vx * Math.min(1, dt * 0.5);
       } else {
         w.vx -= w.vx * Math.min(1, dt * 2.0);
         w.vy -= w.vy * Math.min(1, dt * 1.6);
@@ -651,7 +762,7 @@
       w.x += w.vx * dt;
       w.y += w.vy * dt;
       if (w.t === 'p' && w.y > chao) { w.y = chao; w.vy = 0; w.vx *= 0.25; }
-      w.v -= dt * (w.t === 'p' ? 0.5 : 1.5);
+      w.v -= dt * (w.d || (w.t === 'p' ? 0.5 : 1.5));
       if (w.v <= 0 || w.x < C.camX - 140) C.part.splice(q, 1);
     }
 
@@ -661,6 +772,19 @@
     }
 
     if (C.tremor > 0) C.tremor = Math.max(0, C.tremor - dtReal * 55);
+
+    // quando a gravidade vira, o relogio do movimento marca a hora: Avesso,
+    // Mola e Bussola vivem disso
+    if (C.segurando !== C.segAntes) { C.segAntes = C.segurando; C.virou = C.tempo; }
+    // giro que acelera com a queda, para a Helice
+    C.giro += dtReal * (4 + Math.abs(C.vy / A.vyMax) * 16);
+
+    // A paleta caminha ate a do ato em ~0.8s. E ela que faz o Subsolo parecer
+    // terra e a Forja parecer fogo sem uma palavra escrita — e caminhando, a
+    // troca de ato deixa de ser um pisca e vira uma virada de luz.
+    var at = ATOS[C.setor], andar = Math.min(1, dtReal / 0.8);
+    C.tintaC = mistura(C.tintaC, at.tinta, andar);
+    C.ossoC = mistura(C.ossoC, at.osso, andar);
 
     var alvo = (C.estado === 'jogando' && C.segurando && C.inverter && !C.poucoMov) ? 1 : 0;
     C.inv += (alvo - C.inv) * Math.min(1, dtReal / A.inverteEm);
@@ -699,9 +823,31 @@
 
   // Serve ao campo e ao vestiario. O ponto da gravidade e desenhado FORA da
   // rotacao: ele aponta para onde o mundo puxa, e o mundo nao gira.
-  function desenharPeca(ctx, p, r, ang, fundo, gravCima) {
+  function estadoMov() {
+    return { t: C.tempo, vy: C.vy, vyMax: A.vyMax, segurando: C.segurando,
+      camX: C.camX, raio: A.raio, virou: C.virou, giro: C.giro };
+  }
+
+  function desenharPeca(ctx, p, r, e, fundo, gravCima, fantasma) {
+    var m = (MOVS[p.mov] || MOVS.fixo)(e) || {};
+    var ex = m.ex === undefined ? 1 : m.ex;
+    var ey = m.ey === undefined ? 1 : m.ey;
+
+    if (m.eco && !fantasma) {
+      ctx.save();
+      ctx.globalAlpha = 0.32;
+      ctx.translate(-r * 1.6, 0);
+      desenharPeca(ctx, p, r * 0.82, e, fundo, gravCima, true);
+      ctx.restore();
+    }
+
     ctx.save();
-    ctx.rotate(ang);
+    if (m.a !== undefined) ctx.globalAlpha = m.a;
+    ctx.translate(m.dx || 0, m.dy || 0);
+
+    ctx.save();
+    ctx.rotate(m.r || 0);
+    ctx.scale(ex, ey);
     caminho(ctx, p.forma, r);
     if (p.casca === 'vazado') {
       ctx.lineWidth = r * 0.42; ctx.lineJoin = 'round';
@@ -717,15 +863,91 @@
     }
     ctx.restore();
 
+    // o ponto da gravidade NAO gira nem escala: ele aponta para onde o mundo
+    // puxa, e o mundo nao se mexe junto com a roupa
     ctx.beginPath();
     ctx.arc(0, gravCima ? -r * 0.5 : r * 0.5, r * 0.24, 0, 6.2832);
     ctx.fillStyle = (p.casca === 'vazado' || p.casca === 'anel') ? p.cor : fundo;
     ctx.fill();
+
+    ctx.restore();
   }
 
   // Desenha a cara do setor por cima da peca ja pintada. Tudo em cor de
   // FUNDO, nunca numa cor propria: assim a textura inverte junto com o
   // mundo sem ninguem escrever a regra duas vezes.
+  // A aresta interna da faixa, com a cara do ato: terra batida desmorona em
+  // conchas, a forja pinga escoria com um fio quente na borda, a rocha sai
+  // lascada. E o que faz o ato se reconhecer num relance, sem texto.
+  // Nada disto tem colisao: a borda de verdade continua reta, onde a faixa
+  // acaba. Por isso o recorte so TIRA da faixa (ou pendura algo curto), e
+  // nunca sugere chao onde nao ha.
+  function bordaFaixa(f, solido, fundo, acento, tema) {
+    var passo = 46, base0 = Math.floor(C.camX / passo), desl = C.camX % passo;
+    var topo = f, pe = C.alt - f, i, x, idx, s1, s2, h1, h2;
+    cx.save();
+    for (i = -1; i * passo - desl < C.larg + passo; i++) {
+      x = i * passo - desl;
+      idx = base0 + i;
+      s1 = Math.sin(idx * 12.9 + 7.3) * 0.5 + 0.5;
+      s2 = Math.sin(idx * 7.7 + 3.1) * 0.5 + 0.5;
+
+      if (tema === 'terra') {
+        // sem a irregularidade (e sem pular alguns) isto vira renda, nao
+        // terra desmoronando: o olho pega a repeticao antes de pegar o tema
+        cx.fillStyle = fundo;
+        if (s1 > 0.22) {
+          cx.beginPath();
+          cx.arc(x + passo * (0.2 + s2 * 0.6), topo, passo * (0.08 + s1 * 0.26), Math.PI, 0);
+          cx.fill();
+        }
+        if (s2 > 0.18) {
+          cx.beginPath();
+          cx.arc(x + passo * (0.15 + s1 * 0.65), pe, passo * (0.07 + s2 * 0.25), 0, Math.PI);
+          cx.fill();
+        }
+
+      } else if (tema === 'fogo') {
+        cx.fillStyle = solido;
+        if (s1 > 0.25) {
+          h1 = 3 + s1 * 15;
+          cx.fillRect(x + passo * (0.1 + s2 * 0.6), topo, passo * (0.1 + s1 * 0.14), h1);
+          cx.beginPath();
+          cx.arc(x + passo * (0.15 + s2 * 0.6), topo + h1, passo * (0.05 + s1 * 0.07), 0, 6.2832);
+          cx.fill();
+        }
+        if (s2 > 0.35) {
+          h2 = 3 + s2 * 11;
+          cx.fillRect(x + passo * (0.2 + s1 * 0.6), pe - h2, passo * (0.08 + s2 * 0.12), h2);
+        }
+        cx.fillStyle = acento; cx.globalAlpha = 0.5;
+        cx.fillRect(x, topo - 2.5, passo, 2.5);
+        cx.fillRect(x, pe, passo, 2.5);
+        cx.globalAlpha = 1;
+
+      } else {
+        // lascas de larguras e alturas diferentes, e nem toda casa tem uma:
+        // em zigue-zague parelho isto lia como serrilha de selo, nao rocha
+        cx.fillStyle = fundo;
+        if (s1 > 0.15) {
+          cx.beginPath();
+          cx.moveTo(x + passo * s2 * 0.3, topo);
+          cx.lineTo(x + passo * (0.15 + s1 * 0.5), topo - (4 + s1 * 17));
+          cx.lineTo(x + passo * (0.45 + s2 * 0.5), topo);
+          cx.closePath(); cx.fill();
+        }
+        if (s2 > 0.12) {
+          cx.beginPath();
+          cx.moveTo(x + passo * s1 * 0.25, pe);
+          cx.lineTo(x + passo * (0.2 + s2 * 0.45), pe + (4 + s2 * 15));
+          cx.lineTo(x + passo * (0.5 + s1 * 0.45), pe);
+          cx.closePath(); cx.fill();
+        }
+      }
+    }
+    cx.restore();
+  }
+
   function textura(b, tema, pc, fundo) {
     var sd = pc.s || 0, i;
     cx.save();
@@ -845,12 +1067,6 @@
     cx.restore();
   }
 
-  function anguloDe(p) {
-    if (p.giro === 'roda') return (C.camX / 34) % 6.2832;
-    if (p.giro === 'inclina') return (C.vy / A.vyMax) * 0.55;
-    return 0;
-  }
-
   function desenhar() {
     var p = porId[C.vestido] || P[0];
     cx.setTransform(esc, 0, 0, esc, 0, 0);
@@ -859,8 +1075,8 @@
       cx.translate((Math.random() * 2 - 1) * C.tremor, (Math.random() * 2 - 1) * C.tremor);
     }
 
-    var fA = mistura(TINTA, OSSO, C.inv);
-    var sA = mistura(OSSO, TINTA, C.inv);
+    var fA = mistura(C.tintaC, C.ossoC, C.inv);
+    var sA = mistura(C.ossoC, C.tintaC, C.inv);
     var fundo = cor(fA), solido = cor(sA);
     var f = faixa();
 
@@ -886,6 +1102,7 @@
     cx.fillStyle = solido;
     cx.fillRect(0, 0, C.larg, f);
     cx.fillRect(0, C.alt - f, C.larg, f);
+    bordaFaixa(f, solido, fundo, ATOS[C.setor].pino, ATOS[C.setor].tema);
 
     for (var i = 0; i < C.obst.length; i++) {
       var g = C.obst[i];
@@ -912,6 +1129,9 @@
       if (w2.t === 'f') {
         cx.fillStyle = COR_FAISCA;
         cx.fillRect(wx - 1.6, w2.y - 1.6, 3.2, 3.2);
+      } else if (w2.t === 'a') {
+        cx.fillStyle = w2.cor;
+        cx.fillRect(wx - w2.r / 2, w2.y - w2.r / 2, w2.r, w2.r);
       } else {
         cx.fillStyle = COR_PEDRA;
         cx.fillRect(wx - w2.r / 2, w2.y - w2.r / 2, w2.r, w2.r);
@@ -973,7 +1193,7 @@
     if (C.estado !== 'morto') {
       cx.save();
       cx.translate(jx, C.y);
-      desenharPeca(cx, p, A.raio, anguloDe(p), fundo, C.segurando);
+      desenharPeca(cx, p, A.raio, estadoMov(), fundo, C.segurando);
       cx.restore();
     }
 
@@ -1193,7 +1413,8 @@
   }
 
   var avisoTimer = null;
-  function avisar(texto, corTexto, dura) {
+  function avisar(texto, corTexto, dura, classe) {
+    el.aviso.className = 'aviso' + (classe ? ' aviso--' + classe : '');
     el.avisoTexto.textContent = texto;
     el.aviso.style.color = corTexto;
     el.aviso.hidden = false;
@@ -1237,23 +1458,45 @@
     onde.hidden = !lista.length;
   }
 
-  function pintarPeca(canvas, p, vestida) {
+  // Um estado de mentira para o vestiario: inverte a gravidade a cada 1.2s e
+  // sobe e desce, para Avesso, Mola, Bussola e Ima terem o que mostrar.
+  function estadoMostra(t, raio) {
+    var meio = 1.2, f = t % (meio * 2);
+    return { t: t, vy: Math.sin(t * 2.6) * A.vyMax * 0.75, vyMax: A.vyMax,
+      segurando: f < meio, camX: t * 300, raio: raio,
+      virou: t - (f % meio), giro: t * 9 };
+  }
+
+  function pintarPeca(canvas, p, travada, t) {
     var ctx = canvas.getContext && canvas.getContext('2d');
     if (!ctx) return;
-    var L = canvas.width;
+    var L = canvas.width, r = L * 0.27;
     ctx.clearRect(0, 0, L, L);
     ctx.save();
     ctx.translate(L / 2, L / 2);
-    if (vestida === 'travada') {
-      desenharPeca(ctx, { forma: p.forma, casca: p.casca, cor: '#2a2e34' }, L * 0.30, 0, '#14171b', false);
+    var e = estadoMostra(t || 0, r);
+    if (travada) {
+      desenharPeca(ctx, { forma: p.forma, casca: p.casca, cor: '#2a2e34', mov: p.mov },
+        r, e, '#14171b', e.segurando);
     } else {
-      desenharPeca(ctx, p, L * 0.30, 0, '#14171b', false);
+      desenharPeca(ctx, p, r, e, '#14171b', e.segurando);
     }
     ctx.restore();
   }
 
+  // Enquanto o armario estiver aberto, os 30 cartoes sao redesenhados a cada
+  // quadro: e o movimento que diferencia uma roupa da outra, e cartao parado
+  // nao conta isso. Para fora do armario, nenhum custo.
+  function pintarCartoes() {
+    for (var i = 0; i < C.cartoes.length; i++) {
+      var c = C.cartoes[i];
+      pintarPeca(c.cv, c.p, c.travada, C.relogio);
+    }
+  }
+
   function montarGrade() {
     el.grade.textContent = '';
+    C.cartoes.length = 0;
     for (var i = 0; i < P.length; i++) {
       var p = P[i], livre = tem(p), vestida = p.id === C.vestido;
       var b = document.createElement('button');
@@ -1277,13 +1520,15 @@
       b.appendChild(c);
 
       el.grade.appendChild(b);
-      pintarPeca(cvv, p, livre ? 'ok' : 'travada');
+      C.cartoes.push({ cv: cvv, p: p, travada: !livre });
+      pintarPeca(cvv, p, !livre, C.relogio);
     }
     el.vestLinha.textContent = tidas().length + ' de ' + P.length + ' · ' + C.total + ' m somados';
   }
 
   function montarNovidade(novas) {
     el.novidadeLista.textContent = '';
+    C.cartoes.length = 0;
     el.novidade.hidden = !novas.length;
     if (!novas.length) return;
     for (var i = 0; i < novas.length && i < 3; i++) {
@@ -1300,7 +1545,8 @@
       v.className = 'nova__acao'; v.textContent = 'Vestir';
       b.appendChild(v);
       el.novidadeLista.appendChild(b);
-      pintarPeca(cvv, p, 'ok');
+      C.cartoes.push({ cv: cvv, p: p, travada: false });
+      pintarPeca(cvv, p, false, C.relogio);
     }
   }
 
@@ -1334,7 +1580,7 @@
 
       var f = document.createElement('span');
       f.className = 'ato__faixa';
-      f.textContent = (i * A.setorM) + '–' + ((i + 1) * A.setorM) + ' m';
+      f.textContent = (i ? ATOS[i - 1].ate : 0) + (i < ATOS.length - 1 ? '–' + ATOS[i].ate : '+') + ' m';
       d.appendChild(f);
 
       var n = document.createElement('span');
@@ -1464,6 +1710,7 @@
     if (dt > 0.033) dt = 0.033;
     if (dt > 0) atualizar(dt);
     desenhar();
+    if (!C.poucoMov && (!el.vestiario.hidden || !el.fim.hidden)) pintarCartoes();
   }
 
   function ligarLaco() {
@@ -1517,13 +1764,17 @@
     // mesma conta — senao o recorde de ontem viraria um numero pequeno e os
     // metros somados valeriam um terço do que valiam. Uma vez so.
     var totalAntigo = C.total;   // para a migracao das roupas, mais abaixo
-    if (lerGuardado('avesso.regua', '1') !== '2') {
-      var fator = 50 / A.passoM;
+    // Cada vez que a regua muda, o que esta guardado passa pela mesma conta.
+    // `avesso.regua` diz qual regua gerou os numeros que estao no disco.
+    var reguaVinda = lerGuardado('avesso.regua', '1');
+    var reguaAntiga = { '1': 50, '2': 7 }[reguaVinda];
+    if (reguaAntiga && reguaAntiga !== A.passoM) {
+      var fator = reguaAntiga / A.passoM;
       C.recorde = Math.round(C.recorde * fator);
       C.total = Math.round(C.total * fator);
       guardar('avesso.recorde', C.recorde);
       guardar('avesso.total', C.total);
-      guardar('avesso.regua', '2');
+      guardar('avesso.regua', '3');
     }
     C.inverter = lerGuardado('avesso.inverter', '1') !== '0';
     C.som = lerGuardado('avesso.som', '1') !== '0';
@@ -1533,10 +1784,12 @@
 
     var gs = lerGuardado('avesso.ganhas', null);
     if (gs === null) {
-      // Migracao, uma vez so. A curva de metros subiu; quem ja tinha uma
-      // roupa nao pode perde-la por isso. Conta quantos cortes ANTIGOS o
-      // total ja passava e credita as primeiras roupas por soma, na ordem.
-      var antigos = window.AVESSO_CORTES_ANTIGOS || [];
+      // Migracao, uma vez so, e SO para quem vem da primeira regua: os
+      // cortes de AVESSO_CORTES_ANTIGOS foram medidos nela. Um save mais
+      // novo que este ja nasceu com `ganhas` gravado, e um save sem `ganhas`
+      // vindo de outra regua compararia metros de reguas diferentes — foi
+      // assim que um armario de 6 roupas virou 16 num teste.
+      var antigos = reguaVinda === '1' ? (window.AVESSO_CORTES_ANTIGOS || []) : [];
       var n = 0, soma = [];
       for (var q = 0; q < antigos.length; q++) if (totalAntigo >= antigos[q]) n++;
       for (var w = 0; w < P.length; w++) if (P[w].por.tipo === 'soma') soma.push(P[w].id);

@@ -82,11 +82,17 @@ body{
 .aviso{
   position:absolute;left:0;right:0;top:34%;
   margin:0;text-align:center;pointer-events:none;
-  font-weight:700;font-size:clamp(30px,6vw,74px);
-  line-height:1;letter-spacing:-.04em;text-transform:uppercase;
+  font-weight:700;font-size:clamp(22px,3.4vw,46px);
+  line-height:1;letter-spacing:-.03em;text-transform:uppercase;
   text-shadow:0 2px 24px rgba(0,0,0,.55);
 }
 .aviso[hidden]{display:none}
+/* o nome do ato e lembrete, nao manchete: quem conta o ato e o mundo */
+.aviso--ato{
+  font-size:clamp(12px,1.6vw,19px);
+  letter-spacing:.3em;font-weight:700;
+  text-shadow:0 1px 14px rgba(0,0,0,.6);
+}
 
 /* ---------- telas ---------- */
 
