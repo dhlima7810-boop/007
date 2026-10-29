@@ -140,18 +140,56 @@ const maca = fazerMaca(0xef4444, 0xdc2626, 0xff4d4d);
 const macaOuro = fazerMaca(0xfbbf24, 0xf59e0b, 0xffd166);
 
 // ---------- obstáculos ----------
+// O bloco não cresce parado: ele sobe do chão girando, passa do ponto e
+// assenta, e depois respira. Cada um tem a sua fase, senão os 16 pulsam
+// juntos e o tabuleiro inteiro pisca.
 const geoBloco = new THREE.BoxGeometry(.92, .92, .92);
-const matBloco = new THREE.MeshStandardMaterial({ color: 0x334e68, emissive: 0x0e7490, emissiveIntensity: .35, roughness: .6 });
+const geoAresta = new THREE.EdgesGeometry(geoBloco);
+const matBlocoBase = new THREE.MeshStandardMaterial({ color: 0x334e68, emissive: 0x0e7490, emissiveIntensity: .35, roughness: .6 });
+const matArestaBase = new THREE.LineBasicMaterial({ color: 0x67e8f9, transparent: true, opacity: .85 });
 const blocosMesh = [];
 const meshBloco = i => {
   while (blocosMesh.length <= i) {
-    const m = new THREE.Mesh(geoBloco, matBloco);
-    m.castShadow = m.receiveShadow = true;
-    cena.add(m);
-    blocosMesh.push(m);
+    const grupo = new THREE.Group();
+    const caixa = new THREE.Mesh(geoBloco, matBlocoBase.clone());
+    caixa.castShadow = caixa.receiveShadow = true;
+    grupo.add(caixa);
+    grupo.add(new THREE.LineSegments(geoAresta, matArestaBase.clone()));
+    cena.add(grupo);
+    blocosMesh.push(grupo);
   }
   return blocosMesh[i];
 };
+
+// curvas: uma que assenta e outra que passa do ponto e volta
+const saida = t => 1 - Math.pow(1 - t, 3);
+const estufa = t => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2);
+
+// anel de choque no chão, para o bloco chegar com peso
+const ondas = [];
+const geoOnda = new THREE.RingGeometry(.34, .5, 28);
+function onda(x, z, cor = 0x67e8f9) {
+  const m = new THREE.Mesh(geoOnda, new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: .9, side: THREE.DoubleSide, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2;
+  m.position.set(x, .03, z);
+  m.userData = { vida: 1 };
+  cena.add(m);
+  ondas.push(m);
+}
+
+// o bloco não some: ele estoura em cacos e deixa o anel
+function estilhacar(x, z) {
+  onda(x, z, 0x93c5fd);
+  for (let i = 0; i < 14; i++) {
+    const m = new THREE.Mesh(geoFaisca, new THREE.MeshBasicMaterial({ color: i % 3 ? 0x60a5fa : 0x334e68 }));
+    m.position.set(x, .5, z);
+    m.scale.setScalar(1.6);
+    m.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+    m.userData = { v: new THREE.Vector3((Math.random() - .5) * 7, Math.random() * 6 + 2, (Math.random() - .5) * 7), vida: 1, gira: true };
+    cena.add(m);
+    faiscas.push(m);
+  }
+}
 
 // ---------- faíscas ----------
 const faiscas = [];
@@ -251,7 +289,7 @@ function tique() {
     som(300, .25);
     if (fora) h = { x: (h.x + N) % N, y: (h.y + N) % N };  // atravessa a parede
     if (iBloco >= 0) {                                      // e despedaça o bloco
-      explodir(mundo(h.x), mundo(h.y), 0x60a5fa);
+      estilhacar(mundo(h.x), mundo(h.y));
       blocos.splice(iBloco, 1);
     }
   }
@@ -308,7 +346,7 @@ function conferirBlocos() {
   const frente = [1, 2, 3].map(k => ({ x: cobra[0].x + dir.x * k, y: cobra[0].y + dir.y * k }));
   const casa = sortear(frente);
   if (!casa) return;
-  blocos.push({ ...casa, surgir: 0 });
+  blocos.push({ ...casa, surgir: 0, fase: Math.random() * Math.PI * 2, pousou: false });
   marcoPontos = pontos;
   marcoTempo = tempoJogo;
   som(180, .18, 'square');
@@ -377,26 +415,41 @@ function avisar(texto) {
 function abrirPainel(modo, titulo, sub) {
   $('titulo').textContent = titulo;
   $('sub').textContent = sub;
-  $('niveis').hidden = modo === 'pausa';
+  $('principal').hidden = modo === 'pausa';
   $('acoes').hidden = modo !== 'pausa';
   $('dica').hidden = modo === 'pausa';
+  $('jogar').textContent = modo === 'fim' ? 'Jogar de novo' : 'Jogar';
   const ofertas = modo === 'fim' && !revivido;
   $('revToken').hidden = !(ofertas && podeToken());
   $('revBanco').hidden = !(ofertas && podeBanco());
   $('revToken').textContent = `Reviver · 1 token (tem ${dados.tokens})`;
   $('revBanco').textContent = `Reviver · ${CUSTO_BANCO} pontos (banco ${dados.banco})`;
-  $('pconfig').hidden = true;
+  $('pconfig').hidden = $('pniveis').hidden = true;
   $('painel').hidden = false;
   $('pausa').hidden = true;
 }
 
 function fecharPaineis() {
-  $('painel').hidden = $('pconfig').hidden = true;
+  $('painel').hidden = $('pconfig').hidden = $('pniveis').hidden = true;
   $('pausa').hidden = estado !== 'jogando';
 }
 
+// Os dois submenus do painel: dificuldade e configurações.
+const abrirSub = id => { $('painel').hidden = true; $(id).hidden = false; if (id === 'pconfig') pintarConfig(); };
+const voltarSub = () => { $('pconfig').hidden = $('pniveis').hidden = true; $('painel').hidden = false; };
+const naoSub = () => $('pconfig').hidden && $('pniveis').hidden;
+
+// A dificuldade escolhida fica escrita no proprio botao do menu.
+function escolherNivel(n) {
+  nivel = n;
+  dados.nivel = n;
+  salvar();
+  $('abrirNiveis').textContent = `Dificuldade · ${NIVEIS[n].nome}`;
+  hud();
+}
+
 function comecar(n) {
-  if (n) { nivel = n; dados.nivel = n; salvar(); }
+  if (n) escolherNivel(n);
   if (estado === 'jogando') return;
   reiniciar();
   estado = 'jogando';
@@ -437,8 +490,9 @@ const teclas = {
 const porNumero = { Digit1: 'facil', Digit2: 'medio', Digit3: 'dificil' };
 addEventListener('keydown', e => {
   if (teclas[e.code]) { e.preventDefault(); virar(...teclas[e.code]); return; }
-  if (!$('pconfig').hidden) {                      // configurações abertas: só Esc sai
-    if (e.code === 'Escape') { $('pconfig').hidden = true; $('painel').hidden = false; }
+  if (!naoSub()) {                                 // num submenu: 1/2/3 escolhem, Esc volta
+    if (!$('pniveis').hidden && porNumero[e.code]) { escolherNivel(porNumero[e.code]); voltarSub(); }
+    else if (e.code === 'Escape') voltarSub();
     return;
   }
   if (porNumero[e.code] && estado !== 'jogando' && estado !== 'pausado') comecar(porNumero[e.code]);
@@ -458,15 +512,18 @@ addEventListener('touchend', e => {
 });
 
 document.querySelectorAll('[data-nivel]').forEach(b =>
-  b.addEventListener('click', () => comecar(b.dataset.nivel)));
+  b.addEventListener('click', () => { escolherNivel(b.dataset.nivel); voltarSub(); }));
+$('jogar').addEventListener('click', () => comecar());
+$('abrirNiveis').addEventListener('click', () => abrirSub('pniveis'));
+$('voltarNiveis').addEventListener('click', voltarSub);
 $('pausa').addEventListener('click', pausar);
 $('continuar').addEventListener('click', pausar);
 $('sair').addEventListener('click', sairParaMenu);
 $('revToken').addEventListener('click', () => reviver('token'));
 $('revBanco').addEventListener('click', () => reviver('banco'));
-$('abrirConfig').addEventListener('click', () => { $('painel').hidden = true; $('pconfig').hidden = false; pintarConfig(); });
-$('menuConfig').addEventListener('click', () => { $('painel').hidden = true; $('pconfig').hidden = false; pintarConfig(); });
-$('fecharConfig').addEventListener('click', () => { $('pconfig').hidden = true; $('painel').hidden = false; });
+$('abrirConfig').addEventListener('click', () => abrirSub('pconfig'));
+$('menuConfig').addEventListener('click', () => abrirSub('pconfig'));
+$('fecharConfig').addEventListener('click', voltarSub);
 $('tSom').addEventListener('click', () => { dados.config.som = !dados.config.som; salvar(); pintarConfig(); if (dados.config.som) som(700, .12); });
 $('tAba').addEventListener('click', () => { dados.config.pausaAba = !dados.config.pausaAba; salvar(); pintarConfig(); });
 
@@ -507,7 +564,7 @@ addEventListener('resize', ajustar);
 const relogio = new THREE.Clock();
 const alvoOlhar = new THREE.Vector3();
 reiniciar();
-hud();
+escolherNivel(nivel);
 ajustar();
 abrirPainel('menu', 'Cobrinha 3D', 'Escolha o nível');
 
@@ -568,13 +625,28 @@ renderer.setAnimationLoop(() => {
     macaOuro.scale.setScalar(1.08 * (1 - Math.pow(1 - surgirOuro, 3)));
   } else macaOuro.visible = false;
 
-  // obstáculos
+  // obstáculos: sobem do chão girando, passam do ponto, assentam e respiram
   blocos.forEach((b, i) => {
     const m = meshBloco(i);
-    b.surgir = Math.min(1, b.surgir + dt * 2.2);
+    const antes = b.surgir;
+    b.surgir = Math.min(1, b.surgir + dt * 1.7);
+    const e = b.surgir, x = mundo(b.x), z = mundo(b.y);
     m.visible = true;
-    m.position.set(mundo(b.x), .46, mundo(b.y));
-    m.scale.setScalar(1 - Math.pow(1 - b.surgir, 3));
+
+    if (e < 1) {
+      const sobe = saida(e), pop = estufa(e);
+      m.position.set(x, -.55 + (.46 + .55) * sobe, z);
+      m.rotation.set(0, b.fase + (1 - sobe) * Math.PI * 1.6, (1 - sobe) * .5);
+      m.scale.set(pop, 1.25 - .25 * pop, pop);          // esticado na subida, achatado ao pousar
+      if (antes < .62 && e >= .62) { onda(x, z); som(140, .12, 'square'); }   // o baque
+    } else {
+      const r = tempo * .55 + b.fase;
+      m.position.set(x, .46 + Math.sin(r * 1.6) * .045, z);
+      m.rotation.set(Math.sin(r * .9) * .05, b.fase + Math.sin(r) * .12, Math.cos(r * 1.1) * .05);
+      m.scale.setScalar(1);
+    }
+    m.children[0].material.emissiveIntensity = .3 + Math.sin(tempo * 2 + b.fase) * .18;
+    m.children[1].material.opacity = .6 + Math.sin(tempo * 2 + b.fase) * .25;
   });
   for (let i = blocos.length; i < blocosMesh.length; i++) blocosMesh[i].visible = false;
 
@@ -583,9 +655,19 @@ renderer.setAnimationLoop(() => {
     const f = faiscas[i], d = f.userData;
     d.v.y -= 14 * dt;
     f.position.addScaledVector(d.v, dt);
+    if (d.gira) f.rotation.x += dt * 7, f.rotation.z += dt * 5;
     d.vida -= dt * 1.4;
-    f.scale.setScalar(Math.max(d.vida, 0));
+    f.scale.setScalar(Math.max(d.vida, 0) * (d.gira ? 1.6 : 1));
     if (d.vida <= 0) { cena.remove(f); f.material.dispose(); faiscas.splice(i, 1); }
+  }
+
+  // anéis de choque
+  for (let i = ondas.length - 1; i >= 0; i--) {
+    const o = ondas[i], d = o.userData;
+    d.vida -= dt * 1.8;
+    o.scale.setScalar(1 + (1 - d.vida) * 2.6);
+    o.material.opacity = Math.max(0, d.vida) * .9;
+    if (d.vida <= 0) { cena.remove(o); o.material.dispose(); ondas.splice(i, 1); }
   }
 
   // câmera: acompanha de leve a cabeça; no menu, balança sozinha

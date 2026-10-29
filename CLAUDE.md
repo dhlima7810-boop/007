@@ -742,6 +742,20 @@ sem servidor** — esse é o requisito que moldou a estrutura:
   ela pesa: `passo()`, `tique()` ou o desenho. Era esse o pedido do dono: ir
   juntando poderes com o tempo.
 
+**O menu é raso de propósito:** Jogar, Dificuldade e Configurações. Os três
+níveis moram atrás do botão Dificuldade, num submenu (`#pniveis`), e escolher
+um **volta ao menu em vez de começar** — quem começa é o Jogar, e só ele. O
+botão carrega a escolha escrita (`Dificuldade · Médio`), senão não há como
+saber no que se vai jogar. As teclas 1/2/3 continuam valendo como atalho: no
+menu elas já começam a partida, dentro do submenu elas só escolhem.
+
+**O obstáculo não cresce parado.** Ele sobe de baixo do chão girando, estica na
+subida, passa do ponto e achata ao pousar (`estufa`, uma curva que ultrapassa),
+e no pouso solta um anel de choque (`onda`) com um baque grave. Parado, respira:
+balança devagar e pulsa o brilho das arestas. **Cada bloco tem a sua `fase`** —
+sem isso os 16 pulsam juntos e o tabuleiro inteiro pisca. Quebrado pelo escudo
+ele não some: `estilhacar()` espalha cacos que giram e deixa o anel.
+
 Outras regras que não são óbvias no código:
 
 - **`conquistar()` é o gancho das recompensas.** Toda meta batida passa por

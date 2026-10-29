@@ -28,7 +28,7 @@
            font-size: 11px; letter-spacing: .08em; text-transform: none; white-space: nowrap; }
   .poder[hidden] { display: none; }
 
-  .aviso { position: fixed; inset: 92px 12px auto; text-align: center; color: var(--ouro);
+  .aviso { position: fixed; inset: 104px 12px auto; text-align: center; color: var(--ouro);
            letter-spacing: .06em; pointer-events: none; text-shadow: 0 2px 12px rgba(0,0,0,.6); }
   .aviso[hidden] { display: none; }
 
@@ -74,12 +74,11 @@
   <h1 id="titulo">Cobrinha 3D</h1>
   <p id="sub">Escolha o nível</p>
 
-  <div class="grupo" id="niveis">
+  <div class="grupo" id="principal">
     <button class="botao botao--ouro" id="revToken" hidden></button>
     <button class="botao botao--ouro" id="revBanco" hidden></button>
-    <button class="botao" data-nivel="facil">Fácil · meta 15</button>
-    <button class="botao" data-nivel="medio">Médio · meta 25</button>
-    <button class="botao" data-nivel="dificil">Difícil · meta 40</button>
+    <button class="botao" id="jogar">Jogar</button>
+    <button class="botao botao--fraco" id="abrirNiveis">Dificuldade</button>
     <button class="botao botao--fraco" id="menuConfig">Configurações</button>
   </div>
 
@@ -89,7 +88,18 @@
     <button class="botao botao--fraco" id="sair">Sair para o menu</button>
   </div>
 
-  <p id="dica">Setas ou WASD · deslize no celular · 1 2 3 escolhem o nível · P pausa</p>
+  <p id="dica">Setas ou WASD · deslize no celular · P pausa</p>
+</div>
+
+<div class="painel" id="pniveis" hidden>
+  <h2>Dificuldade</h2>
+  <p id="subNiveis">A meta muda, e com ela a velocidade e os obstáculos</p>
+  <div class="grupo">
+    <button class="botao" data-nivel="facil">Fácil · meta 15</button>
+    <button class="botao" data-nivel="medio">Médio · meta 25</button>
+    <button class="botao" data-nivel="dificil">Difícil · meta 40</button>
+    <button class="botao botao--fraco" id="voltarNiveis">Voltar</button>
+  </div>
 </div>
 
 <div class="painel" id="pconfig" hidden>
