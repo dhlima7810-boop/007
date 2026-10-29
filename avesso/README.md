@@ -33,9 +33,9 @@ A corrida tem três atos, e **quem diz qual é o ato é o mundo, não o texto**.
 
 | Ato | Metros | | O que se vê |
 |---|---|---|---|
-| **Subsolo** | 0–250 | Fácil | terra caindo do teto, aresta desmoronada, estacas de madeira velha largando terra |
-| **Forja** | 250–625 | Médio | brasa subindo do chão, fio quente na borda, escória pingando, rodas girando |
-| **Desabamento** | 625+ | Difícil | cascalho despencando, rocha lascada na aresta, pêndulos |
+| **Subsolo** | 0–1000 | Fácil | terra caindo do teto, aresta desmoronada, estacas de madeira velha largando terra |
+| **Forja** | 1000–2500 | Médio | brasa subindo do chão, fio quente na borda, escória pingando, rodas girando |
+| **Desabamento** | 2500+ | Difícil | cascalho despencando, rocha lascada na aresta, pêndulos |
 
 Cada ato tem **paleta própria** — o Subsolo é terroso, a Forja é quente, o
 Desabamento é frio — e a paleta **caminha** até a do ato em 0,8s, para a
@@ -45,15 +45,27 @@ pequena quando ele começa: é lembrete, não manchete.
 A cada ato a velocidade dá um degrau e **a faixa do chão e do teto engrossa**,
 apertando o campo de verdade em vez de só acelerar.
 
-**Os atos crescem na proporção 1 : 2,5 : 4**, que foi a que o dono desenhou
-como 1.000 / 2.500 / 4.000. Os absolutos não cabem: **1.000 m são 20.000px,
-uns 50 segundos vivo, e a corrida mediana dura 5**. Com o fim do primeiro ato
-ali, toda partida morreria no Subsolo e a Forja nunca apareceria — para os
-absolutos funcionarem, o contador teria de correr 5x mais rápido do que a
-velocidade aprovada. A proporção era o que importava; a escala é a que cabe.
+**Os limites dos atos moram numa linha só**, a constante `LIMITES` no topo do
+`jogo.js`:
 
-O Subsolo também ficou 67% mais longo (de 150 para 250 m) e com mais respiro
-entre obstáculos (`esp` 1.08): a parte fácil dura mais, que era o pedido.
+| `LIMITES` | O que dá |
+|---|---|
+| `[1000, 2500]` | os números que o dono quis ver, **em vigor** |
+| `[250, 625]` | a mesma proporção numa escala alcançável |
+
+Com `[1000, 2500]`, medido com o piloto automático em 110 s: **12 corridas,
+mediana 152 m, melhor 315 m, nenhuma chegou aos 1.000**. Só o Subsolo
+aparece; Forja e Desabamento existem no código e não na tela.
+
+A conta por trás disso: 1.000 m são 20.000px, uns 50 segundos vivo, e a
+corrida mediana dura 5. Para os absolutos caberem, o contador teria de correr
+5x mais rápido do que a velocidade aprovada — que é exatamente o que foi
+corrigido na rodada anterior.
+
+Está assim **por escolha de quem manda, para ver com os próprios olhos**.
+Voltar é trocar aquela linha.
+
+O Subsolo também ganhou mais respiro entre obstáculos (`esp` 1.08).
 
 **A régua: 1 m = 20px.** A 400px/s o contador sobe uns 20 m por segundo e dá
 para atravessar a tela antes de chegar aos 100. Com 7px ele subia três vezes

@@ -58,6 +58,17 @@
   var TINTA = [12, 13, 16];
   var OSSO = [237, 234, 227];
 
+  // OS LIMITES DOS ATOS, em metros. Mexe-se AQUI e em mais lugar nenhum.
+  //
+  //   [1000, 2500]  os numeros que o dono quis ver, e que estao valendo
+  //   [250, 625]    a proporcao dele numa escala alcancavel (o que havia antes)
+  //
+  // A conta que motivou a dúvida: 1.000 m sao 20.000px, uns 50 segundos vivo,
+  // e a corrida mediana dura 5. Com o fim do primeiro ato ali, quase toda
+  // partida acaba no Subsolo. Ficou assim por escolha de quem manda, para
+  // ver com os proprios olhos; voltar e trocar esta linha.
+  var LIMITES = [1000, 2500];
+
   // TRES ATOS de 300 m. Um tema cada, uma dificuldade dita em voz alta.
   //
   // Antes eram seis setores em 900 m, o que dava 2,6s de mundo por setor:
@@ -74,10 +85,10 @@
   // colisao nenhuma: quem mata e a caixa, e so ela. Um enfeite que mata e um
   // enfeite que mente.
   var ATOS = [
-    { nome: 'Subsolo',     dif: 'Fácil',   tema: 'terra', cor: '#b08c5a', ate: 250, art: 'ao',
+    { nome: 'Subsolo',     dif: 'Fácil',   tema: 'terra', cor: '#b08c5a', ate: LIMITES[0], art: 'ao',
       tinta: [21, 17, 12], osso: [228, 217, 196], pino: '#8a7355',
       fFaixa: 0.078, vel: 0,   esp: 1.08, vao: 0.22, laje: 0.08, pendulo: 0,    aperto: 0 },
-    { nome: 'Forja',       dif: 'Médio',   tema: 'fogo',  cor: '#ff7a1a', ate: 625, art: 'à',
+    { nome: 'Forja',       dif: 'Médio',   tema: 'fogo',  cor: '#ff7a1a', ate: LIMITES[1], art: 'à',
       tinta: [25, 13, 10], osso: [244, 228, 205], pino: '#ff7a1a',
       fFaixa: 0.100, vel: 95,  esp: 0.90, vao: 0.30, laje: 0.20, pendulo: 0.30, aperto: 0.45 },
     { nome: 'Desabamento', dif: 'Difícil', tema: 'pedra', cor: '#9aa0a6', ate: Infinity, art: 'ao',
@@ -185,7 +196,7 @@
           ? 'Chegar ' + ATOS[i].art + ' ' + ATOS[i].nome
           : 'Passar dos ' + n + ' m';
       },
-      alvos: [250, 625, 1000], premios: [36, 74, 134], le: function (e) { return e.m; } },
+      alvos: [LIMITES[0], LIMITES[1], 4000], premios: [36, 74, 134], le: function (e) { return e.m; } },
 
     { id: 'tempo',  diz: function (n) { return 'Ficar ' + n + ' segundos vivo'; },
       alvos: [12, 20, 30], premios: [32, 68, 116], le: function (e) { return e.tempo; } },
@@ -356,11 +367,6 @@
   // da rocada e dos desafios; com o setor preso so a distancia, o numero na
   // tela e a troca de mundo andavam em unidades diferentes, e a divisao
   // "0 a 300 e facil" nunca fechava com o que se via.
-  // Os atos crescem na proporcao 1 : 2,5 : 4 — a que o dono desenhou como
-  // 1.000 / 2.500 / 4.000. Os absolutos dele nao cabem: 1.000 m sao 20.000px,
-  // uns 50 segundos vivo, e a corrida mediana dura 5. Com o fim do primeiro
-  // ato ali, toda partida morreria no Subsolo e a Forja nunca apareceria.
-  // A proporcao era o que importava; a escala e a que cabe.
   function setorDeM(m) {
     for (var i = 0; i < ATOS.length - 1; i++) if (m < ATOS[i].ate) return i;
     return ATOS.length - 1;
