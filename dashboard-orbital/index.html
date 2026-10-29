@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbital — Central de Vendas</title>
+<meta name="description" content="Dashboard de estudo com dados fictícios: vendas por país, vendedor, empresa e trimestre.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="fundo" aria-hidden="true"></div>
+
+<header class="topo">
+  <div class="marca">
+    <span class="marca__nucleo" aria-hidden="true"></span>
+    <div>
+      <h1>ORBITAL</h1>
+      <p>Central de vendas · 2025</p>
+    </div>
+  </div>
+
+  <div class="controles">
+    <label class="campo">
+      <span>País</span>
+      <select id="f-pais"><option value="">Todos</option></select>
+    </label>
+    <div class="campo">
+      <span>Período</span>
+      <div class="seg" id="f-tri" role="group" aria-label="Trimestre">
+        <button data-tri="0" aria-pressed="true">Ano</button>
+        <button data-tri="1" aria-pressed="false">T1</button>
+        <button data-tri="2" aria-pressed="false">T2</button>
+        <button data-tri="3" aria-pressed="false">T3</button>
+        <button data-tri="4" aria-pressed="false">T4</button>
+      </div>
+    </div>
+    <button class="btn" id="b-vivo" aria-pressed="false">▶ Vendas ao vivo</button>
+  </div>
+
+  <div class="status">
+    <span class="selo">DADOS FICTÍCIOS</span>
+    <time id="relogio">--:--:--</time>
+  </div>
+</header>
+
+<main class="grade">
+  <section class="kpis" id="kpis" aria-label="Indicadores"></section>
+
+  <article class="painel p-radar">
+    <h2>Radar de países <small>quanto mais perto do núcleo, maior o faturamento</small></h2>
+    <div id="radar"></div>
+  </article>
+
+  <article class="painel p-mensal">
+    <h2>Faturamento mensal <small id="mensal-sub"></small></h2>
+    <div id="mensal"></div>
+  </article>
+
+  <article class="painel p-tri">
+    <h2>Anéis trimestrais <small>clique num anel para filtrar</small></h2>
+    <div id="tri"></div>
+  </article>
+
+  <article class="painel p-vend">
+    <h2>Vendedores <small>faturamento e nº de vendas</small></h2>
+    <div id="vend"></div>
+  </article>
+
+  <article class="painel p-emp">
+    <h2>Empresas-chave <small>maiores compradores</small></h2>
+    <div id="emp"></div>
+  </article>
+
+  <article class="painel p-feed">
+    <h2>Vendas feitas <small id="feed-sub">últimas operações</small></h2>
+    <ul id="feed" class="feed"></ul>
+  </article>
+
+  <article class="painel p-ia">
+    <h2>Leitura automática <small>regras simples sobre os números filtrados</small></h2>
+    <div id="ia" class="ia"></div>
+    <div class="ia__rodape">
+      <button class="btn" id="b-copiar">Copiar resumo para o Claude</button>
+      <span id="copiado" role="status"></span>
+    </div>
+  </article>
+</main>
+
+<footer class="rodape">
+  Dados inventados para aprender. Cada recorte vira um resumo que você cola no Claude para pedir uma análise de verdade.
+</footer>
+
+<div id="tip" class="tip" role="tooltip" hidden></div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
