@@ -27,8 +27,7 @@
       <p class="hud__mult" id="mult" hidden>Roçada &times;<span id="multN">1</span></p>
     </div>
     <div class="hud__dir">
-      <p class="hud__lado">Recorde <span id="hudRecorde">0</span> m</p>
-      <p class="hud__lado hud__lado--fraco" id="hudSetor">Raso</p>
+      <p class="hud__lado"><span id="hudSetor">Raso</span><span class="hud__sep">·</span>Recorde <span id="hudRecorde">0</span> m</p>
     </div>
   </div>
 
@@ -60,10 +59,19 @@
     <p class="semjs">Este jogo precisa de JavaScript para rodar.</p>
   </section>
 
+  <section class="tela tela--largada" id="largada" hidden aria-labelledby="largSelo">
+    <p class="selo" id="largSelo">Desafios da partida</p>
+    <ul class="metas" id="metas"></ul>
+    <p class="conta" id="conta" aria-hidden="true">3</p>
+    <p class="teclas"><span id="pular">Aperte para começar agora</span></p>
+  </section>
+
   <section class="tela tela--fim" id="fim" hidden aria-labelledby="fimSelo">
     <p class="selo" id="fimSelo">Bateu</p>
     <p class="numero"><span id="fimPlacar">0</span><span class="numero__un">m</span></p>
     <p class="linha" id="fimLinha" aria-live="polite">Recorde de 0 m.</p>
+
+    <ul class="metas metas--fim" id="metasFim" hidden></ul>
 
     <div class="novidade" id="novidade" hidden>
       <p class="novidade__selo">Roupa nova</p>

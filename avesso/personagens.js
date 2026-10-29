@@ -24,30 +24,35 @@
    pessoa escolher a feia.
    ======================================================================== */
 
+// Os cortes de ANTES desta curva. Servem uma vez so, na migracao do
+// jogo.js: quem ja tinha uma roupa nao pode perde-la porque a exigencia
+// subiu. Nao use para mais nada e nao mexa.
+window.AVESSO_CORTES_ANTIGOS = [120, 300, 550, 850, 1200, 1600, 2050, 2550, 3100, 3700, 4400, 5200, 6100, 7100, 8200, 9400, 10700, 12100, 13600, 15200, 17500];
+
 window.AVESSO_PERSONAGENS = [
   { id:'avesso',   nome:'Avesso',    forma:'disco',     casca:'solido',  cor:'#ff3b14', rastro:'bolhas', giro:'fixo',    por:{ tipo:'livre' } },
 
-  { id:'brasa',    nome:'Brasa',     forma:'disco',     casca:'anel',    cor:'#ff6a2b', rastro:'risco',  giro:'roda',    por:{ tipo:'soma', m:120 } },
+  { id:'brasa',    nome:'Brasa',     forma:'disco',     casca:'anel',    cor:'#ff6a2b', rastro:'risco',  giro:'roda',    por:{ tipo:'soma', m:150 } },
   { id:'cal',      nome:'Cal',       forma:'quadrado',  casca:'solido',  cor:'#a8aab0', rastro:'bolhas', giro:'fixo',    por:{ tipo:'soma', m:300 } },
   { id:'gema',     nome:'Gema',      forma:'disco',     casca:'solido',  cor:'#e8a400', rastro:'pontos', giro:'roda',    por:{ tipo:'soma', m:550 } },
-  { id:'grafite',  nome:'Grafite',   forma:'hexagono',  casca:'vazado',  cor:'#7a828c', rastro:'risco',  giro:'roda',    por:{ tipo:'soma', m:850 } },
-  { id:'carmim',   nome:'Carmim',    forma:'losango',   casca:'solido',  cor:'#c21f3a', rastro:'bolhas', giro:'inclina', por:{ tipo:'soma', m:1200 } },
-  { id:'indigo',   nome:'Índigo',    forma:'disco',     casca:'partido', cor:'#4455c8', rastro:'bolhas', giro:'roda',    por:{ tipo:'soma', m:1600 } },
-  { id:'musgo',    nome:'Musgo',     forma:'capsula',   casca:'solido',  cor:'#5f8c3f', rastro:'risco',  giro:'inclina', por:{ tipo:'soma', m:2050 } },
-  { id:'ambar',    nome:'Âmbar',     forma:'hexagono',  casca:'solido',  cor:'#d98324', rastro:'pontos', giro:'fixo',    por:{ tipo:'soma', m:2550 } },
-  { id:'vidro',    nome:'Vidro',     forma:'disco',     casca:'vazado',  cor:'#4fb3c9', rastro:'nenhum', giro:'fixo',    por:{ tipo:'soma', m:3100 } },
-  { id:'polvora',  nome:'Pólvora',   forma:'triangulo', casca:'solido',  cor:'#8a7f9e', rastro:'pontos', giro:'inclina', por:{ tipo:'soma', m:3700 } },
-  { id:'ferrugem', nome:'Ferrugem',  forma:'quadrado',  casca:'anel',    cor:'#9e4a28', rastro:'bolhas', giro:'roda',    por:{ tipo:'soma', m:4400 } },
-  { id:'ocre',     nome:'Ocre',      forma:'cruz',      casca:'solido',  cor:'#b89150', rastro:'risco',  giro:'roda',    por:{ tipo:'soma', m:5200 } },
-  { id:'menta',    nome:'Menta',     forma:'disco',     casca:'anel',    cor:'#3fbf8f', rastro:'pontos', giro:'fixo',    por:{ tipo:'soma', m:6100 } },
-  { id:'lilas',    nome:'Lilás',     forma:'losango',   casca:'vazado',  cor:'#9b6bd6', rastro:'risco',  giro:'inclina', por:{ tipo:'soma', m:7100 } },
-  { id:'pessego',  nome:'Pêssego',   forma:'capsula',   casca:'partido', cor:'#e8886b', rastro:'bolhas', giro:'fixo',    por:{ tipo:'soma', m:8200 } },
-  { id:'chumbo',   nome:'Chumbo',    forma:'hexagono',  casca:'partido', cor:'#6b7079', rastro:'nenhum', giro:'roda',    por:{ tipo:'soma', m:9400 } },
-  { id:'estopim',  nome:'Estopim',   forma:'triangulo', casca:'vazado',  cor:'#ff5a3c', rastro:'pontos', giro:'inclina', por:{ tipo:'soma', m:10700 } },
-  { id:'giz',      nome:'Giz',       forma:'quadrado',  casca:'vazado',  cor:'#a8a394', rastro:'bolhas', giro:'fixo',    por:{ tipo:'soma', m:12100 } },
-  { id:'lasca',    nome:'Lasca',     forma:'cruz',      casca:'vazado',  cor:'#c9a44a', rastro:'risco',  giro:'roda',    por:{ tipo:'soma', m:13600 } },
-  { id:'breu',     nome:'Breu',      forma:'disco',     casca:'solido',  cor:'#5a4a6e', rastro:'risco',  giro:'roda',    por:{ tipo:'soma', m:15200 } },
-  { id:'nespera',  nome:'Nêspera',   forma:'capsula',   casca:'anel',    cor:'#d9663f', rastro:'pontos', giro:'inclina', por:{ tipo:'soma', m:17500 } },
+  { id:'grafite',  nome:'Grafite',   forma:'hexagono',  casca:'vazado',  cor:'#7a828c', rastro:'risco',  giro:'roda',    por:{ tipo:'soma', m:900 } },
+  { id:'carmim',   nome:'Carmim',    forma:'losango',   casca:'solido',  cor:'#c21f3a', rastro:'bolhas', giro:'inclina', por:{ tipo:'soma', m:1400 } },
+  { id:'indigo',   nome:'Índigo',    forma:'disco',     casca:'partido', cor:'#4455c8', rastro:'bolhas', giro:'roda',    por:{ tipo:'soma', m:2100 } },
+  { id:'musgo',    nome:'Musgo',     forma:'capsula',   casca:'solido',  cor:'#5f8c3f', rastro:'risco',  giro:'inclina', por:{ tipo:'soma', m:3000 } },
+  { id:'ambar',    nome:'Âmbar',     forma:'hexagono',  casca:'solido',  cor:'#d98324', rastro:'pontos', giro:'fixo',    por:{ tipo:'soma', m:4200 } },
+  { id:'vidro',    nome:'Vidro',     forma:'disco',     casca:'vazado',  cor:'#4fb3c9', rastro:'nenhum', giro:'fixo',    por:{ tipo:'soma', m:5800 } },
+  { id:'polvora',  nome:'Pólvora',   forma:'triangulo', casca:'solido',  cor:'#8a7f9e', rastro:'pontos', giro:'inclina', por:{ tipo:'soma', m:7800 } },
+  { id:'ferrugem', nome:'Ferrugem',  forma:'quadrado',  casca:'anel',    cor:'#9e4a28', rastro:'bolhas', giro:'roda',    por:{ tipo:'soma', m:10200 } },
+  { id:'ocre',     nome:'Ocre',      forma:'cruz',      casca:'solido',  cor:'#b89150', rastro:'risco',  giro:'roda',    por:{ tipo:'soma', m:13000 } },
+  { id:'menta',    nome:'Menta',     forma:'disco',     casca:'anel',    cor:'#3fbf8f', rastro:'pontos', giro:'fixo',    por:{ tipo:'soma', m:16500 } },
+  { id:'lilas',    nome:'Lilás',     forma:'losango',   casca:'vazado',  cor:'#9b6bd6', rastro:'risco',  giro:'inclina', por:{ tipo:'soma', m:20500 } },
+  { id:'pessego',  nome:'Pêssego',   forma:'capsula',   casca:'partido', cor:'#e8886b', rastro:'bolhas', giro:'fixo',    por:{ tipo:'soma', m:25500 } },
+  { id:'chumbo',   nome:'Chumbo',    forma:'hexagono',  casca:'partido', cor:'#6b7079', rastro:'nenhum', giro:'roda',    por:{ tipo:'soma', m:31500 } },
+  { id:'estopim',  nome:'Estopim',   forma:'triangulo', casca:'vazado',  cor:'#ff5a3c', rastro:'pontos', giro:'inclina', por:{ tipo:'soma', m:38500 } },
+  { id:'giz',      nome:'Giz',       forma:'quadrado',  casca:'vazado',  cor:'#a8a394', rastro:'bolhas', giro:'fixo',    por:{ tipo:'soma', m:47000 } },
+  { id:'lasca',    nome:'Lasca',     forma:'cruz',      casca:'vazado',  cor:'#c9a44a', rastro:'risco',  giro:'roda',    por:{ tipo:'soma', m:57000 } },
+  { id:'breu',     nome:'Breu',      forma:'disco',     casca:'solido',  cor:'#5a4a6e', rastro:'risco',  giro:'roda',    por:{ tipo:'soma', m:69000 } },
+  { id:'nespera',  nome:'Nêspera',   forma:'capsula',   casca:'anel',    cor:'#d9663f', rastro:'pontos', giro:'inclina', por:{ tipo:'soma', m:83000 } },
 
   { id:'cem',      nome:'Cem',       forma:'losango',   casca:'partido', cor:'#e09a28', rastro:'risco',  giro:'roda',    por:{ tipo:'proeza', id:'cem' } },
   { id:'voo',      nome:'Voo',       forma:'disco',     casca:'vazado',  cor:'#5ab6cf', rastro:'risco',  giro:'fixo',    por:{ tipo:'proeza', id:'voo' } },

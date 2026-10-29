@@ -69,6 +69,7 @@ body{
   opacity:.88;
 }
 .hud__lado--fraco{opacity:.8}
+.hud__sep{margin:0 .55em;opacity:.45}
 
 .hud__mult{
   margin:0;
@@ -305,3 +306,46 @@ kbd{
   .peca__fig{width:52px;height:52px}
   .peca__como{font-size:9px}
 }
+
+/* ---------- largada: os tres desafios e a contagem ---------- */
+
+.metas{
+  list-style:none;margin:0;padding:0;
+  display:flex;flex-direction:column;gap:8px;
+  width:min(420px,86vw);
+}
+.metas[hidden]{display:none}
+
+.meta{
+  display:flex;align-items:center;gap:12px;
+  border:1px solid var(--fio);border-radius:8px;
+  padding:11px 15px;text-align:left;
+}
+.meta__texto{
+  flex:1;min-width:0;
+  font-size:clamp(11px,1.2vw,13px);letter-spacing:.07em;text-transform:uppercase;
+  color:rgba(237,234,227,.82);line-height:1.35;
+}
+.meta__premio{
+  flex:none;font-weight:700;
+  font-size:clamp(11px,1.2vw,13px);letter-spacing:.06em;
+  font-variant-numeric:tabular-nums;color:var(--acento);
+}
+.meta__marca{
+  flex:none;width:16px;text-align:center;font-weight:700;
+  font-size:13px;color:rgba(237,234,227,.3);
+}
+
+.meta--feita{border-color:var(--acento);background:rgba(255,59,20,.07)}
+.meta--feita .meta__marca{color:var(--acento)}
+.meta--feita .meta__texto{color:var(--osso)}
+.meta--perdida .meta__texto{color:rgba(237,234,227,.34)}
+.meta--perdida .meta__premio{color:rgba(237,234,227,.24)}
+
+.conta{
+  margin:0;font-weight:700;
+  font-size:clamp(68px,14vw,150px);line-height:.85;letter-spacing:-.05em;
+  font-variant-numeric:tabular-nums;
+}
+
+.metas--fim .meta{padding:8px 13px}

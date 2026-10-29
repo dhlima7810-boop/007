@@ -63,13 +63,39 @@
   // aperta de verdade em vez de so acelerar. Tudo que e gerado guarda fracao
   // da altura util, nunca pixel: assim a faixa pode crescer (e a janela pode
   // mudar de tamanho) sem fechar um vao que ja existia.
+  // A cara do mundo por setor. `fFaixa` e a espessura do chao e do teto em
+  // fracao da altura — ela ENGROSSA a cada setor, e e por isso que o campo
+  // aperta de verdade em vez de so acelerar. Tudo que e gerado guarda fracao
+  // da altura util, nunca pixel: assim a faixa pode crescer (e a janela pode
+  // mudar de tamanho) sem fechar um vao que ja existia.
+  //
+  // `tema` so muda o DESENHO. Faisca, pedra e roda de fogo nao tem colisao
+  // nenhuma: quem mata continua sendo o retangulo, e so ele. Um enfeite que
+  // mata e um enfeite que mente.
   var SETORES = [
-    { nome: 'Raso',    fFaixa: 0.075, vel: 0,   esp: 1.00, vao: 0.00, laje: 0.00, movel: 0,    aperto: 0,   cor: '#6f7b86' },
-    { nome: 'Vão',     fFaixa: 0.086, vel: 40,  esp: 0.96, vao: 0.34, laje: 0.00, movel: 0,    aperto: 0,   cor: '#4f9ec4' },
-    { nome: 'Laje',    fFaixa: 0.097, vel: 80,  esp: 0.92, vao: 0.30, laje: 0.22, movel: 0,    aperto: 0.2, cor: '#4fb38d' },
-    { nome: 'Pêndulo', fFaixa: 0.108, vel: 120, esp: 0.88, vao: 0.28, laje: 0.24, movel: 0.55, aperto: 0.4, cor: '#c9a44a' },
-    { nome: 'Agulha',  fFaixa: 0.119, vel: 170, esp: 0.82, vao: 0.40, laje: 0.22, movel: 0.6,  aperto: 0.7, cor: '#e07a2a' },
-    { nome: 'Avesso',  fFaixa: 0.131, vel: 220, esp: 0.78, vao: 0.36, laje: 0.28, movel: 0.7,  aperto: 1.0, cor: '#e03a2a' }
+    { nome: 'Raso',    tema: 'terra',   fFaixa: 0.075, vel: 0,   esp: 1.00, vao: 0.00, laje: 0.00, movel: 0,    aperto: 0,   cor: '#6f7b86' },
+    { nome: 'Vão',     tema: 'madeira', fFaixa: 0.086, vel: 40,  esp: 0.96, vao: 0.34, laje: 0.00, movel: 0,    aperto: 0,   cor: '#4f9ec4' },
+    { nome: 'Laje',    tema: 'fogo',    fFaixa: 0.097, vel: 80,  esp: 0.92, vao: 0.30, laje: 0.22, movel: 0,    aperto: 0.2, cor: '#4fb38d' },
+    { nome: 'Pêndulo', tema: 'fogo',    fFaixa: 0.108, vel: 120, esp: 0.88, vao: 0.28, laje: 0.24, movel: 0.55, aperto: 0.4, cor: '#c9a44a' },
+    { nome: 'Agulha',  tema: 'pedra',   fFaixa: 0.119, vel: 170, esp: 0.82, vao: 0.40, laje: 0.22, movel: 0.6,  aperto: 0.7, cor: '#e07a2a' },
+    { nome: 'Avesso',  tema: 'pedra',   fFaixa: 0.131, vel: 220, esp: 0.78, vao: 0.36, laje: 0.28, movel: 0.7,  aperto: 1.0, cor: '#e03a2a' }
+  ];
+
+  var COR_FAISCA = '#ff7a1a';   // brilho 148: aparece no preto e no osso
+  var COR_PEDRA = '#8a7f74';    // brilho 138
+
+  // Tres desafios por partida, sorteados: um facil, um medio, um dificil,
+  // sempre nessa ordem. `le` tira o progresso do estado da corrida; cumprido,
+  // o premio entra como metros de bonus, iguais aos da rocada.
+  var DESAFIOS = [
+    { id: 'dist',   diz: function (n) { return 'Chegar a ' + n + ' m'; },                        alvos: [45, 70, 100], premios: [18, 30, 45], le: function (e) { return e.m; } },
+    { id: 'rocar',  diz: function (n) { return 'Roçar ' + n + (n > 1 ? ' vezes' : ' vez'); },     alvos: [3, 6, 10],    premios: [20, 34, 52], le: function (e) { return e.rocadas; } },
+    { id: 'mult',  diz: function (n) { return 'Levar a roçada a ×' + n; },                       alvos: [3, 5, 7],     premios: [22, 36, 55], le: function (e) { return e.maxMult; } },
+    { id: 'voo',    diz: function (n) { return 'Passar ' + n + ' obstáculos sem tocar nas bordas'; }, alvos: [4, 7, 11], premios: [24, 38, 58], le: function (e) { return e.maxSemTocar; } },
+    { id: 'setor',  diz: function (n) { return 'Alcançar o setor ' + n; },                       alvos: [2, 3, 4],     premios: [20, 35, 55], le: function (e) { return e.setor + 1; } },
+    { id: 'tempo',  diz: function (n) { return 'Ficar ' + n + ' segundos vivo'; },               alvos: [12, 20, 30],  premios: [18, 30, 46], le: function (e) { return e.tempo; } },
+    { id: 'passar', diz: function (n) { return 'Passar ' + n + ' obstáculos'; },                 alvos: [8, 14, 20],   premios: [16, 28, 44], le: function (e) { return e.passados; } },
+    { id: 'limpo',  diz: function (n) { return 'Passar ' + n + ' obstáculos seguidos sem roçar'; }, alvos: [5, 8, 12], premios: [18, 30, 46], le: function (e) { return e.maxLimpo; } }
   ];
 
   var PROEZAS = {
@@ -90,16 +116,18 @@
     camX: 0, base: 0, tempo: 0,
     y: 0, vy: 0, segurando: false,
     obst: [], proximoX: 0,
-    rastro: [], cacos: [], faiscas: [],
+    rastro: [], cacos: [], faiscas: [], part: [],
     inv: 0, tremor: 0,
     larg: 1280, alt: 720,
     fFaixa: SETORES[0].fFaixa,
     setor: 0,
     escalaTempo: 1,
     mult: 0, bonus: 0, rocadas: 0, semTocar: 0,
+    maxMult: 0, maxSemTocar: 0, limpo: 0, maxLimpo: 0, passados: 0,
+    desafios: [], premioDesafios: 0,
     passouRecorde: false, primeiro: true,
     recorde: 0, total: 0,
-    proezas: {}, vestido: 'avesso',
+    proezas: {}, ganhas: {}, vestido: 'avesso',
     inverter: true, som: true,
     poucoMov: false, podeReiniciar: false
   };
@@ -185,6 +213,8 @@
     morte:  function ()     { tom(200, 55, 0.38, 'sawtooth', 0.09); },
     setor:  function ()     { tom(330, 495, 0.22, 'triangle', 0.06); },
     marca:  function ()     { tom(660, 990, 0.3, 'triangle', 0.07); },
+    meta:   function ()     { tom(700, 1050, 0.26, 'triangle', 0.07); },
+    conta:  function (n)    { tom(n > 1 ? 380 : 620, n > 1 ? 380 : 780, 0.12, 'triangle', 0.05); },
     roupa:  function ()     { tom(523, 523, 0.14, 'triangle', 0.07);
                               window.setTimeout(function () { tom(659, 659, 0.14, 'triangle', 0.07); }, 120);
                               window.setTimeout(function () { tom(784, 784, 0.3, 'triangle', 0.07); }, 240); }
@@ -283,6 +313,9 @@
       }
       C.primeiro = false;
 
+      // semente fixa por peca: sem ela a textura sorteia de novo a cada
+      // quadro e o obstaculo fica fervendo
+      for (var q = 0; q < g.pecas.length; q++) g.pecas[q].s = Math.random();
       C.obst.push(g);
       C.proximoX += w + (A.espBase - A.espCorte * k) * s.esp + folgaExtra;
     }
@@ -294,11 +327,14 @@
   }
 
   function limparMundo() {
-    C.obst.length = 0; C.rastro.length = 0; C.cacos.length = 0; C.faiscas.length = 0;
+    C.obst.length = 0; C.rastro.length = 0; C.cacos.length = 0;
+    C.faiscas.length = 0; C.part.length = 0;
     C.y = C.alt - faixa() - A.raio;
     C.vy = 0; C.inv = 0; C.tremor = 0; C.segurando = false;
     C.escalaTempo = 1; C.mult = 0; C.bonus = 0; C.rocadas = 0; C.semTocar = 0;
     C.passouRecorde = false; C.primeiro = true;
+    C.maxMult = 0; C.maxSemTocar = 0; C.limpo = 0; C.maxLimpo = 0;
+    C.passados = 0; C.premioDesafios = 0;
   }
 
   /* §8 — passo da fisica ------------------------------------------------- */
@@ -364,14 +400,20 @@
       if (!g.pronto && g.x + g.w < jx - A.raio) {
         g.pronto = true;
         C.semTocar++;
+        C.passados++;
+        if (C.semTocar > C.maxSemTocar) C.maxSemTocar = C.semTocar;
         if (g.dmin < A.rocada) {
           C.mult = Math.min(C.mult + 1, A.multMax);
+          if (C.mult > C.maxMult) C.maxMult = C.mult;
           C.bonus += C.mult;
           C.rocadas++;
+          C.limpo = 0;
           C.faiscas.push({ x: g.x + g.w, y: C.y, v: 1, n: C.mult });
           SONS.rocada(C.mult);
         } else {
           C.mult = 0;
+          C.limpo++;
+          if (C.limpo > C.maxLimpo) C.maxLimpo = C.limpo;
         }
       }
     }
@@ -397,6 +439,69 @@
     if (C.setor !== setorEscrito) { setorEscrito = C.setor; el.hudSetor.textContent = SETORES[C.setor].nome; }
 
     conferirProezas(m);
+    conferirDesafios(m);
+    emitir(dt);
+  }
+
+  /* §8b — enfeite dos setores: faisca e pedra ---------------------------- */
+  /* Nada disto tem colisao. Quem mata e o retangulo, e so ele: um enfeite
+     que mata e um enfeite que mente. */
+
+  function emitir(dt) {
+    if (C.poucoMov || C.part.length > 140) return;
+    for (var i = 0; i < C.obst.length; i++) {
+      var g = C.obst[i];
+      var sx = g.x - C.camX;
+      if (sx > C.larg || sx + g.w < 0) continue;
+      var tema = SETORES[setorDe(g.x)].tema;
+      if (tema !== 'fogo' && tema !== 'pedra') continue;
+
+      for (var j = 0; j < g.pecas.length; j++) {
+        var pc = g.pecas[j];
+        var b = caixa(g, pc);
+        if (tema === 'fogo') {
+          if (Math.random() > dt * 10) continue;
+          var py = pc.anc === 'teto' ? b.y + b.h : (pc.anc === 'chao' ? b.y : b.y + Math.random() * b.h);
+          var dir = pc.anc === 'teto' ? 1 : (pc.anc === 'chao' ? -1 : (Math.random() < 0.5 ? -1 : 1));
+          C.part.push({ t: 'f', x: b.x + acaso(4, b.w - 4), y: py,
+            vx: acaso(-90, 10), vy: dir * acaso(50, 190), v: acaso(0.5, 1) });
+        } else if (pc.anc === 'teto') {
+          if (Math.random() > dt * 2.4) continue;
+          C.part.push({ t: 'p', x: b.x + acaso(3, b.w - 3), y: b.y + b.h,
+            vx: acaso(-30, 0), vy: acaso(10, 60), r: acaso(1.8, 3.6), v: 1 });
+        }
+      }
+    }
+  }
+
+  function sortearDesafios() {
+    var pool = DESAFIOS.slice(), i, j, t;
+    for (i = pool.length - 1; i > 0; i--) {
+      j = Math.floor(Math.random() * (i + 1));
+      t = pool[i]; pool[i] = pool[j]; pool[j] = t;
+    }
+    // sempre um facil, um medio e um dificil, nessa ordem: a partida ganha
+    // uma meta que quase sempre se cumpre e uma que quase nunca
+    var fora = [];
+    for (i = 0; i < 3; i++) {
+      fora.push({ d: pool[i], alvo: pool[i].alvos[i], premio: pool[i].premios[i], feito: false });
+    }
+    return fora;
+  }
+
+  function conferirDesafios(m) {
+    if (!C.desafios.length) return;
+    var e = { m: m, rocadas: C.rocadas, maxMult: C.maxMult, maxSemTocar: C.maxSemTocar,
+      setor: C.setor, tempo: C.tempo, passados: C.passados, maxLimpo: C.maxLimpo };
+    for (var i = 0; i < C.desafios.length; i++) {
+      var x = C.desafios[i];
+      if (x.feito || x.d.le(e) < x.alvo) continue;
+      x.feito = true;
+      C.bonus += x.premio;
+      C.premioDesafios += x.premio;
+      avisar('+' + x.premio + ' m', '#ff3b14');
+      SONS.meta();
+    }
   }
 
   function conferirProezas(m) {
@@ -420,13 +525,31 @@
     var dt = dtReal * (C.estado === 'jogando' ? C.escalaTempo : 1);
 
     if (C.estado === 'jogando') passo(dt);
-    else if (C.estado === 'menu' && !C.poucoMov) { C.camX += A.velMenu * dt; C.tempo += dt; }
+    else if ((C.estado === 'menu' || C.estado === 'largada') && !C.poucoMov) {
+      C.camX += A.velMenu * dt; C.tempo += dt;
+    }
 
     for (var i = C.cacos.length - 1; i >= 0; i--) {
       var c = C.cacos[i];
       c.vy += 1700 * dt; c.x += c.vx * dt; c.y += c.vy * dt; c.a += c.va * dt; c.v -= dt * 1.25;
       if (c.v <= 0) C.cacos.splice(i, 1);
     }
+    var chao = C.alt - faixa();
+    for (var q = C.part.length - 1; q >= 0; q--) {
+      var w = C.part[q];
+      if (w.t === 'p') {
+        w.vy += 900 * dt;
+      } else {
+        w.vx -= w.vx * Math.min(1, dt * 2.0);
+        w.vy -= w.vy * Math.min(1, dt * 1.6);
+      }
+      w.x += w.vx * dt;
+      w.y += w.vy * dt;
+      if (w.t === 'p' && w.y > chao) { w.y = chao; w.vy = 0; w.vx *= 0.25; }
+      w.v -= dt * (w.t === 'p' ? 0.5 : 1.5);
+      if (w.v <= 0 || w.x < C.camX - 140) C.part.splice(q, 1);
+    }
+
     for (var j = C.faiscas.length - 1; j >= 0; j--) {
       C.faiscas[j].v -= dtReal * 1.7;
       if (C.faiscas[j].v <= 0) C.faiscas.splice(j, 1);
@@ -495,6 +618,68 @@
     ctx.fill();
   }
 
+  // Desenha a cara do setor por cima da peca ja pintada. Tudo em cor de
+  // FUNDO, nunca numa cor propria: assim a textura inverte junto com o
+  // mundo sem ninguem escrever a regra duas vezes.
+  function textura(b, tema, pc, fundo) {
+    var sd = pc.s || 0, i;
+    cx.save();
+    cx.fillStyle = fundo;
+
+    if (tema === 'terra') {
+      cx.globalAlpha = 0.2;
+      var n = Math.max(3, Math.min(14, Math.floor(b.h / 20)));
+      for (i = 0; i < n; i++) {
+        var a1 = Math.sin(sd * 99 + i * 12.9) * 0.5 + 0.5;
+        var a2 = Math.sin(sd * 57 + i * 7.3) * 0.5 + 0.5;
+        cx.fillRect(b.x + 4 + a1 * Math.max(0, b.w - 11), b.y + 6 + a2 * Math.max(0, b.h - 13), 3, 3);
+      }
+
+    } else if (tema === 'madeira') {
+      cx.globalAlpha = 0.17;
+      var linhas = Math.max(2, Math.min(6, Math.floor(b.h / 28)));
+      for (i = 1; i <= linhas; i++) cx.fillRect(b.x + 3, b.y + (b.h * i) / (linhas + 1), b.w - 6, 1.6);
+      cx.globalAlpha = 0.22;
+      cx.beginPath();
+      cx.ellipse(b.x + b.w * 0.5, b.y + b.h * (0.2 + sd * 0.6), b.w * 0.16, b.w * 0.1, 0, 0, 6.2832);
+      cx.fill();
+
+    } else if (tema === 'fogo') {
+      // roda entalhada girando, inscrita DENTRO do retangulo: o que gira
+      // nunca passa da caixa que mata, senao o desenho mentiria
+      var r = Math.min(b.w, b.h) * 0.34;
+      if (r > 4.5) {
+        var px = b.x + b.w / 2;
+        var py = pc.anc === 'teto' ? b.y + b.h - r - 3 : (pc.anc === 'chao' ? b.y + r + 3 : b.y + b.h / 2);
+        cx.globalAlpha = 0.8;
+        cx.translate(px, py);
+        cx.rotate(C.poucoMov ? sd * 6.2832 : C.tempo * 2.3 + sd * 6.2832);
+        for (i = 0; i < 6; i++) {
+          cx.rotate(1.0472);
+          cx.fillRect(-r * 0.17, -r, r * 0.34, r * 0.58);
+        }
+        cx.beginPath(); cx.arc(0, 0, r * 0.34, 0, 6.2832); cx.fill();
+      }
+
+    } else {
+      // pedra: lascas na borda virada para o campo
+      cx.globalAlpha = 0.3;
+      var borda = pc.anc === 'teto' ? b.y + b.h : b.y;
+      var sinal = pc.anc === 'teto' ? -1 : 1;
+      var q = Math.max(2, Math.min(8, Math.floor(b.w / 13)));
+      var lw = b.w / q;
+      for (i = 0; i < q; i++) {
+        var f = Math.sin(sd * 71 + i * 4.1) * 0.5 + 0.5;
+        cx.beginPath();
+        cx.moveTo(b.x + i * lw, borda);
+        cx.lineTo(b.x + (i + 0.5) * lw, borda + sinal * (4 + f * 9));
+        cx.lineTo(b.x + (i + 1) * lw, borda);
+        cx.closePath(); cx.fill();
+      }
+    }
+    cx.restore();
+  }
+
   function anguloDe(p) {
     if (p.giro === 'roda') return (C.camX / 34) % 6.2832;
     if (p.giro === 'inclina') return (C.vy / A.vyMax) * 0.55;
@@ -541,11 +726,31 @@
       var g = C.obst[i];
       var sx = g.x - C.camX;
       if (sx > C.larg + 8 || sx + g.w < -8) continue;
+      var tema = SETORES[setorDe(g.x)].tema;
       for (var j = 0; j < g.pecas.length; j++) {
         var b = caixa(g, g.pecas[j]);
-        cx.fillRect(b.x - C.camX, b.y, b.w, b.h);
+        b.x -= C.camX;
+        cx.fillStyle = solido;
+        cx.fillRect(b.x, b.y, b.w, b.h);
+        textura(b, tema, g.pecas[j], fundo);
       }
     }
+
+    // faiscas e pedras soltas
+    for (var pq = 0; pq < C.part.length; pq++) {
+      var w2 = C.part[pq];
+      var wx = w2.x - C.camX;
+      if (wx < -20 || wx > C.larg + 20) continue;
+      cx.globalAlpha = Math.max(0, Math.min(1, w2.v));
+      if (w2.t === 'f') {
+        cx.fillStyle = COR_FAISCA;
+        cx.fillRect(wx - 1.6, w2.y - 1.6, 3.2, 3.2);
+      } else {
+        cx.fillStyle = COR_PEDRA;
+        cx.fillRect(wx - w2.r / 2, w2.y - w2.r / 2, w2.r, w2.r);
+      }
+    }
+    cx.globalAlpha = 1;
 
     var jx = C.larg * A.xJogador;
 
@@ -610,10 +815,22 @@
 
   /* §10 — roupas: o que se tem e o que falta ----------------------------- */
 
+  // Uma vez ganha, nunca se perde. A curva de metros ja subiu uma vez e pode
+  // subir de novo; sem este registro, apertar a exigencia TIRA do armario uma
+  // roupa que a pessoa ja tinha, que e a pior coisa que uma colecao pode fazer.
   function tem(p) {
     if (p.por.tipo === 'livre') return true;
+    if (C.ganhas[p.id]) return true;
     if (p.por.tipo === 'soma') return C.total >= p.por.m;
     return !!C.proezas[p.por.id];
+  }
+
+  function gravarGanhas() {
+    var mudou = false;
+    for (var i = 0; i < P.length; i++) {
+      if (tem(P[i]) && !C.ganhas[P[i].id]) { C.ganhas[P[i].id] = 1; mudou = true; }
+    }
+    if (mudou) guardar('avesso.ganhas', Object.keys(C.ganhas).join(','));
   }
 
   function tidas() {
@@ -641,6 +858,41 @@
   }
 
   /* §11 — vida e morte --------------------------------------------------- */
+
+  var contaTimer = null;
+
+  function preparar() {
+    C.desafios = sortearDesafios();
+    montarMetas(el.metas, C.desafios, false);
+    C.estado = 'largada';
+    abrir(el.largada);
+    contar(3);
+  }
+
+  // A contagem e PULAVEL de proposito. Uma corrida dura uns dez segundos;
+  // 2,2s de pre-jogo obrigatorio a cada tentativa viraria castigo la pela
+  // vigesima. Quem chega ve; quem esta tentando de novo aperta e larga.
+  function contar(n) {
+    if (contaTimer) window.clearTimeout(contaTimer);
+    el.conta.textContent = n;
+    if (anima) {
+      window.gsap.fromTo(el.conta, { scale: 1.3, autoAlpha: 0.15 },
+        { scale: 1, autoAlpha: 1, duration: 0.6, ease: 'power3.out', overwrite: true, clearProps: 'transform' });
+    }
+    SONS.conta(n);
+    contaTimer = window.setTimeout(function () {
+      if (C.estado !== 'largada') return;
+      if (n > 1) contar(n - 1);
+      else pularLargada();
+    }, 750);
+  }
+
+  function pularLargada() {
+    if (C.estado !== 'largada') return;
+    if (contaTimer) { window.clearTimeout(contaTimer); contaTimer = null; }
+    fechar(el.largada);
+    comecar();
+  }
 
   function comecar() {
     C.base = C.camX;
@@ -683,6 +935,7 @@
     C.total += m;
     guardar('avesso.total', C.total);
     conferirProezas(m);
+    gravarGanhas();
 
     var novo = m > C.recorde;
     if (novo) { C.recorde = m; guardar('avesso.recorde', m); }
@@ -692,8 +945,12 @@
 
     el.fimPlacar.textContent = m;
     el.fimSelo.textContent = novo ? 'Recorde' : 'Bateu';
+    var feitos = 0;
+    for (var f = 0; f < C.desafios.length; f++) if (C.desafios[f].feito) feitos++;
     el.fimLinha.textContent = (novo ? 'Melhor que todas as anteriores. ' : 'Recorde de ' + C.recorde + ' m. ')
-      + (C.rocadas ? C.rocadas + (C.rocadas === 1 ? ' roçada, ' : ' roçadas, ') + '+' + C.bonus + ' m de bônus.' : 'Nenhuma roçada.');
+      + (C.rocadas ? C.rocadas + (C.rocadas === 1 ? ' roçada' : ' roçadas') : 'Nenhuma roçada')
+      + ' · ' + feitos + ' de ' + C.desafios.length + ' desafios · +' + C.bonus + ' m de bônus.';
+    montarMetas(el.metasFim, C.desafios, true);
     el.recorde.textContent = C.recorde;
     el.hudRecorde.textContent = C.recorde;
     atualizarMenu();
@@ -712,12 +969,13 @@
   }
 
   function aoMenu() {
+    if (contaTimer) { window.clearTimeout(contaTimer); contaTimer = null; }
     C.estado = 'menu';
     C.podeReiniciar = false; C.segurando = false;
     C.fFaixa = SETORES[0].fFaixa;
     limparMundo();
     atualizarMenu();
-    fechar(el.hud); fechar(el.fim); fechar(el.pausa); fechar(el.vestiario);
+    fechar(el.hud); fechar(el.fim); fechar(el.pausa); fechar(el.vestiario); fechar(el.largada);
     abrir(el.inicio);
   }
 
@@ -782,6 +1040,33 @@
           onComplete: function () { el.aviso.hidden = true; } });
       } else { el.aviso.hidden = true; }
     }, 1200);
+  }
+
+  function montarMetas(onde, lista, comResultado) {
+    onde.textContent = '';
+    for (var i = 0; i < lista.length; i++) {
+      var x = lista[i];
+      var li = document.createElement('li');
+      li.className = 'meta' + (comResultado ? (x.feito ? ' meta--feita' : ' meta--perdida') : '');
+
+      var mk = document.createElement('span');
+      mk.className = 'meta__marca';
+      mk.textContent = comResultado ? (x.feito ? '\u2713' : '\u00b7') : String(i + 1);
+      li.appendChild(mk);
+
+      var tx = document.createElement('span');
+      tx.className = 'meta__texto';
+      tx.textContent = x.d.diz(x.alvo);
+      li.appendChild(tx);
+
+      var pr = document.createElement('span');
+      pr.className = 'meta__premio';
+      pr.textContent = '+' + x.premio + ' m';
+      li.appendChild(pr);
+
+      onde.appendChild(li);
+    }
+    onde.hidden = !lista.length;
   }
 
   function pintarPeca(canvas, p, vestida) {
@@ -888,8 +1173,9 @@
       C.segurando = true; return;
     }
     if (C.estado === 'pausado') { despausar(); return; }
-    if (C.estado === 'menu') { fechar(el.inicio); comecar(); C.segurando = true; return; }
-    if (C.estado === 'morto' && C.podeReiniciar) { fechar(el.fim); comecar(); C.segurando = true; }
+    if (C.estado === 'largada') { pularLargada(); C.segurando = true; return; }
+    if (C.estado === 'menu') { fechar(el.inicio); preparar(); return; }
+    if (C.estado === 'morto' && C.podeReiniciar) { fechar(el.fim); preparar(); }
   }
 
   function soltou() {
@@ -928,8 +1214,8 @@
       if (document.hidden) { soltou(); pausar(); }
     });
 
-    el.btJogar.addEventListener('click', function () { somAcordar(); fechar(el.inicio); comecar(); });
-    el.btDeNovo.addEventListener('click', function () { fechar(el.fim); comecar(); });
+    el.btJogar.addEventListener('click', function () { somAcordar(); fechar(el.inicio); preparar(); });
+    el.btDeNovo.addEventListener('click', function () { fechar(el.fim); preparar(); });
     el.btMenu.addEventListener('click', aoMenu);
     el.btVoltar.addEventListener('click', despausar);
     el.btSair.addEventListener('click', aoMenu);
@@ -1006,6 +1292,7 @@
   function pegar() {
     var ids = ['palco', 'tela', 'hud', 'placar', 'hudRecorde', 'hudSetor', 'mult', 'multN',
       'aviso', 'avisoTexto', 'inicio', 'fim', 'pausa', 'vestiario', 'grade', 'vestLinha',
+      'largada', 'metas', 'conta', 'metasFim',
       'btJogar', 'btDeNovo', 'btMenu', 'btVoltar', 'btSair', 'btVestiario', 'btVestiario2',
       'btVestFechar', 'fimPlacar', 'fimSelo', 'fimLinha', 'recorde', 'somaTotal', 'vestCont',
       'optInverter', 'optSom', 'novidade', 'novidadeLista', 'barra', 'barraTexto', 'barraCheio'];
@@ -1036,6 +1323,22 @@
 
     var pr = lerGuardado('avesso.proezas', '').split(',');
     for (var j = 0; j < pr.length; j++) if (pr[j]) C.proezas[pr[j]] = 1;
+
+    var gs = lerGuardado('avesso.ganhas', null);
+    if (gs === null) {
+      // Migracao, uma vez so. A curva de metros subiu; quem ja tinha uma
+      // roupa nao pode perde-la por isso. Conta quantos cortes ANTIGOS o
+      // total ja passava e credita as primeiras roupas por soma, na ordem.
+      var antigos = window.AVESSO_CORTES_ANTIGOS || [];
+      var n = 0, soma = [];
+      for (var q = 0; q < antigos.length; q++) if (C.total >= antigos[q]) n++;
+      for (var w = 0; w < P.length; w++) if (P[w].por.tipo === 'soma') soma.push(P[w].id);
+      for (var z = 0; z < n && z < soma.length; z++) C.ganhas[soma[z]] = 1;
+    } else {
+      var lista = gs.split(',');
+      for (var y = 0; y < lista.length; y++) if (lista[y]) C.ganhas[lista[y]] = 1;
+    }
+    gravarGanhas();
 
     var v = lerGuardado('avesso.vestido', 'avesso');
     C.vestido = (porId[v] && tem(porId[v])) ? v : 'avesso';
