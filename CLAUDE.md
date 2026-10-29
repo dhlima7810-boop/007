@@ -1,7 +1,18 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Pizza Mia — site
 
 Site estático da pizzaria Pizza Mia (Av. Emilio Ribas, 3175 — Vila Galvão,
 Guarulhos / SP). HTML, CSS e JavaScript puros, sem build e sem framework.
+
+O repositório também guarda dois projetos à parte (`cobrinha/` e `src/`), que
+**não fazem parte do site** e não seguem as regras de animação abaixo. Veja
+"Outros projetos no repositório" no fim.
+
+Não há testes nem lint: `npm test` é um placeholder que falha. Para ver o
+site, abra `index.html` ou rode `python3 -m http.server 8000` na raiz.
 
 ## Regra de animação
 
@@ -476,8 +487,9 @@ alvo.
 
 ## Sem componentes
 
-O projeto ainda **não** tem camada de componentes. Nada de React, Vue, web
-components ou um sistema de componentes próprio. É uma página só, em
+O **site** ainda não tem camada de componentes. Nada de React, Vue, web
+components ou um sistema de componentes próprio. (Os componentes React de
+`src/` são de outro projeto e não entram na página.) É uma página só, em
 `index.html`, com o CSS em um arquivo e o JS em outro. Quando for preciso
 repetir um bloco, repita o HTML.
 
@@ -594,6 +606,8 @@ assets/css/style.css  estilos
 assets/js/main.js     Lenis + GSAP + ScrollTrigger
 assets/img/           fotos (cada foto aparece uma vez só no site)
 assets/vendor/        libs
+cobrinha/             jogo da cobrinha 3D (projeto à parte)
+src/                  telas do app Ascend em React (projeto à parte)
 ```
 
 ## Conteúdo
@@ -693,3 +707,33 @@ O `_headers` também é ignorado.
 
 O `README` traz as opções em ordem. Não feche esses agentes sem o dono pedir, e
 não publique em subcaminho achando que tanto faz.
+
+## Outros projetos no repositório
+
+Nenhum dos dois entra no `index.html` nem usa Lenis/GSAP.
+
+### `cobrinha/` — jogo da cobrinha 3D
+
+Three.js (0.170.0), tabuleiro 17×17, uma página só. **Abre com duplo clique,
+sem servidor** — esse é o requisito que moldou a estrutura:
+
+- **A fonte é `jogo.src.js`; `jogo.js` é gerado.** O `index.html` carrega só
+  `jogo.js`, como `<script>` comum. Módulo ES (`type="module"`) é bloqueado em
+  `file://`: o menu aparecia e o jogo nunca iniciava. Depois de editar a fonte:
+  `npx esbuild jogo.src.js --bundle --minify --format=iife --outfile=jogo.js`
+  (esbuild não é dependência do projeto; rode com `npx`). Commite os dois.
+- `three.module.min.js` fica na pasta só como entrada do empacotamento.
+- Estado de jogo em `estado`: `pronto` / `jogando` / `pausado` / `fim`.
+  O passo da lógica (`passo()`) é separado do desenho: a cobra é interpolada
+  entre a casa anterior (`anterior`) e a atual (`cobra`) a cada quadro.
+- Começa a andar assim que se clica em Jogar, de propósito: a cobra nasce a 12
+  casas do muro e devagar (0,22s por casa) para dar tempo de reagir. Uma
+  versão que esperava a primeira seta foi descartada a pedido do dono.
+
+### `src/` — telas do app Ascend
+
+Quatro telas 1080×1920 em React + TypeScript, feitas para renderizar em
+Remotion (`src/projetos/ascend/README.md` tem a paleta e as props). Os
+componentes não têm relógio próprio: o tempo entra por props. Reaproveitáveis
+em `src/cenas/`. Não há `tsconfig`, bundler nem dependência React no
+`package.json` — o código ainda não compila neste repositório.
