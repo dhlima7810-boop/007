@@ -33,9 +33,9 @@ A corrida tem três atos, e **quem diz qual é o ato é o mundo, não o texto**.
 
 | Ato | Metros | | O que se vê |
 |---|---|---|---|
-| **Subsolo** | 0–150 | Fácil | terra caindo do teto, aresta desmoronada, estacas de madeira velha largando terra |
-| **Forja** | 150–400 | Médio | brasa subindo do chão, fio quente na borda, escória pingando, rodas girando |
-| **Desabamento** | 400+ | Difícil | cascalho despencando, rocha lascada na aresta, pêndulos |
+| **Subsolo** | 0–250 | Fácil | terra caindo do teto, aresta desmoronada, estacas de madeira velha largando terra |
+| **Forja** | 250–625 | Médio | brasa subindo do chão, fio quente na borda, escória pingando, rodas girando |
+| **Desabamento** | 625+ | Difícil | cascalho despencando, rocha lascada na aresta, pêndulos |
 
 Cada ato tem **paleta própria** — o Subsolo é terroso, a Forja é quente, o
 Desabamento é frio — e a paleta **caminha** até a do ato em 0,8s, para a
@@ -45,9 +45,15 @@ pequena quando ele começa: é lembrete, não manchete.
 A cada ato a velocidade dá um degrau e **a faixa do chão e do teto engrossa**,
 apertando o campo de verdade em vez de só acelerar.
 
-**Os atos crescem**: o primeiro é curto porque é onde quase toda corrida
-acaba; os seguintes são mais largos porque ali já se corre mais rápido e o
-mesmo número de metros passa em menos tempo.
+**Os atos crescem na proporção 1 : 2,5 : 4**, que foi a que o dono desenhou
+como 1.000 / 2.500 / 4.000. Os absolutos não cabem: **1.000 m são 20.000px,
+uns 50 segundos vivo, e a corrida mediana dura 5**. Com o fim do primeiro ato
+ali, toda partida morreria no Subsolo e a Forja nunca apareceria — para os
+absolutos funcionarem, o contador teria de correr 5x mais rápido do que a
+velocidade aprovada. A proporção era o que importava; a escala é a que cabe.
+
+O Subsolo também ficou 67% mais longo (de 150 para 250 m) e com mais respiro
+entre obstáculos (`esp` 1.08): a parte fácil dura mais, que era o pedido.
 
 **A régua: 1 m = 20px.** A 400px/s o contador sobe uns 20 m por segundo e dá
 para atravessar a tela antes de chegar aos 100. Com 7px ele subia três vezes
@@ -103,9 +109,11 @@ e nos metros somados.
 
 São oito tipos (distância, roçadas, multiplicador, voo sem tocar nas bordas,
 ato alcançado, tempo vivo, obstáculos passados, passagens limpas seguidas),
-cada um com três níveis e três prêmios, de **+14 m a +74 m**. Os prêmios são
-calibrados contra uma corrida mediana de ~107 m: cumprir o fácil soma pouco,
-cumprir o difícil muda a corrida, e cumprir os três é raro e paga bem.
+cada um com três níveis e três prêmios, de **+28 m a +148 m**. Os prêmios e os
+alvos **em metros** estão no dobro do que já estiveram, a pedido do dono;
+contagens e segundos não dobraram, porque "roçar 3 vezes" é uma meta e não uma
+distância. Com a mediana em ~113 m, um prêmio difícil agora mais que dobra a
+corrida — e é para ser assim: desafio cumprido tem de ser sentido no número.
 
 **A contagem é pulável, e isso é de propósito.** Uma corrida dura uns dez
 segundos; 2,2 s de pré-jogo obrigatório a cada tentativa viraria castigo lá
@@ -247,12 +255,18 @@ a 34% da largura à frente e persegue o centro dele:
 
 | | |
 |---|---|
-| corrida mediana | ~107 m (Subsolo) |
-| corrida boa | ~275 m (Forja) |
-| corrida ótima | 400 m+ (Desabamento) |
+| corrida mediana | ~113 m (Subsolo) |
+| corrida boa | ~278 m (entrando na Forja) |
+| corrida ótima | 625 m+ (Desabamento) |
 
 A medição vale para o piloto automático, que lê uma coluna de pixels; quem
 joga enxerga a tela inteira e vai mais longe.
+
+**O piloto tem de engolir os blocos curtos.** Faísca, terra e cascalho ocupam
+poucos pixels na coluna e não são parede: sem ignorar sequências de até 9px,
+o piloto desvia de poeira e a mediana medida cai de 113 m para 77 m. Isso é
+erro de medição, não dificuldade — foi o que quase me fez "corrigir" o jogo
+por causa do próprio enfeite.
 
 É **piso, não teto**: o piloto enxerga uma coluna, quem joga enxerga a tela
 inteira. Serve para dizer que a geração não produz parede impossível — não

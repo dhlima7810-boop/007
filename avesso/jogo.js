@@ -74,13 +74,13 @@
   // colisao nenhuma: quem mata e a caixa, e so ela. Um enfeite que mata e um
   // enfeite que mente.
   var ATOS = [
-    { nome: 'Subsolo',     dif: 'Fácil',   tema: 'terra', cor: '#b08c5a', ate: 150,
+    { nome: 'Subsolo',     dif: 'Fácil',   tema: 'terra', cor: '#b08c5a', ate: 250, art: 'ao',
       tinta: [21, 17, 12], osso: [228, 217, 196], pino: '#8a7355',
-      fFaixa: 0.078, vel: 0,   esp: 1.00, vao: 0.22, laje: 0.08, pendulo: 0,    aperto: 0 },
-    { nome: 'Forja',       dif: 'Médio',   tema: 'fogo',  cor: '#ff7a1a', ate: 400,
+      fFaixa: 0.078, vel: 0,   esp: 1.08, vao: 0.22, laje: 0.08, pendulo: 0,    aperto: 0 },
+    { nome: 'Forja',       dif: 'Médio',   tema: 'fogo',  cor: '#ff7a1a', ate: 625, art: 'à',
       tinta: [25, 13, 10], osso: [244, 228, 205], pino: '#ff7a1a',
       fFaixa: 0.100, vel: 95,  esp: 0.90, vao: 0.30, laje: 0.20, pendulo: 0.30, aperto: 0.45 },
-    { nome: 'Desabamento', dif: 'Difícil', tema: 'pedra', cor: '#9aa0a6', ate: Infinity,
+    { nome: 'Desabamento', dif: 'Difícil', tema: 'pedra', cor: '#9aa0a6', ate: Infinity, art: 'ao',
       tinta: [13, 15, 19], osso: [223, 225, 224], pino: '#9a9890',
       fFaixa: 0.125, vel: 195, esp: 0.80, vao: 0.34, laje: 0.16, pendulo: 0.50, aperto: 1.0 }
   ];
@@ -161,36 +161,40 @@
   // sempre nessa ordem. `le` tira o progresso do estado da corrida; cumprido,
   // o premio entra como metros de bonus, iguais aos da rocada.
   //
-  // Os premios sao calibrados contra uma corrida mediana de ~107 m: cumprir
-  // um facil soma pouco, cumprir o dificil muda a corrida. Cumprir os tres
-  // e raro e deve pagar bem.
+  // Os premios e os alvos em METROS estao no dobro do que ja estiveram, a
+  // pedido do dono. Contagens e segundos nao dobraram: "roçar 3 vezes" e uma
+  // meta, nao uma distancia. Com a mediana em ~107 m, um premio dificil agora
+  // mais que dobra a corrida — e e para ser assim: desafio cumprido tem de
+  // ser sentido no numero.
   var DESAFIOS = [
     { id: 'dist',   diz: function (n) { return 'Chegar a ' + n + ' m'; },
-      alvos: [50, 110, 180], premios: [16, 34, 60], le: function (e) { return e.m; } },
+      alvos: [100, 220, 360], premios: [32, 68, 120], le: function (e) { return e.m; } },
 
     { id: 'rocar',  diz: function (n) { return 'Roçar ' + n + (n > 1 ? ' vezes' : ' vez'); },
-      alvos: [3, 6, 10], premios: [18, 37, 65], le: function (e) { return e.rocadas; } },
+      alvos: [3, 6, 10], premios: [36, 74, 130], le: function (e) { return e.rocadas; } },
 
     { id: 'mult',   diz: function (n) { return 'Levar a roçada a ×' + n; },
-      alvos: [3, 5, 7], premios: [20, 39, 68], le: function (e) { return e.maxMult; } },
+      alvos: [3, 5, 7], premios: [40, 78, 136], le: function (e) { return e.maxMult; } },
 
     { id: 'voo',    diz: function (n) { return 'Passar ' + n + ' obstáculos sem tocar nas bordas'; },
-      alvos: [4, 7, 11], premios: [21, 42, 74], le: function (e) { return e.maxSemTocar; } },
+      alvos: [4, 7, 11], premios: [42, 84, 148], le: function (e) { return e.maxSemTocar; } },
 
     { id: 'ato',    diz: function (n) {
         var i = setorDeM(n);
-        return (i > 0 && ATOS[i - 1].ate === n) ? 'Chegar ao ' + ATOS[i].nome : 'Passar dos ' + n + ' m';
+        return (i > 0 && ATOS[i - 1].ate === n)
+          ? 'Chegar ' + ATOS[i].art + ' ' + ATOS[i].nome
+          : 'Passar dos ' + n + ' m';
       },
-      alvos: [150, 400, 700], premios: [18, 37, 67], le: function (e) { return e.m; } },
+      alvos: [250, 625, 1000], premios: [36, 74, 134], le: function (e) { return e.m; } },
 
     { id: 'tempo',  diz: function (n) { return 'Ficar ' + n + ' segundos vivo'; },
-      alvos: [12, 20, 30], premios: [16, 34, 58], le: function (e) { return e.tempo; } },
+      alvos: [12, 20, 30], premios: [32, 68, 116], le: function (e) { return e.tempo; } },
 
     { id: 'passar', diz: function (n) { return 'Passar ' + n + ' obstáculos'; },
-      alvos: [8, 14, 20], premios: [14, 32, 56], le: function (e) { return e.passados; } },
+      alvos: [8, 14, 20], premios: [28, 64, 112], le: function (e) { return e.passados; } },
 
     { id: 'limpo',  diz: function (n) { return 'Passar ' + n + ' obstáculos seguidos sem roçar'; },
-      alvos: [5, 8, 12], premios: [16, 34, 58], le: function (e) { return e.maxLimpo; } }
+      alvos: [5, 8, 12], premios: [32, 68, 116], le: function (e) { return e.maxLimpo; } }
   ];
 
   var PROEZAS = {
@@ -352,9 +356,11 @@
   // da rocada e dos desafios; com o setor preso so a distancia, o numero na
   // tela e a troca de mundo andavam em unidades diferentes, e a divisao
   // "0 a 300 e facil" nunca fechava com o que se via.
-  // Os atos crescem: o primeiro e curto porque e onde quase toda corrida
-  // acaba, e os seguintes sao mais largos porque ali ja se corre mais rapido
-  // e o mesmo numero de metros passa em menos tempo.
+  // Os atos crescem na proporcao 1 : 2,5 : 4 — a que o dono desenhou como
+  // 1.000 / 2.500 / 4.000. Os absolutos dele nao cabem: 1.000 m sao 20.000px,
+  // uns 50 segundos vivo, e a corrida mediana dura 5. Com o fim do primeiro
+  // ato ali, toda partida morreria no Subsolo e a Forja nunca apareceria.
+  // A proporcao era o que importava; a escala e a que cabe.
   function setorDeM(m) {
     for (var i = 0; i < ATOS.length - 1; i++) if (m < ATOS[i].ate) return i;
     return ATOS.length - 1;
