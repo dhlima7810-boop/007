@@ -594,34 +594,19 @@ assets/css/style.css  estilos
 assets/js/main.js     Lenis + GSAP + ScrollTrigger
 assets/img/           fotos (cada foto aparece uma vez só no site)
 assets/vendor/        libs
-avesso/               jogo, projeto separado — ver abaixo
 ```
 
-## `avesso/` não é o site
+## O jogo Avesso saiu daqui
 
-A pasta `avesso/` guarda um jogo (**Avesso**: um botão só, gravidade
-invertida) que **mora neste repositório mas não faz parte do site da Pizza
-Mia**. Decisão do dono em 29/10/2026. Na prática:
+A pasta `avesso/` guardou, entre 29 e 30/10/2026, um jogo de um botão só
+chamado **Avesso**. Ele **mudou de casa** e agora vive sozinho em
+`github.com/dhlima7810-boop/Flappy-Bird`, que é o repositório dele.
 
-- **fora do `sitemap.xml`**, e com `noindex, nofollow` na própria página. Quem
-  regerar o sitemap não inclua `/avesso/`;
-- **o site não linka para ele** e ele não linka de volta;
-- **o JSON-LD não sabe que ele existe**, e não deve saber;
-- **não usa o sistema Fachada.** Paleta e tipografia são próprias (Space
-  Grotesk; tinta, osso e um vermelho só dele). Não "corrija" para Antonio nem
-  para as cores da pizzaria — a separação é o projeto.
-
-O que ele herda daqui e não negocia: sem build, sem framework, sem
-componentes; o mesmo `assets/vendor/gsap.min.js` para a interface, com a regra
-dos 0.6s e das curvas power3/expo; caixa alta por `text-transform`; e as três
-degradações, medidas no navegador.
-
-A física do jogo é a única coisa fora da regra de animação, e o cabeçalho do
-`avesso/jogo.js` explica por quê: posição conduzida por quem joga não tem
-curva nem duração — é a mesma razão pela qual o `ease:'none'` é liberado em
-tween preso ao scroll. O GSAP continua dono do relógio, porque o laço roda no
-`gsap.ticker` e só cai no `requestAnimationFrame` se o GSAP não carregar.
-Lenis não entra: aquela página não rola.
+Isto fica registrado por um motivo só: se aparecer um commit antigo, um link
+quebrado ou uma menção a `/avesso/`, é disto que se trata. **Não traga o jogo
+de volta para cá** — este repositório é o site da pizzaria, e ele nunca
+pertenceu a ele. O sitemap, o `robots.txt` e o JSON-LD nunca souberam da
+pasta, então não há nada a limpar neles.
 
 ## Conteúdo
 
